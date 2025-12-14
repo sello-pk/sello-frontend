@@ -33,26 +33,26 @@ const PromptModal = ({
     
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                             disabled={isLoading}
                         >
                             <FiX size={20} />
                         </button>
                     </div>
                     <form onSubmit={handleSubmit}>
-                        <p className="text-gray-600 mb-4">{message}</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">{message}</p>
                         <input
                             type={type}
                             value={value}
                             onChange={(e) => setValue(e.target.value)}
                             placeholder={placeholder}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 mb-6"
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white mb-6"
                             autoFocus
                             required
                         />
@@ -61,7 +61,7 @@ const PromptModal = ({
                                 type="button"
                                 onClick={onClose}
                                 disabled={isLoading}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300"
                             >
                                 {cancelText}
                             </button>

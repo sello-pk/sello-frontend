@@ -12,9 +12,9 @@ export const aboutImages = {
 
 
 export const ourStoryData = {
-    title: "we are the car-changing martketplace for life-changing moments our story",
+    title: "The Smarter Way to Buy & Sell Cars in Pakistan",
     img: ourStoryImg,
-    description: "What started as a simple reviews site, is now one of the largest online car-changing destinations in Europe.Over 12M customers have used Carwow to buy or sell their car Lastyear we grew over 50% with nearly £3 billion worth of cars boughton our site, while £1.8 billion of cars were listed for sale throughour Sell My Car service."
+    description: "Sello is designed to serve car buyers and sellers across Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, and all major cities of Pakistan. From sedans and hatchbacks to SUVs, luxury cars, and imported vehicles, we make car trading seamless and efficient. With advanced search filters, users can easily browse cars by make, model, price, city, mileage, and condition, ensuring they find the perfect vehicle that matches their needs and budget. We empower car dealers in Pakistan with tools to promote their inventory and reach serious buyers, while helping individuals sell their cars faster without unnecessary middlemen."
 }
 
 export const selloGroupData = {

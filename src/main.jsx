@@ -17,57 +17,6 @@ const fallbackClientId = "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.goog
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || fallbackClientId;
 const isUsingFallback = !hasGoogleClientId;
 
-// Suppress Google OAuth library errors when using fallback client ID (development only)
-if (isUsingFallback && import.meta.env.DEV) {
-  // Filter console.error and console.warn for Google OAuth related errors
-  const originalConsoleError = console.error;
-  const originalConsoleWarn = console.warn;
-  
-  console.error = function(...args) {
-    const message = String(args[0] || '');
-    // Filter out Google OAuth library errors (GSI_LOGGER, origin not allowed, 403 errors)
-    if (
-      message.includes('GSI_LOGGER') ||
-      message.includes('origin is not allowed') ||
-      message.includes('credential_button_library') ||
-      message.includes('button?type=standard') ||
-      (args.length > 1 && String(args[1] || '').includes('403'))
-    ) {
-      // Suppress these specific errors - they're expected when OAuth isn't configured
-      return;
-    }
-    // Allow all other errors through
-    originalConsoleError.apply(console, args);
-  };
-  
-  console.warn = function(...args) {
-    const message = String(args[0] || '');
-    // Filter out Google OAuth warnings
-    if (
-      message.includes('GSI_LOGGER') ||
-      message.includes('origin is not allowed') ||
-      message.includes('credential_button_library')
-    ) {
-      return;
-    }
-    originalConsoleWarn.apply(console, args);
-  };
-  
-  // Warn once about configuration (only in development)
-  if (!sessionStorage.getItem('google-warning-shown')) {
-    sessionStorage.setItem('google-warning-shown', 'true');
-    // Use setTimeout to ensure this runs after console override
-    setTimeout(() => {
-      console.group('ℹ️ Google OAuth Notice');
-      console.info("VITE_GOOGLE_CLIENT_ID not configured. Google Sign-In button is visible but won't work.");
-      console.info("To enable Google Sign-In:");
-      console.info("1. Create a .env file with: VITE_GOOGLE_CLIENT_ID=your-client-id");
-      console.info("2. Add http://localhost:5173 to Google Cloud Console authorized origins");
-      console.info("Note: Google OAuth library errors (403, GSI_LOGGER) are expected and have been filtered.");
-      console.groupEnd();
-    }, 100);
-  }
-}
 
 // App Root Component with Initial Loader
 const AppRoot = () => {

@@ -72,9 +72,10 @@ const EditCarForm = () => {
 
   // Populate form when car data loads
   useEffect(() => {
-    if (car) {
+    if (car && car.postedBy) {
       // Check if user owns this car
-      if (currentUser && car.postedBy && currentUser._id !== car.postedBy._id && currentUser.role !== 'admin') {
+      const postedById = typeof car.postedBy === "object" ? car.postedBy._id : car.postedBy;
+      if (currentUser && postedById && currentUser._id !== postedById && currentUser.role !== 'admin') {
         toast.error("You don't have permission to edit this car");
         navigate('/my-listings');
         return;
@@ -117,19 +118,22 @@ const EditCarForm = () => {
       });
 
       // Set available models and years based on loaded car
-      if (car.make) {
-        const selectedMakeObj = makes.find(m => m.name === car.make);
-        if (selectedMakeObj) {
+      if (car.make && makes && makes.length > 0) {
+        const selectedMakeObj = makes.find(m => m && m.name === car.make);
+        if (selectedMakeObj && selectedMakeObj._id) {
           setSelectedMake(car.make);
-          const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+          const makeModels = (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
           setAvailableModels(makeModels);
           
-          if (car.model) {
-            const selectedModelObj = makeModels.find(m => m.name === car.model);
-            if (selectedModelObj) {
+          if (car.model && makeModels.length > 0) {
+            const selectedModelObj = makeModels.find(m => m && m.name === car.model);
+            if (selectedModelObj && selectedModelObj._id && years && years.length > 0) {
               const modelYears = years.filter(y => {
-                const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
-                return parentId === selectedModelObj._id;
+                if (!y || !y.parentCategory) return false;
+                const parentId = typeof y.parentCategory === "object" 
+                  ? (y.parentCategory?._id || null)
+                  : y.parentCategory;
+                return parentId && parentId === selectedModelObj._id;
               });
               setAvailableYears(modelYears);
             }
@@ -140,26 +144,29 @@ const EditCarForm = () => {
   }, [car, makes, getModelsByMake, years, currentUser, navigate]);
 
   const handleChange = (field, value) => {
-    // Handle features to ensure it's a flat array
+    // Handle features to ensure it's a flat array with no duplicates
     if (field === "features") {
-      const flatValue = Array.isArray(value)
-        ? value.flat().filter((item) => typeof item === "string" && item.trim())
-        : typeof value === "string" && value.trim()
-        ? value.split(",").map((item) => item.trim())
-        : [];
-      setFormData((prev) => ({ ...prev, [field]: flatValue }));
+      let flatValue = [];
+      if (Array.isArray(value)) {
+        flatValue = value.flat().filter((item) => typeof item === "string" && item.trim());
+      } else if (typeof value === "string" && value.trim()) {
+        flatValue = value.split(",").map((item) => item.trim());
+      }
+      // Remove duplicates by converting to Set and back to array
+      const uniqueFeatures = [...new Set(flatValue)];
+      setFormData((prev) => ({ ...prev, [field]: uniqueFeatures }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
       
       // When make changes, update available models
       if (field === "make") {
         setSelectedMake(value);
-        const selectedMakeObj = makes.find(m => m.name === value);
-        if (selectedMakeObj) {
-          const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+        const selectedMakeObj = makes && makes.length > 0 ? makes.find(m => m && m.name === value) : null;
+        if (selectedMakeObj && selectedMakeObj._id) {
+          const makeModels = (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
           setAvailableModels(makeModels);
           // Reset model if it's not available for the new make
-          if (formData.model && !makeModels.find(m => m.name === formData.model)) {
+          if (formData.model && !makeModels.find(m => m && m.name === formData.model)) {
             setFormData((prev) => ({ ...prev, model: "" }));
           }
         }
@@ -167,15 +174,20 @@ const EditCarForm = () => {
       
       // When model changes, update available years
       if (field === "model") {
-        const selectedModelObj = availableModels.find(m => m.name === value);
-        if (selectedModelObj) {
+        const selectedModelObj = availableModels && availableModels.length > 0 
+          ? availableModels.find(m => m && m.name === value) 
+          : null;
+        if (selectedModelObj && selectedModelObj._id && years && years.length > 0) {
           const modelYears = years.filter(y => {
-            const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
-            return parentId === selectedModelObj._id;
+            if (!y || !y.parentCategory) return false;
+            const parentId = typeof y.parentCategory === "object" 
+              ? (y.parentCategory?._id || null)
+              : y.parentCategory;
+            return parentId && parentId === selectedModelObj._id;
           });
           setAvailableYears(modelYears);
           // Reset year if it's not available for the new model
-          if (formData.year && !modelYears.find(y => y.name === formData.year.toString())) {
+          if (formData.year && !modelYears.find(y => y && y.name === formData.year.toString())) {
             setFormData((prev) => ({ ...prev, year: "" }));
           }
         }

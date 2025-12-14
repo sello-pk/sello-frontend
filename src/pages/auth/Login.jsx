@@ -67,7 +67,6 @@ const Login = () => {
           store.dispatch(api.util.invalidateTags(["User"]));
         }
       } catch (error) {
-        console.warn("Failed to invalidate cache:", error);
         // This is not critical - the mutation already invalidates tags
       }
 
@@ -78,11 +77,6 @@ const Login = () => {
         // Redirect based on user role - be strict about admin checks
         const userRole = user?.role?.toLowerCase()?.trim();
         
-        // Debug logging (can be removed in production)
-        console.log("Login redirect - User role:", userRole);
-        console.log("Login redirect - User adminRole:", user?.adminRole);
-        console.log("Login redirect - User roleId:", user?.roleId);
-        
         // Redirect based on user role - be conservative about admin redirects
         // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
         if (userRole === "admin") {
@@ -92,13 +86,16 @@ const Login = () => {
             navigate("/admin/dashboard");
           } else {
             // Role is "admin" but missing admin properties - redirect to home for safety
-            console.warn("User with admin role missing admin properties. Redirecting to home.");
             navigate("/");
           }
         } else if (userRole === "dealer" && user?.dealerInfo?.verified) {
           navigate("/dealer/dashboard");
-        } else if (userRole === "individual" || userRole === "dealer") {
+        } else if (userRole === "dealer" && !user?.dealerInfo?.verified) {
+          // Unverified dealers go to seller dashboard
           navigate("/seller/dashboard");
+        } else if (userRole === "individual") {
+          // Individual users go to home page, not seller dashboard
+          navigate("/");
         } else {
           // Default: redirect to home page
           navigate("/");
@@ -140,7 +137,6 @@ const Login = () => {
           store.dispatch(api.util.invalidateTags(["User"]));
         }
       } catch (error) {
-        console.warn("Failed to invalidate cache:", error);
         // This is not critical - the mutation already invalidates tags
       }
 
@@ -151,11 +147,6 @@ const Login = () => {
         // Redirect based on user role - be strict about admin checks
         const userRole = responseUser?.role?.toLowerCase()?.trim();
         
-        // Debug logging (can be removed in production)
-        console.log("Google login redirect - User role:", userRole);
-        console.log("Google login redirect - User adminRole:", responseUser?.adminRole);
-        console.log("Google login redirect - User roleId:", responseUser?.roleId);
-        
         // Redirect based on user role - be conservative about admin redirects
         // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
         if (userRole === "admin") {
@@ -165,13 +156,16 @@ const Login = () => {
             navigate("/admin/dashboard");
           } else {
             // Role is "admin" but missing admin properties - redirect to home for safety
-            console.warn("User with admin role missing admin properties. Redirecting to home.");
             navigate("/");
           }
         } else if (userRole === "dealer" && responseUser?.dealerInfo?.verified) {
           navigate("/dealer/dashboard");
-        } else if (userRole === "individual" || userRole === "dealer") {
+        } else if (userRole === "dealer" && !responseUser?.dealerInfo?.verified) {
+          // Unverified dealers go to seller dashboard
           navigate("/seller/dashboard");
+        } else if (userRole === "individual") {
+          // Individual users go to home page, not seller dashboard
+          navigate("/");
         } else {
           // Default: redirect to home page
           navigate("/");
@@ -331,7 +325,6 @@ const Login = () => {
                     onError={(error) => {
                       // Handle configuration errors gracefully - don't show errors for unconfigured OAuth
                       if (!hasGoogleClientId) {
-                        // Silently handle - user knows it's not configured from console warning
                         return;
                       }
                       

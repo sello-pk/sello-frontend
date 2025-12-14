@@ -66,7 +66,6 @@ const SupportChatWidget = () => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Support chat socket connected');
             setSocketConnected(true);
             newSocket.emit('join-chats');
             if (selectedChat) {

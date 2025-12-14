@@ -41,6 +41,8 @@ const FilterForm = ({ onFilter }) => {
     maxYear: "",
     minMileage: "",
     maxMileage: "",
+    condition: "",
+    sellerType: "",
     bodyType: "",
     regionalSpec: "",
     fuelType: "",
@@ -150,6 +152,7 @@ const FilterForm = ({ onFilter }) => {
         maxBatteryRange: isFieldVisible(value, "batteryRange") ? prev.maxBatteryRange : "",
         minMotorPower: isFieldVisible(value, "motorPower") ? prev.minMotorPower : "",
         maxMotorPower: isFieldVisible(value, "motorPower") ? prev.maxMotorPower : "",
+        // Keep condition and sellerType - they apply to all vehicle types
       }));
     }
     
@@ -407,6 +410,8 @@ const FilterForm = ({ onFilter }) => {
       backendFilters.motorPowerMax = filters.maxMotorPower;
     if (filters.technicalFeatures)
       backendFilters.features = filters.technicalFeatures;
+    if (filters.condition) backendFilters.condition = filters.condition;
+    if (filters.sellerType) backendFilters.sellerType = filters.sellerType;
     if (filters.country) backendFilters.country = filters.country;
     if (filters.city) backendFilters.city = filters.city;
     if (filters.radius) backendFilters.radius = filters.radius;
@@ -442,6 +447,8 @@ const FilterForm = ({ onFilter }) => {
       maxYear: "",
       minMileage: "",
       maxMileage: "",
+      condition: "",
+      sellerType: "",
       bodyType: "",
       regionalSpec: "",
       fuelType: "",
@@ -840,6 +847,34 @@ const FilterForm = ({ onFilter }) => {
           </div>
         </div>
         )}
+
+        {/* Condition Filter */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">Condition</label>
+          <select
+            value={filters.condition || ""}
+            onChange={(e) => handleChange("condition", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">All Conditions</option>
+            <option value="New">New</option>
+            <option value="Used">Used</option>
+          </select>
+        </div>
+
+        {/* Seller Type Filter */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">Seller Type</label>
+          <select
+            value={filters.sellerType || ""}
+            onChange={(e) => handleChange("sellerType", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">All Sellers</option>
+            <option value="individual">Individual</option>
+            <option value="dealer">Dealer</option>
+          </select>
+        </div>
 
         {/* Other Filters */}
         {isFieldVisible(filters.vehicleType || "Car", "bodyType") && (

@@ -122,8 +122,12 @@ const SignUp = () => {
         navigate("/admin/dashboard");
       } else if (responseUser?.role === "dealer" && responseUser?.dealerInfo?.verified) {
         navigate("/dealer/dashboard");
-      } else if (responseUser?.role === "seller") {
+      } else if (responseUser?.role === "dealer" && !responseUser?.dealerInfo?.verified) {
+        // Unverified dealers go to seller dashboard
         navigate("/seller/dashboard");
+      } else if (responseUser?.role === "individual") {
+        // Individual users go to home page, not seller dashboard
+        navigate("/");
       } else {
         navigate("/");
       }
@@ -338,7 +342,6 @@ const SignUp = () => {
                     onError={(error) => {
                       // Handle configuration errors gracefully - don't show errors for unconfigured OAuth
                       if (!hasGoogleClientId) {
-                        // Silently handle - user knows it's not configured from console warning
                         return;
                       }
                       

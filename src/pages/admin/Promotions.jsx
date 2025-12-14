@@ -9,11 +9,12 @@ import {
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiPlus, FiX, FiEdit, FiTrash2 } from "react-icons/fi";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Promotions = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingPromotion, setEditingPromotion] = useState(null);
-    const { data, isLoading } = useGetAllPromotionsQuery({ page: 1, limit: 20 });
+    const { data, isLoading, refetch } = useGetAllPromotionsQuery({ page: 1, limit: 20 });
     const [createPromotion, { isLoading: isCreating }] = useCreatePromotionMutation();
     const [updatePromotion, { isLoading: isUpdating }] = useUpdatePromotionMutation();
     const [deletePromotion] = useDeletePromotionMutation();
@@ -75,6 +76,7 @@ const Promotions = () => {
             setShowModal(false);
             setEditingPromotion(null);
             resetForm();
+            refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to save promotion");
         }
@@ -132,6 +134,7 @@ const Promotions = () => {
         try {
             await deletePromotion(promotionToDelete).unwrap();
             toast.success("Promotion deleted successfully");
+            refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete promotion");
         } finally {
@@ -165,12 +168,12 @@ const Promotions = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Promotions</h2>
-                        <p className="text-sm text-gray-500 mt-1">Create and manage promotional campaigns</p>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Promotions</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Create and manage promotional campaigns</p>
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
@@ -187,51 +190,51 @@ const Promotions = () => {
                         <Spinner fullScreen={false} />
                     </div>
                 ) : promotions.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                        <p className="text-gray-500 text-lg">No promotions found. Create your first one!</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">No promotions found. Create your first one!</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <table className="w-full">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gray-50 dark:bg-gray-900">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Title</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Promo Code</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Discount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Start Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">End Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Title</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Promo Code</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Discount</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Start Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">End Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {promotions.map((promo) => (
-                                    <tr key={promo._id} className="hover:bg-gray-50">
+                                    <tr key={promo._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{promo.title}</div>
+                                            <div className="font-medium text-gray-900 dark:text-white">{promo.title}</div>
                                             {promo.description && (
-                                                <div className="text-sm text-gray-500 mt-1 line-clamp-1">
+                                                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
                                                     {promo.description}
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="font-mono font-semibold text-primary-600">
+                                            <span className="font-mono font-semibold text-primary-600 dark:text-primary-400">
                                                 {promo.promoCode}
                                             </span>
-                                            <div className="text-xs text-gray-500 mt-1">
+                                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                 Used: {promo.usedCount || 0} / {promo.usageLimit}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
+                                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                                             {promo.discountType === "percentage" 
                                                 ? `${promo.discountValue}%` 
                                                 : `$${promo.discountValue.toFixed(2)}`}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
+                                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                                             {formatDate(promo.startDate)}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
+                                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                                             {formatDate(promo.endDate)}
                                         </td>
                                         <td className="px-6 py-4">
@@ -243,14 +246,14 @@ const Promotions = () => {
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     onClick={() => handleEdit(promo)}
-                                                    className="text-primary-500 hover:text-primary-600 flex items-center gap-1"
+                                                    className="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 flex items-center gap-1"
                                                 >
                                                     <FiEdit size={16} />
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(promo._id)}
-                                                    className="text-red-500 hover:text-red-600 flex items-center gap-1"
+                                                    className="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 flex items-center gap-1"
                                                 >
                                                     <FiTrash2 size={16} />
                                                     Delete
@@ -267,9 +270,9 @@ const Promotions = () => {
                 {/* Create Promotion Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                             {/* Modal Header */}
-                            <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
                                 <h3 className="text-xl font-bold">
                                     {editingPromotion ? "Edit Promotion" : "Create New Promotion"}
                                 </h3>
@@ -285,7 +288,7 @@ const Promotions = () => {
                             <form onSubmit={handleSubmit} className="p-6 space-y-4">
                                 {/* Promotion Title */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Promotion Title <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -295,13 +298,13 @@ const Promotions = () => {
                                         onChange={handleChange}
                                         required
                                         placeholder="e.g., Summer Sale 2024"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
 
                                 {/* Description */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Description
                                     </label>
                                     <textarea
@@ -310,13 +313,13 @@ const Promotions = () => {
                                         onChange={handleChange}
                                         placeholder="Describe your promotion..."
                                         rows="3"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
 
                                 {/* Promo Code */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Promo Code <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex gap-2">
@@ -327,7 +330,7 @@ const Promotions = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="e.g., SUMMER2024"
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase"
+                                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white uppercase"
                                             style={{ textTransform: 'uppercase' }}
                                         />
                                         {!editingPromotion && (
@@ -338,13 +341,13 @@ const Promotions = () => {
                                                                       Math.floor(Math.random() * 10000).toString().padStart(4, '0');
                                                     setFormData(prev => ({ ...prev, promoCode: randomCode }));
                                                 }}
-                                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors text-gray-700 dark:text-gray-300"
                                             >
                                                 Generate
                                             </button>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                         Promo code will be automatically converted to uppercase
                                     </p>
                                 </div>
@@ -352,7 +355,7 @@ const Promotions = () => {
                                 {/* Discount Type and Value */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Discount Type <span className="text-red-500">*</span>
                                         </label>
                                         <select
@@ -360,14 +363,14 @@ const Promotions = () => {
                                             value={formData.discountType}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         >
                                             <option value="percentage">Percentage</option>
                                             <option value="fixed">Fixed Amount</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Discount Value <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -377,7 +380,7 @@ const Promotions = () => {
                                             onChange={handleChange}
                                             required
                                             min="0"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -385,7 +388,7 @@ const Promotions = () => {
                                 {/* Usage Limit and Min Purchase */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Usage Limit <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -395,11 +398,11 @@ const Promotions = () => {
                                             onChange={handleChange}
                                             required
                                             min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Min Purchase Amount
                                         </label>
                                         <input
@@ -410,7 +413,7 @@ const Promotions = () => {
                                             min="0"
                                             step="0.01"
                                             placeholder="0"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -418,7 +421,7 @@ const Promotions = () => {
                                 {/* Max Discount Amount (for percentage) */}
                                 {formData.discountType === "percentage" && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Max Discount Amount (Optional)
                                         </label>
                                         <input
@@ -429,9 +432,9 @@ const Promotions = () => {
                                             min="0"
                                             step="0.01"
                                             placeholder="No limit"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                             Maximum discount amount when using percentage discount
                                         </p>
                                     </div>
@@ -440,7 +443,7 @@ const Promotions = () => {
                                 {/* Start Date and End Date */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Start Date <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -449,11 +452,11 @@ const Promotions = () => {
                                             value={formData.startDate}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             End Date <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -462,7 +465,7 @@ const Promotions = () => {
                                             value={formData.endDate}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -470,7 +473,7 @@ const Promotions = () => {
                                 {/* Target Audience and Status */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Target Audience <span className="text-red-500">*</span>
                                         </label>
                                         <select
@@ -478,7 +481,7 @@ const Promotions = () => {
                                             value={formData.targetAudience}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         >
                                             <option value="all">All Users</option>
                                             <option value="buyers">Buyers</option>
@@ -487,7 +490,7 @@ const Promotions = () => {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Status <span className="text-red-500">*</span>
                                         </label>
                                         <select
@@ -495,7 +498,7 @@ const Promotions = () => {
                                             value={formData.status}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         >
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
@@ -504,11 +507,11 @@ const Promotions = () => {
                                 </div>
 
                                 {/* Modal Footer */}
-                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                     <button
                                         type="button"
                                         onClick={handleCloseModal}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
                                     >
                                         Cancel
                                     </button>

@@ -559,12 +559,12 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         </div>
       )}
       
-      <div className="w-full h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-gray-300 shadow-md relative">
+      <div className="w-full h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-gray-300 shadow-md relative" style={{ zIndex: 1 }}>
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "100%", width: "100%", zIndex: 1, position: "relative" }}
           eventHandlers={showLocationPicker ? {
             click: handleMapClick
           } : {}}

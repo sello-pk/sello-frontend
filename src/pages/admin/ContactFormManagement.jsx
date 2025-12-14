@@ -164,7 +164,7 @@ const ContactFormManagement = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
                     <div className="flex gap-4">
                         <div className="flex-1 relative">
                             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -173,13 +173,13 @@ const ContactFormManagement = () => {
                                 placeholder="Search by name, email, or subject..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#25D366] dark:bg-gray-700 dark:text-white"
                         >
                             <option value="all">All Status</option>
                             <option value="new">New</option>
@@ -210,7 +210,7 @@ const ContactFormManagement = () => {
 
 
                 {/* Table */}
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
                     {isLoading ? (
                         <div className="flex justify-center py-12">
                             <Spinner fullScreen={false} />
@@ -326,7 +326,7 @@ const ContactFormManagement = () => {
                                                             handleStatusChange(form._id, e.target.value);
                                                         }}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                                     >
                                                         <option value="new">New</option>
                                                         <option value="in_progress">In Progress</option>
@@ -354,7 +354,7 @@ const ContactFormManagement = () => {
 
                 {/* Selected Form Details */}
                 {selectedForm && (
-                    <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+                    <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                         {(() => {
                             const form = contactForms.find(f => f._id === selectedForm);
                             if (!form) return null;
@@ -364,7 +364,7 @@ const ContactFormManagement = () => {
                                         <h3 className="text-lg font-semibold text-gray-800">Contact Form Details</h3>
                                         <button
                                             onClick={() => setSelectedForm(null)}
-                                            className="text-gray-500 hover:text-gray-700"
+                                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                             ×
                                         </button>

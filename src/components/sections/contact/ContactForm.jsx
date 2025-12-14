@@ -118,8 +118,8 @@ const ContactForm = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Contact Form */}
+        <div className="flex flex-col gap-8 lg:gap-12">
+          {/* Contact Form - Top */}
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100">
             <div className="mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -281,7 +281,7 @@ const ContactForm = () => {
             </form>
           </div>
 
-          {/* Contact Information */}
+          {/* Contact Information - Bottom */}
           <div className="flex flex-col">
             <ContactInformation />
           </div>

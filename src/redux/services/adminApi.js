@@ -9,6 +9,11 @@ const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
+    // Optimize caching configuration
+    keepUnusedDataFor: 60, // Keep unused data for 60 seconds (default is 60)
+    refetchOnMountOrArgChange: false, // Don't refetch on mount if data exists
+    refetchOnFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: true, // Refetch on reconnect
     baseQuery: async (args, api, extraOptions) => {
         try {
             const baseResult = await fetchBaseQuery({
@@ -18,15 +23,13 @@ export const adminApi = createApi({
                     const token = localStorage.getItem("token");
                     if (token) {
                         headers.set("Authorization", `Bearer ${token}`);
-                    } else {
-                        // Log warning if no token found for admin endpoints
-                        if (endpoint && (endpoint.includes("admin") || endpoint.includes("dashboard"))) {
-                            console.warn("⚠️ No token found for admin API request:", endpoint);
-                        }
                     }
-                    headers.set("Content-Type", "application/json");
-                    // Don't set Content-Type for FormData - browser will set it with boundary
-                    // RTK Query will handle this automatically
+                    // Don't set Content-Type for FormData - browser will set it automatically with boundary
+                    // Check if body is FormData
+                    const body = args?.body || extra?.body;
+                    if (!(body instanceof FormData)) {
+                        headers.set("Content-Type", "application/json");
+                    }
                     return headers;
                 },
                 // Add credentials to ensure cookies are sent if backend uses them
@@ -37,21 +40,9 @@ export const adminApi = createApi({
             if (baseResult.error && baseResult.error.status === 401) {
                 const url = args?.url || '';
                 const token = localStorage.getItem("token");
-                const errorData = baseResult.error?.data || {};
-
-                // Log detailed error information for debugging
-                console.error("⚠️ 401 Unauthorized error:", {
-                    url,
-                    hasToken: !!token,
-                    tokenLength: token?.length,
-                    tokenPreview: token ? `${token.substring(0, 20)}...` : 'N/A',
-                    errorMessage: errorData?.message,
-                    errorData: errorData,
-                });
 
                 // Only clear token for auth-related endpoints
                 if (url.includes('/admin/') || url.includes('/auth/')) {
-                    console.warn("⚠️ Clearing token due to 401 error on:", url);
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
 
@@ -93,7 +84,6 @@ export const adminApi = createApi({
             return baseResult;
         } catch (error) {
             // Catch any unexpected errors
-            console.error("Admin API request error:", error);
             return {
                 error: {
                     status: 'FETCH_ERROR',
@@ -206,6 +196,14 @@ export const adminApi = createApi({
             providesTags: ["Cars"],
             transformResponse: (response) => response?.data || response,
         }),
+        getAuditLogs: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/admin/audit-logs?${searchParams}`;
+            },
+            providesTags: ["AuditLogs"],
+            transformResponse: (response) => response?.data || response,
+        }),
 
         // Dealers
         getAllDealers: builder.query({
@@ -225,7 +223,7 @@ export const adminApi = createApi({
             invalidatesTags: ["Dealers", "Users"], // Also invalidate Users so dealer dashboard refreshes
         }),
 
-        // Categories
+        // Categories - Cache for longer as it's relatively static data
         getAllCategories: builder.query({
             query: (params = {}) => {
                 const searchParams = new URLSearchParams(params).toString();
@@ -233,6 +231,7 @@ export const adminApi = createApi({
             },
             providesTags: ["Categories"],
             transformResponse: (response) => response?.data || response,
+            keepUnusedDataFor: 300, // Cache categories for 5 minutes (static data)
         }),
         createCategory: builder.mutation({
             query: (data) => {
@@ -504,7 +503,9 @@ export const adminApi = createApi({
                 return `/support-chat?${searchParams}`;
             },
             providesTags: ["SupportChat"],
-            transformResponse: (response) => response?.data || response,
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
         }),
         getSupportChatMessagesAdmin: builder.query({
             query: (chatId) => `/support-chat/${chatId}/messages`,
@@ -711,6 +712,7 @@ export const adminApi = createApi({
             query: () => "/roles",
             providesTags: ["Roles"],
             transformResponse: (response) => response?.data || response,
+            keepUnusedDataFor: 300, // Cache roles for 5 minutes (static data)
         }),
         getRoleById: builder.query({
             query: (roleId) => `/roles/${roleId}`,
@@ -822,6 +824,7 @@ export const adminApi = createApi({
             },
             providesTags: ["SubscriptionPlans"],
             transformResponse: (response) => response?.data || response,
+            keepUnusedDataFor: 300, // Cache subscription plans for 5 minutes (relatively static)
         }),
         getSubscriptionPlanById: builder.query({
             query: (planId) => `/subscription-plans/${planId}`,
@@ -874,6 +877,7 @@ export const {
     usePromoteCarMutation,
     useGetAllDealersQuery,
     useVerifyDealerMutation,
+    useGetAuditLogsQuery,
     useGetAllCategoriesQuery,
     useCreateCategoryMutation,
     useUpdateCategoryMutation,

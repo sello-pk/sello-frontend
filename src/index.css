@@ -143,6 +143,30 @@
     scrollbar-width: none;
 }
 
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f1f1;
+}
+
 ::selection {
     background-color: #FFA602;
     color: black;
@@ -183,4 +207,23 @@
     background: #f9fafb !important;
     border-color: #9ca3af !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Fix Leaflet map z-index to prevent overlapping header */
+.leaflet-container {
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+.leaflet-pane {
+    z-index: 1 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+    z-index: 10 !important;
+}
+
+.leaflet-control {
+    z-index: 10 !important;
 }

@@ -313,8 +313,8 @@ const ProfileHero = () => {
       icon: FiMessageSquare,
       onClick: () => navigate("/my-chats"),
     },
-    // For dealers: Only show Dealer Dashboard (not My Dashboard)
-    ...(user?.role === "dealer"
+    // For dealers: Show appropriate dashboard based on verification status
+    ...(user?.role === "dealer" && user?.dealerInfo?.verified
       ? [
           {
             id: "dealer-dashboard",
@@ -325,8 +325,7 @@ const ProfileHero = () => {
           },
         ]
       : []),
-    // For individual users: Show My Dashboard
-    ...(user?.role === "individual"
+    ...(user?.role === "dealer" && !user?.dealerInfo?.verified
       ? [
           {
             id: "seller-dashboard",
@@ -336,6 +335,10 @@ const ProfileHero = () => {
             highlight: true,
           },
         ]
+      : []),
+    // For individual users: Show My Dashboard
+    ...(user?.role === "individual"
+      ? [] // Individual users don't have a dashboard
       : []),
     ...(user?.role === "dealer"
       ? [
@@ -558,7 +561,13 @@ const ProfileHero = () => {
                             Edit Business Profile
                           </button>
                           <button
-                            onClick={() => navigate("/dealer/dashboard")}
+                            onClick={() => {
+                              if (user?.dealerInfo?.verified) {
+                                navigate("/dealer/dashboard");
+                              } else {
+                                navigate("/seller/dashboard");
+                              }
+                            }}
                             className="px-4 py-2 border border-primary-500 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium"
                           >
                             View Dashboard

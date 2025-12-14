@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import HeaderLogo from "../../components/utils/HeaderLogo";
 import { FaRegEye, FaRegEyeSlash, FaUpload, FaPlus, FaTimes } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import {
 } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
 import { FiX, FiChevronDown } from "react-icons/fi";
+import { useCarCategories } from "../../hooks/useCarCategories";
 
 const DealerSignup = ({ onBack }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +26,8 @@ const DealerSignup = ({ onBack }) => {
     mobileNumber: "",
     whatsappNumber: "",
     email: "",
+    country: "",
+    state: "",
     city: "",
     area: "",
     vehicleTypes: "",
@@ -55,10 +58,36 @@ const DealerSignup = ({ onBack }) => {
   const [registerUser] = useRegisterUserMutation();
   const navigate = useNavigate();
 
-  const cities = [
-    "Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", 
-    "Fujairah", "Umm Al Quwain", "Al Ain"
-  ];
+  // Fetch categories from admin
+  const { countries, states, cities, getStatesByCountry, getCitiesByState, isLoading: categoriesLoading } = useCarCategories();
+
+  // Filter states by selected country
+  const availableStates = useMemo(() => {
+    if (!formData.country) return [];
+    const statesMap = getStatesByCountry || {};
+    return statesMap[formData.country] || [];
+  }, [formData.country, getStatesByCountry]);
+
+  // Filter cities by selected state
+  const availableCities = useMemo(() => {
+    if (!formData.state) return [];
+    const citiesMap = getCitiesByState || {};
+    return citiesMap[formData.state] || [];
+  }, [formData.state, getCitiesByState]);
+
+  // Reset state when country changes
+  useEffect(() => {
+    if (formData.country) {
+      setFormData(prev => ({ ...prev, state: "", city: "" }));
+    }
+  }, [formData.country]);
+
+  // Reset city when state changes
+  useEffect(() => {
+    if (formData.state) {
+      setFormData(prev => ({ ...prev, city: "" }));
+    }
+  }, [formData.state]);
 
   const employeeCountOptions = ["1-10", "11-50", "51-100", "100+"];
   const commonSpecialties = ["Luxury Cars", "Budget Cars", "Electric Vehicles", "SUVs", "Sports Cars", "Classic Cars", "Commercial Vehicles"];
@@ -71,6 +100,14 @@ const DealerSignup = ({ onBack }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    
+    // Validate URL fields (social media and website)
+    if (['website', 'facebook', 'instagram', 'twitter', 'linkedin'].includes(name) && value) {
+      const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      if (!urlPattern.test(value) && !value.startsWith('http://') && !value.startsWith('https://')) {
+        // Allow partial URLs - will be fixed on backend
+      }
     }
   };
 
@@ -110,6 +147,8 @@ const DealerSignup = ({ onBack }) => {
     if (!formData.whatsappNumber.trim()) newErrors.whatsappNumber = "WhatsApp number is required";
     if (!formData.email.trim()) newErrors.email = "Email address is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) newErrors.email = "Please enter a valid email address";
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.state) newErrors.state = "State is required";
     if (!formData.city) newErrors.city = "City is required";
     if (!formData.area.trim()) newErrors.area = "Area is required";
     if (!formData.vehicleTypes.trim()) newErrors.vehicleTypes = "Type of vehicles is required";
@@ -190,7 +229,10 @@ const DealerSignup = ({ onBack }) => {
     registrationData.append("dealerName", formData.dealerName);
     registrationData.append("mobileNumber", formData.mobileNumber);
     registrationData.append("whatsappNumber", formData.whatsappNumber);
-    registrationData.append("city", formData.city);
+    // Send category IDs for location
+    if (formData.country) registrationData.append("country", formData.country);
+    if (formData.state) registrationData.append("state", formData.state);
+    if (formData.city) registrationData.append("city", formData.city);
     registrationData.append("area", formData.area);
     registrationData.append("vehicleTypes", formData.vehicleTypes);
     registrationData.append("cnicFile", cnicFile);
@@ -374,7 +416,67 @@ const DealerSignup = ({ onBack }) => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Country *
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="country"
+                          value={formData.country}
+                          onChange={handleChange}
+                          className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none ${
+                            errors.country ? "border-red-500" : "border-gray-300"
+                          } ${categoriesLoading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                          disabled={categoriesLoading}
+                        >
+                          <option value="">
+                            {categoriesLoading ? "Loading countries..." : "Select Country"}
+                          </option>
+                          {countries.map((country) => (
+                            <option key={country._id} value={country._id}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </select>
+                        <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
+                      {errors.country && (
+                        <p className="text-red-500 text-xs mt-1">{errors.country}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        State *
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="state"
+                          value={formData.state}
+                          onChange={handleChange}
+                          className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none ${
+                            errors.state ? "border-red-500" : "border-gray-300"
+                          } ${!formData.country || categoriesLoading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                          disabled={!formData.country || categoriesLoading}
+                        >
+                          <option value="">
+                            {!formData.country ? "Select country first" : availableStates.length === 0 ? "No states available" : "Select State"}
+                          </option>
+                          {availableStates.map((state) => (
+                            <option key={state._id} value={state._id}>
+                              {state.name}
+                            </option>
+                          ))}
+                        </select>
+                        <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
+                      {errors.state && (
+                        <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+                      )}
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         City *
@@ -386,12 +488,15 @@ const DealerSignup = ({ onBack }) => {
                           onChange={handleChange}
                           className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none ${
                             errors.city ? "border-red-500" : "border-gray-300"
-                          }`}
+                          } ${!formData.state || categoriesLoading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                          disabled={!formData.state || categoriesLoading}
                         >
-                          <option value="">Select City</option>
-                          {cities.map((city) => (
-                            <option key={city} value={city}>
-                              {city}
+                          <option value="">
+                            {!formData.state ? "Select state first" : availableCities.length === 0 ? "No cities available" : "Select City"}
+                          </option>
+                          {availableCities.map((city) => (
+                            <option key={city._id} value={city._id}>
+                              {city.name}
                             </option>
                           ))}
                         </select>
@@ -401,6 +506,7 @@ const DealerSignup = ({ onBack }) => {
                         <p className="text-red-500 text-xs mt-1">{errors.city}</p>
                       )}
                     </div>
+                  </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -420,7 +526,6 @@ const DealerSignup = ({ onBack }) => {
                         <p className="text-red-500 text-xs mt-1">{errors.area}</p>
                       )}
                     </div>
-                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -905,7 +1010,12 @@ const DealerSignup = ({ onBack }) => {
                         </div>
                         <div>
                           <span className="text-gray-600">Location:</span>
-                          <p className="font-medium">{formData.area}, {formData.city}</p>
+                          <p className="font-medium">
+                            {formData.area}
+                            {formData.city && `, ${cities.find(c => c._id === formData.city)?.name || formData.city}`}
+                            {formData.state && `, ${states.find(s => s._id === formData.state)?.name || formData.state}`}
+                            {formData.country && `, ${countries.find(c => c._id === formData.country)?.name || formData.country}`}
+                          </p>
                         </div>
                         <div>
                           <span className="text-gray-600">Vehicle Types:</span>

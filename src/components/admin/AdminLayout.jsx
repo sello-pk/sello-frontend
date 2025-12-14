@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     FiLayout,
@@ -19,18 +19,54 @@ import {
     FiGrid,
     FiDollarSign,
     FiStar,
-    FiMail
+    FiMail,
+    FiActivity
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
 import { canAccessMenu } from "../../utils/roleAccess";
+import ErrorBoundary from "../ErrorBoundary";
+import KeyboardShortcuts from "./KeyboardShortcuts";
+import { useTheme } from "../../contexts/ThemeContext";
+import { FiSun, FiMoon } from "react-icons/fi";
 
 const AdminLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
+    const { theme, toggleTheme, isDark } = useTheme();
     const { data: user, isLoading: userLoading, error: userError } = useGetMeQuery();
     const [logout] = useLogoutMutation();
+    const sidebarNavRef = useRef(null);
+    const mainContentRef = useRef(null);
+    
+    // Preserve sidebar scroll position on mount
+    useEffect(() => {
+        const savedScrollPosition = sessionStorage.getItem('sidebarScrollPosition');
+        if (savedScrollPosition && sidebarNavRef.current) {
+            // Use setTimeout to ensure DOM is ready
+            setTimeout(() => {
+                if (sidebarNavRef.current) {
+                    sidebarNavRef.current.scrollTop = parseInt(savedScrollPosition, 10);
+                }
+            }, 0);
+        }
+    }, []); // Only run on mount
+
+    // Save sidebar scroll position and scroll main content to top on navigation
+    const handleSidebarLinkClick = () => {
+        if (sidebarNavRef.current) {
+            sessionStorage.setItem('sidebarScrollPosition', sidebarNavRef.current.scrollTop.toString());
+        }
+    };
+
+    // Scroll main content to top when route changes (but preserve sidebar scroll)
+    useEffect(() => {
+        if (mainContentRef.current) {
+            mainContentRef.current.scrollTop = 0;
+        }
+    }, [location.pathname]);
 
     const allMenuItems = [
         { path: "/admin/dashboard", icon: FiLayout, label: "Dashboard" },
@@ -41,10 +77,10 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/blogs", icon: FiFileText, label: "Blog Management" },
         { path: "/admin/testimonials", icon: FiStar, label: "Reviews & Testimonials" },
         { path: "/admin/analytics", icon: FiBarChart2, label: "Reports & Analytics" },
+        { path: "/admin/activity-log", icon: FiActivity, label: "Activity Log" },
         { path: "/admin/chat", icon: FiMessageSquare, label: "Chat Monitoring" },
         { path: "/admin/chatbot", icon: FiCpu, label: "Support Chatbot" },
-        { path: "/admin/customer-requests", icon: FiUser, label: "Customer Request" },
-        { path: "/admin/contact-forms", icon: FiMail, label: "Contact Forms" },
+        { path: "/admin/customer-requests", icon: FiUser, label: "Customer Requests" },
         { path: "/admin/promotions", icon: FiHeart, label: "Promotions" },
         { path: "/admin/payments", icon: FiDollarSign, label: "Payments" },
         { path: "/admin/notifications", icon: FiBell, label: "Notifications" },
@@ -65,7 +101,9 @@ const AdminLayout = ({ children }) => {
             localStorage.removeItem("user");
             navigate("/login");
         } catch (error) {
-            console.error("Logout error:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Logout error:", error);
+            }
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             navigate("/login");
@@ -73,11 +111,22 @@ const AdminLayout = ({ children }) => {
     };
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 relative">
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar - Dark Grey */}
             <aside
-                className={`${sidebarOpen ? "w-64" : "w-20"
-                    } bg-[#050B20] text-white transition-all duration-300 flex flex-col`}
+                className={`${
+                    sidebarOpen ? "w-64" : "w-20"
+                } ${
+                    mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+                } fixed lg:static h-full bg-[#050B20] dark:bg-gray-900 text-white transition-all duration-300 flex flex-col z-50`}
             >
                 {/* Logo - Primary Orange Header */}
                 <div className="bg-primary-500 px-4 py-2 flex items-center justify-between">
@@ -95,20 +144,20 @@ const AdminLayout = ({ children }) => {
                 </div>
 
                 {/* Menu Items */}
-                <nav className="flex-1 overflow-y-auto py-4 scrollbar">
+                <nav ref={sidebarNavRef} className="flex-1 overflow-y-auto py-4 scrollbar">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         // Check if current path matches or starts with the item path (for sections with sub-routes)
                         const isMainItemActive =
                             location.pathname === item.path ||
                             (item.path === "/admin/blogs" && location.pathname.startsWith("/admin/blog")) ||
-                            (item.path === "/admin/categories" && location.pathname.startsWith("/admin/categor")) ||
-                            (item.path === "/admin/contact-forms" && location.pathname.startsWith("/admin/contact"));
+                            (item.path === "/admin/categories" && location.pathname.startsWith("/admin/categor"));
                         
                         return (
                             <Link
                                 key={item.path}
                                 to={item.path}
+                                onClick={handleSidebarLinkClick}
                                 className={`flex items-center space-x-3 px-4 py-3 mx-2 rounded-lg transition-colors ${
                                     isMainItemActive
                                         ? "bg-primary-500 text-white"
@@ -122,11 +171,20 @@ const AdminLayout = ({ children }) => {
                     })}
                 </nav>
 
-                {/* Logout */}
-                <div className="p-4 border-t border-gray-700">
+                {/* Theme Toggle & Logout */}
+                <div className="p-4 border-t border-gray-700 dark:border-gray-700 space-y-2">
+                    <button
+                        onClick={toggleTheme}
+                        className="flex items-center space-x-3 bg-gray-700 dark:bg-gray-800 px-4 py-3 w-full rounded-lg text-white font-semibold hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors"
+                        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                    >
+                        {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
+                        {sidebarOpen && <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+                    </button>
                     <button
                         onClick={handleLogout}
                         className="flex items-center space-x-3 bg-primary-500 px-4 py-3 w-full rounded-lg text-white font-semibold hover:bg-primary-600 transition-colors"
+                        aria-label="Logout"
                     >
                         <FiLogOut size={20} />
                         {sidebarOpen && <span>Logout</span>}
@@ -135,15 +193,36 @@ const AdminLayout = ({ children }) => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Primary Bar */}
-                {/* <header className="bg-primary-500 text-white py-4 px-6 shadow-md">
-                    <h1 className="text-xl font-bold">Sello Admin</h1>
-                </header> */}
+            <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+                {/* Mobile Header */}
+                <header className="lg:hidden bg-primary-500 dark:bg-primary-600 text-white py-3 px-4 flex items-center justify-between shadow-md z-30">
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="p-2 hover:bg-primary-600 dark:hover:bg-primary-700 rounded-lg"
+                        aria-label="Toggle menu"
+                    >
+                        <FiMenu size={24} />
+                    </button>
+                    <h1 className="text-lg font-bold">Admin Panel</h1>
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2 hover:bg-primary-600 dark:hover:bg-primary-700 rounded-lg"
+                        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                    >
+                        {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
+                    </button>
+                </header>
                 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-gray-100 p-6">{children}</main>
+                <main ref={mainContentRef} className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900 p-4 lg:p-6">
+                    <ErrorBoundary>
+                        {children}
+                    </ErrorBoundary>
+                </main>
             </div>
+
+            {/* Keyboard Shortcuts Handler */}
+            <KeyboardShortcuts />
         </div>
     );
 };

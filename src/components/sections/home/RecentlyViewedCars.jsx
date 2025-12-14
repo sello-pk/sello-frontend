@@ -24,7 +24,7 @@ const RecentlyViewedCars = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 col-span-2 md:col-span-2">
+    <div className="bg-white w-[63.5vw] rounded-xl shadow-md p-6 col-span-2 md:col-span-2">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl md:text-2xl font-semibold text-gray-800">
           Recently Looked Cars
@@ -40,17 +40,21 @@ const RecentlyViewedCars = () => {
       </div>
 
       {displayedCars.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">No recently viewed cars</p>
+        <p className="text-gray-500 text-center py-8">
+          No recently viewed cars
+        </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-[60vw]  gap-4">
           {displayedCars.map((car) => {
             const carId = car._id;
             const carImage =
               (Array.isArray(car.images) && car.images[0]) ||
-              (typeof car.images === 'string' ? car.images : null) ||
+              (typeof car.images === "string" ? car.images : null) ||
               images.carPlaceholder;
             const carTitle =
-              car.title || `${car.make || ""} ${car.model || ""}`.trim() || "Car";
+              car.title ||
+              `${car.make || ""} ${car.model || ""}`.trim() ||
+              "Car";
             const carPrice = car.price
               ? `$${car.price.toLocaleString()}`
               : "Price on request";
@@ -96,4 +100,3 @@ const RecentlyViewedCars = () => {
 };
 
 export default RecentlyViewedCars;
-

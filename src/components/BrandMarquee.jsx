@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarCategories } from "../hooks/useCarCategories";
 
 const BrandMarquee = ({ brands: propBrands = [] }) => {
   const sliderRef = useRef(null);
   const navigate = useNavigate();
+  const [isPaused, setIsPaused] = useState(false);
+  const autoScrollRef = useRef(null);
   
   // Fetch brands from admin categories - always prioritize admin data
   const { makes, isLoading } = useCarCategories();
@@ -31,7 +33,7 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
     if (brands.length === 1) {
       return brands;
     }
-    // For multiple brands, duplicate once (standard marquee pattern)
+    // For multiple brands, duplicate twice for seamless infinite scroll
     return [...brands, ...brands];
   }, [brands]);
   
@@ -43,7 +45,7 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
 
   const scroll = (direction) => {
     if (!sliderRef.current) return;
-    const amount = direction === "left" ? -300 : 300;
+    const amount = direction === "left" ? -400 : 400;
     sliderRef.current.scrollBy({ left: amount, behavior: "smooth" });
   };
 
@@ -55,54 +57,104 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
     // Don't auto-scroll if only 1 brand (no need for infinite loop)
     if (brands.length === 1) return;
 
-    const speed = 1.5; // px per tick
-    
-    // Calculate the width of one set of brands (original array, not duplicated)
-    // Since we duplicate once, scrollWidth / 2 gives us the width of one set
-    const singleSetWidth = el.scrollWidth / 2;
-    
-    const interval = setInterval(() => {
+    // Wait for DOM to render and calculate widths
+    const initScroll = () => {
       if (!el) return;
+      
+      // Ensure we start at the beginning
+      el.scrollLeft = 0;
 
-      // Reset when we've scrolled through one complete set of brands
-      // This prevents showing duplicates - reset happens at exactly half the total width
-      if (el.scrollLeft >= singleSetWidth) {
-        // Reset to start for seamless loop
-        el.scrollLeft = 0;
-      } else {
-        el.scrollLeft += speed;
+      // Calculate the width of one set of brands (original array, not duplicated)
+      // Since we duplicate twice, scrollWidth / 2 gives us the width of one set
+      const calculateSingleSetWidth = () => {
+        // Get the first brand element to calculate width
+        const firstBrand = el.querySelector('[data-brand-item]');
+        if (!firstBrand) return el.scrollWidth / 2;
+        
+        const brandWidth = firstBrand.offsetWidth;
+        const gap = 24; // gap-6 = 24px
+        return brands.length * (brandWidth + gap);
+      };
+      
+      const singleSetWidth = calculateSingleSetWidth();
+
+      // Clear any existing interval
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
       }
-    }, 16); // ~60fps
 
-    return () => clearInterval(interval);
-  }, [items.length, brands.length]);
+      const speed = 0.8; // px per tick (smooth scroll speed)
+      
+      autoScrollRef.current = setInterval(() => {
+        if (!el || isPaused) return;
+
+        // Get current scroll position
+        const currentScroll = el.scrollLeft;
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        
+        // Reset when we've scrolled through one complete set of brands
+        // This prevents showing duplicates - reset happens at exactly half the total width
+        if (currentScroll >= singleSetWidth - 10) {
+          // Reset to start for seamless loop (without animation for instant reset)
+          el.scrollLeft = 0;
+        } else if (currentScroll < maxScroll) {
+          // Continue scrolling
+          el.scrollLeft = currentScroll + speed;
+        }
+      }, 16); // ~60fps for smooth animation
+    };
+
+    // Small delay to ensure DOM is ready and images are loaded
+    const timeout = setTimeout(initScroll, 200);
+
+    return () => {
+      clearTimeout(timeout);
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
+      }
+    };
+  }, [items.length, brands.length, isPaused]);
 
   return (
     <div className="w-full py-6 backdrop-blur-sm">
-      <div className="relative rounded-xl px-10 py-4 overflow-hidden">
+      <div 
+        className="relative rounded-xl px-10 py-4 overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         {/* Slider buttons */}
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-white shadow hover:bg-gray-100"
-          aria-label="Previous brands"
-        >
-          <span className="text-lg font-bold">&#8249;</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-white shadow hover:bg-gray-100"
-          aria-label="Next brands"
-        >
-          <span className="text-lg font-bold">&#8250;</span>
-        </button>
+        {brands.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => scroll("left")}
+              className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all hover:scale-110"
+              aria-label="Previous brands"
+            >
+              <span className="text-xl font-bold text-gray-700">&#8249;</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scroll("right")}
+              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all hover:scale-110"
+              aria-label="Next brands"
+            >
+              <span className="text-xl font-bold text-gray-700">&#8250;</span>
+            </button>
+          </>
+        )}
 
         {/* Slider track - auto & infinite */}
         <div
           ref={sliderRef}
-          className="flex gap-4 md:gap-6 overflow-x-hidden snap-x snap-mandatory scroll-smooth scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+          className="flex gap-4 md:gap-6 overflow-x-hidden scrollbar-hide"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'auto', // Use auto for programmatic scrolling
+            // Disable snap for smooth infinite scroll
+          }}
         >
           {isLoading ? (
             <div className="flex items-center justify-center w-full py-8">
@@ -120,8 +172,9 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
               return (
                 <div
                   key={`brand-${brand._id || index}-${index}`}
+                  data-brand-item
                   onClick={() => handleBrandClick(brandName)}
-                  className="bg-white rounded-xl p-4 flex flex-col items-center justify-center w-24 h-28 md:w-32 md:h-36 shadow-sm flex-shrink-0 snap-start cursor-pointer hover:shadow-md transition-shadow group"
+                  className="bg-white rounded-xl p-4 flex flex-col items-center justify-center w-24 h-28 md:w-32 md:h-36 shadow-sm flex-shrink-0 cursor-pointer hover:shadow-md transition-shadow group"
                 >
                   {brandImage ? (
                     <div className="flex-1 flex items-center justify-center mb-2">

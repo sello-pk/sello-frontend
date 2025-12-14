@@ -72,59 +72,6 @@ const BlogDetails = () => {
       />
       <BlogsHeroSection />
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        {/* Blog Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            {blog.category && (
-              <>
-                <Link
-                  to={`/blog?category=${blog.category._id}`}
-                  className="text-primary-500 hover:underline"
-                >
-                  {blog.category.name}
-                </Link>
-                <span>·</span>
-              </>
-            )}
-            <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-            <span>·</span>
-            <span>{blog.readTime || 5} min read</span>
-            {blog.views > 0 && (
-              <>
-                <span>·</span>
-                <span>{blog.views} views</span>
-              </>
-            )}
-          </div>
-
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            {blog.title}
-          </h1>
-
-          {/* Author Info */}
-          <div className="flex items-center gap-3 mb-6">
-            {blog.author?.avatar ? (
-              <img
-                src={blog.author.avatar}
-                alt={blog.author.name}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-lg">
-                {(blog.author?.name || "A")[0].toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h3 className="font-semibold text-gray-900">
-                {blog.author?.name || "Admin"}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {blog.author?.email || ""}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Featured Image */}
         {blog.featuredImage && (
           <div className="mb-8 rounded-lg overflow-hidden">
@@ -136,11 +83,197 @@ const BlogDetails = () => {
           </div>
         )}
 
+        {/* Blog Header */}
+        <div className="mb-8">
+          {/* Author and Date Info */}
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+            <span>By <span className="font-semibold text-gray-900">{blog.author?.name || "Admin"}</span></span>
+            <span>|</span>
+            <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+          </div>
+
+          {/* Category and Meta Info */}
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+            {blog.category && (
+              <>
+                <Link
+                  to={`/blog?category=${blog.category._id}`}
+                  className="text-primary-500 hover:underline font-medium"
+                >
+                  {blog.category.name}
+                </Link>
+                <span>·</span>
+              </>
+            )}
+            <span>{blog.readTime || 5} min read</span>
+            {blog.views > 0 && (
+              <>
+                <span>·</span>
+                <span>{blog.views} views</span>
+              </>
+            )}
+          </div>
+
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+            {blog.title}
+          </h1>
+        </div>
+
         {/* Blog Content */}
-        <div
-          className="prose prose-lg prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-md max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: blog.content }}
-        />
+        <div className="blog-content-wrapper mb-8">
+          <div
+            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mt-8 prose-headings:mb-4 prose-h1:text-4xl prose-h1:font-bold prose-h1:mt-10 prose-h1:mb-6 prose-h2:text-3xl prose-h2:font-bold prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-2xl prose-h3:font-bold prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-base prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-strong:font-bold prose-img:rounded-lg prose-img:shadow-md prose-img:my-8 prose-img:w-full prose-ul:my-6 prose-ol:my-6 prose-li:my-2 prose-blockquote:border-l-4 prose-blockquote:border-primary-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
+        </div>
+        <style>{`
+          .blog-content-wrapper {
+            width: 100%;
+            position: relative;
+            isolation: isolate;
+          }
+          .blog-content-wrapper .prose {
+            color: #374151;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+          }
+          .blog-content-wrapper .prose > *:first-child {
+            margin-top: 0 !important;
+          }
+          .blog-content-wrapper .prose > *:last-child {
+            margin-bottom: 0 !important;
+          }
+          .blog-content-wrapper .prose h1,
+          .blog-content-wrapper .prose h2,
+          .blog-content-wrapper .prose h3,
+          .blog-content-wrapper .prose h4,
+          .blog-content-wrapper .prose h5,
+          .blog-content-wrapper .prose h6 {
+            line-height: 1.3 !important;
+            font-weight: 700 !important;
+            color: #111827 !important;
+            clear: both !important;
+            display: block !important;
+            width: 100% !important;
+            position: relative !important;
+            z-index: 1;
+            page-break-after: avoid;
+          }
+          .blog-content-wrapper .prose h1 {
+            font-size: 2.25rem !important;
+            margin-top: 2.5rem !important;
+            margin-bottom: 1.5rem !important;
+          }
+          .blog-content-wrapper .prose h2 {
+            font-size: 1.875rem !important;
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
+          }
+          .blog-content-wrapper .prose h3 {
+            font-size: 1.5rem !important;
+            margin-top: 1.5rem !important;
+            margin-bottom: 0.75rem !important;
+          }
+          .blog-content-wrapper .prose h4 {
+            font-size: 1.25rem !important;
+            margin-top: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .blog-content-wrapper .prose p {
+            margin-top: 1.5rem !important;
+            margin-bottom: 1.5rem !important;
+            line-height: 1.75 !important;
+            font-size: 1rem !important;
+            color: #374151 !important;
+            display: block !important;
+            width: 100% !important;
+            position: relative !important;
+            z-index: 1;
+            clear: both;
+          }
+          .blog-content-wrapper .prose p:first-of-type {
+            margin-top: 0 !important;
+          }
+          .blog-content-wrapper .prose img {
+            margin: 2rem auto !important;
+            display: block !important;
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            clear: both;
+          }
+          .blog-content-wrapper .prose ul,
+          .blog-content-wrapper .prose ol {
+            margin-top: 1.5rem !important;
+            margin-bottom: 1.5rem !important;
+            padding-left: 1.75rem !important;
+            clear: both;
+          }
+          .blog-content-wrapper .prose li {
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+            line-height: 1.75;
+          }
+          .blog-content-wrapper .prose blockquote {
+            border-left: 4px solid #FFA602 !important;
+            padding-left: 1.5rem !important;
+            margin: 2rem 0 !important;
+            font-style: italic;
+            color: #4B5563;
+            clear: both;
+          }
+          .blog-content-wrapper .prose a {
+            color: #FFA602 !important;
+            text-decoration: none !important;
+            font-weight: 500;
+            transition: text-decoration 0.2s;
+          }
+          .blog-content-wrapper .prose a:hover {
+            text-decoration: underline !important;
+          }
+          .blog-content-wrapper .prose strong {
+            font-weight: 700 !important;
+            color: #111827 !important;
+          }
+          .blog-content-wrapper .prose em {
+            font-style: italic !important;
+          }
+          .blog-content-wrapper .prose u {
+            text-decoration: underline !important;
+          }
+          .blog-content-wrapper .prose code {
+            background-color: #F3F4F6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            font-family: 'Courier New', monospace;
+          }
+          .blog-content-wrapper .prose pre {
+            background-color: #1F2937;
+            color: #F9FAFB;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 2rem 0;
+            clear: both;
+          }
+          .blog-content-wrapper .prose pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+          }
+          .blog-content-wrapper .prose hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 1px solid #E5E7EB;
+            clear: both;
+          }
+          /* Ensure no floating elements cause overlap */
+          .blog-content-wrapper .prose * {
+            box-sizing: border-box;
+          }
+        `}</style>
 
         {/* Tags */}
         {blog.tags && blog.tags.length > 0 && (

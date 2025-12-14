@@ -6,7 +6,7 @@ import { IoIosArrowRoundUp, IoIosArrowBack, IoIosArrowForward } from "react-icon
 import { FiStar, FiZap } from "react-icons/fi";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import LazyImage from "../../common/LazyImage";
-import { useSaveCarMutation, useUnsaveCarMutation, useGetSavedCarsQuery, useGetMeQuery } from "../../../redux/services/api";
+import { useSaveCarMutation, useUnsaveCarMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
 import toast from "react-hot-toast";
 
 const FeaturedCarsCarousel = () => {
@@ -42,10 +42,8 @@ const FeaturedCarsCarousel = () => {
     // RTK Query returns { cars: [...], total: ..., ... }
     const cars = carsData?.cars || carsData?.data?.cars || [];
     if (!Array.isArray(cars)) {
-      console.log('FeaturedCarsCarousel - Invalid cars data:', carsData);
       return [];
     }
-    console.log('FeaturedCarsCarousel - Total cars received:', cars.length, 'Featured cars:', cars.filter(c => c.featured === true).length);
     const filtered = cars
       .filter(
         (car) =>
@@ -55,7 +53,6 @@ const FeaturedCarsCarousel = () => {
           !car.isSold
       )
       .slice(0, 12); // Show max 12 featured cars
-    console.log('FeaturedCarsCarousel - Filtered featured cars:', filtered.length);
     return filtered;
   }, [carsData]);
 
@@ -114,7 +111,7 @@ const FeaturedCarsCarousel = () => {
 
   if (isLoading) {
     return (
-      <section className="relative py-12 bg-gradient-to-br from-primary-500 via-primary-400 to-primary-600 overflow-hidden">
+      <section className="relative overflow-hidden">
         {/* Enhanced Flag Banner Background */}
         <div className="absolute inset-0">
           {/* Gradient overlay */}
@@ -149,19 +146,16 @@ const FeaturedCarsCarousel = () => {
   }
 
   return (
-    <section className="relative py-16 bg-gradient-to-br from-primary-500 via-primary-400 to-primary-600 overflow-hidden">
+    <section className="relative py-16 bg-[#050B20] overflow-hidden">
       {/* Enhanced Flag Banner Background with Primary-500 Shade */}
       <div className="absolute inset-0">
         {/* Main gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/95 via-primary-400/98 to-primary-500/95"></div>
+        <div className="absolute inset-0"></div>
         
         {/* Subtle diagonal stripe pattern - Flag style */}
         <div className="absolute inset-0 opacity-[0.12]">
           <div 
             className="w-full h-full"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 25px, rgba(255,255,255,0.15) 25px, rgba(255,255,255,0.15) 50px)'
-            }}
           ></div>
         </div>
         
@@ -230,7 +224,7 @@ const FeaturedCarsCarousel = () => {
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white backdrop-blur-sm p-3 rounded-full shadow-lg transition-all transform hover:scale-110"
                 aria-label="Next"
               >
-                <IoIosArrowForward className="text-2xl text-primary-600" />
+                <IoIosArrowForward className="text-2xl text-primary-500" />
               </button>
             </>
           )}
@@ -266,13 +260,13 @@ const FeaturedCarsCarousel = () => {
                 >
                   <div className="relative">
                     {/* Featured Flag Banner */}
-                    <div className="absolute top-0 left-0 z-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white px-6 py-2 rounded-br-lg shadow-lg flex items-center gap-2">
+                    <div className="absolute top-0 left-0 z-20 bg-primary-500  px-6 py-2 rounded-br-lg shadow-lg flex items-center gap-2">
                       <FiStar className="text-white" size={16} />
                       <span className="font-bold text-sm">FEATURED</span>
                     </div>
 
                     {/* Vehicle Type Badge */}
-                    <div className="absolute top-0 right-0 z-20 bg-primary-500 text-white px-3 py-2 rounded-bl-lg shadow-lg">
+                    <div className="absolute top-0 right-0 z-20 bg-primary-500 px-3 py-2 rounded-bl-lg shadow-lg">
                       <span className="font-semibold text-xs">{carVehicleType}</span>
                     </div>
 
@@ -347,7 +341,7 @@ const FeaturedCarsCarousel = () => {
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                         <div>
                           <p className="text-sm text-gray-500">Price</p>
-                          <p className="text-2xl font-bold text-primary-600">
+                          <p className="text-2xl font-bold text-primary-500">
                             AED {carPrice}
                           </p>
                         </div>
@@ -356,7 +350,7 @@ const FeaturedCarsCarousel = () => {
                             e.stopPropagation();
                             navigate(`/cars/${carId}`);
                           }}
-                          className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                          className="bg-primary-500 hover:bg-primary-600 px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
                         >
                           View Details
                           <IoIosArrowRoundUp className="text-lg rotate-[40deg]" />

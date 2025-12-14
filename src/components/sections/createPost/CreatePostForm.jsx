@@ -19,10 +19,9 @@ import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
-import { images } from "../../../assets/assets";
 import { useCarCategories } from "../../../hooks/useCarCategories";
 import LocationPicker from "../../utils/LocationPicker";
-import { isFieldVisible, getRequiredFields, getFieldLabel } from "../../../utils/vehicleFieldConfig";
+import { isFieldVisible, getRequiredFields } from "../../../utils/vehicleFieldConfig";
 
 const CreatePostForm = () => {
   const navigate = useNavigate();
@@ -127,14 +126,17 @@ const CreatePostForm = () => {
   }, [formData.country, countries, cities, getCitiesByCountry]);
 
   const handleChange = (field, value) => {
-    // Handle features to ensure it's a flat array
+    // Handle features to ensure it's a flat array with no duplicates
     if (field === "features") {
-      const flatValue = Array.isArray(value)
-        ? value.flat().filter((item) => typeof item === "string" && item.trim())
-        : typeof value === "string" && value.trim()
-        ? value.split(",").map((item) => item.trim())
-        : [];
-      setFormData((prev) => ({ ...prev, [field]: flatValue }));
+      let flatValue = [];
+      if (Array.isArray(value)) {
+        flatValue = value.flat().filter((item) => typeof item === "string" && item.trim());
+      } else if (typeof value === "string" && value.trim()) {
+        flatValue = value.split(",").map((item) => item.trim());
+      }
+      // Remove duplicates by converting to Set and back to array
+      const uniqueFeatures = [...new Set(flatValue)];
+      setFormData((prev) => ({ ...prev, [field]: uniqueFeatures }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
       
@@ -244,27 +246,38 @@ const CreatePostForm = () => {
       toast.error("Invalid contact number. Must be 9-15 digits.");
       return;
     }
-    let parsedGeoLocation;
-    try {
-      if (Array.isArray(formData.geoLocation)) {
-        parsedGeoLocation = formData.geoLocation;
-      } else if (typeof formData.geoLocation === "string") {
-        parsedGeoLocation = JSON.parse(formData.geoLocation);
+    // geoLocation is optional - use default if not provided
+    let parsedGeoLocation = null;
+    if (formData.geoLocation) {
+      try {
+        if (Array.isArray(formData.geoLocation)) {
+          parsedGeoLocation = formData.geoLocation;
+        } else if (typeof formData.geoLocation === "string" && formData.geoLocation.trim()) {
+          parsedGeoLocation = JSON.parse(formData.geoLocation);
+        }
+      } catch {
+        // Invalid format, will use default
+        parsedGeoLocation = null;
       }
-    } catch {
-      // fall through to validation error below
+      
+      // Validate format if provided
+      if (
+        parsedGeoLocation &&
+        (!Array.isArray(parsedGeoLocation) ||
+        parsedGeoLocation.length !== 2 ||
+        Number(parsedGeoLocation[0]) === 0 ||
+        Number(parsedGeoLocation[1]) === 0 ||
+        Number.isNaN(Number(parsedGeoLocation[0])) ||
+        Number.isNaN(Number(parsedGeoLocation[1])))
+      ) {
+        // Invalid format, use default
+        parsedGeoLocation = null;
+      }
     }
-    if (
-      !parsedGeoLocation ||
-      !Array.isArray(parsedGeoLocation) ||
-      parsedGeoLocation.length !== 2 ||
-      Number(parsedGeoLocation[0]) === 0 ||
-      Number(parsedGeoLocation[1]) === 0 ||
-      Number.isNaN(Number(parsedGeoLocation[0])) ||
-      Number.isNaN(Number(parsedGeoLocation[1]))
-    ) {
-      toast.error("Invalid geoLocation. Please select coordinates on the map.");
-      return;
+    
+    // Use default location (Dubai, UAE) if not provided
+    if (!parsedGeoLocation) {
+      parsedGeoLocation = [55.2708, 25.2048]; // [longitude, latitude] for Dubai, UAE
     }
 
     const data = new FormData();
@@ -291,13 +304,16 @@ const CreatePostForm = () => {
       });
     }
 
-    // Add features array
+    // Add features array as comma-separated string (more reliable with FormData)
     if (defaults.features && defaults.features.length > 0) {
-      defaults.features.forEach((feature) => {
-        if (feature && typeof feature === 'string' && feature.trim()) {
-          data.append("features[]", feature.trim());
-        }
-      });
+      const validFeatures = defaults.features
+        .filter(f => f && typeof f === 'string' && f.trim())
+        .map(f => f.trim());
+      // Remove duplicates before appending
+      const uniqueFeatures = [...new Set(validFeatures)];
+      if (uniqueFeatures.length > 0) {
+        data.append("features", uniqueFeatures.join(","));
+      }
     }
 
     // Add all other fields efficiently
@@ -315,9 +331,15 @@ const CreatePostForm = () => {
     }
 
     fieldsToAppend.forEach((key) => {
-      const value = defaults[key] !== undefined ? defaults[key] : formData[key];
-      if (value !== null && value !== undefined && value !== '') {
-        data.append(key, String(value));
+      // Special handling for geoLocation - always append (will use default if not provided)
+      if (key === 'geoLocation') {
+        // Always append geoLocation (parsedGeoLocation is guaranteed to have a value - either from form or default)
+        data.append(key, JSON.stringify(parsedGeoLocation));
+      } else {
+        const value = defaults[key] !== undefined ? defaults[key] : formData[key];
+        if (value !== null && value !== undefined && value !== '') {
+          data.append(key, String(value));
+        }
       }
     });
 
@@ -405,7 +427,7 @@ const CreatePostForm = () => {
       className="px-4 md:px-20 py-12"
       encType="multipart/form-data"
     >
-      <h1 className="text-center md:text-3xl font-semibold">Post</h1>
+      <h1 className="text-center md:text-3xl font-semibold">Create Post</h1>
       <div className="border-[1px] border-gray-700 rounded-md px-5 py-6 my-5">
         <div className="my-2">
           <ImagesUpload

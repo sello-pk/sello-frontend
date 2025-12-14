@@ -23,6 +23,7 @@ import {
   useGetMyCarsQuery,
   useLogoutMutation,
   useGetUserNotificationsQuery,
+  useGetSubscriptionPlansQuery,
 } from "../../redux/services/api";
 import { useGetSellerBuyerChatsQuery } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
@@ -42,7 +43,20 @@ const DealerDashboard = () => {
     { page: 1, limit: 10 },
     { pollingInterval: 30000 }
   );
+  const { data: subscriptionPlansData } = useGetSubscriptionPlansQuery();
   const [logout] = useLogoutMutation();
+  
+  // Check if subscription tab should be shown
+  // If showSubscriptionTab is explicitly false, hide it
+  // Otherwise, show it (default behavior when undefined or true)
+  const showSubscriptionTab = subscriptionPlansData?.showSubscriptionTab !== false;
+  
+  // Redirect if user is on payments tab but it's disabled
+  useEffect(() => {
+    if (!showSubscriptionTab && activeTab === "payments") {
+      setActiveTab("dashboard");
+    }
+  }, [showSubscriptionTab, activeTab]);
 
   const cars = carsData?.cars || [];
   const chats = chatsData || [];
@@ -98,9 +112,25 @@ const DealerDashboard = () => {
   }
 
   // Check if user is a verified dealer
-  // Allow access if user is dealer, even if not verified (but show warning)
+  // DealerDashboard is ONLY for VERIFIED dealers
   const isDealer = user?.role === "dealer";
   const isVerified = user?.dealerInfo?.verified === true;
+  
+  // Redirect unverified dealers to seller dashboard
+  useEffect(() => {
+    if (!userLoading && user) {
+      if (isDealer && !isVerified) {
+        navigate("/seller/dashboard", { replace: true });
+      } else if (!isDealer) {
+        // Not a dealer - redirect based on role
+        if (user.role === "admin") {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      }
+    }
+  }, [user, userLoading, isDealer, isVerified, navigate]);
   
   if (!user || !isDealer) {
     return (
@@ -113,15 +143,26 @@ const DealerDashboard = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
           <p className="text-gray-600 mb-6">
-            You need to request dealer status first. Please go to your profile to submit a dealer request.
+            {!isDealer 
+              ? "You need to be a verified dealer to access this dashboard."
+              : "Your dealer account is pending verification. Please wait for admin approval."}
           </p>
           <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => navigate("/profile")}
-              className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-            >
-              Go to Profile
-            </button>
+            {!isDealer ? (
+              <button
+                onClick={() => navigate("/profile")}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Go to Profile
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/seller/dashboard")}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Go to Seller Dashboard
+              </button>
+            )}
             <button
               onClick={() => navigate("/")}
               className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
@@ -134,35 +175,15 @@ const DealerDashboard = () => {
     );
   }
 
-  // Show warning banner if not verified, but allow access
-  const showVerificationWarning = !isVerified;
+  // Only verified dealers can access - if not verified, redirect (handled in useEffect)
+  if (!isVerified) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Verification Warning Banner */}
-      {showVerificationWarning && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-white px-4 py-3 shadow-lg">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm font-medium">
-                Your dealer account is pending admin verification. You'll be notified once verified.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/profile")}
-              className="text-sm underline hover:no-underline"
-            >
-              Update Profile
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Sidebar */}
-      <div className={`w-64 bg-white shadow-lg flex flex-col ${showVerificationWarning ? 'mt-12' : ''}`}>
+      <div className="w-64 bg-white shadow-lg flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-primary-500">SELLO</h1>
@@ -229,17 +250,19 @@ const DealerDashboard = () => {
             )}
           </button>
 
-          <button
-            onClick={() => setActiveTab("payments")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeTab === "payments"
-                ? "bg-primary-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <FiCreditCard size={20} />
-            <span>Payments</span>
-          </button>
+          {showSubscriptionTab && (
+            <button
+              onClick={() => setActiveTab("payments")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                activeTab === "payments"
+                  ? "bg-primary-500 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <FiCreditCard size={20} />
+              <span>Payments</span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab("analytics")}
@@ -376,46 +399,48 @@ const DealerDashboard = () => {
                 </div>
               </div>
 
-              {/* Subscription Status Card */}
-              <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-sm border border-gray-200 p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Subscription Status</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    stats.subscriptionActive 
-                      ? "bg-green-500 text-white" 
-                      : "bg-yellow-500 text-white"
-                  }`}>
-                    {stats.subscriptionActive ? "Active" : "Inactive"}
-                  </span>
+              {/* Subscription Status Card - Only show if subscription tab is enabled */}
+              {showSubscriptionTab && (
+                <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-sm border border-gray-200 p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Subscription Status</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      stats.subscriptionActive 
+                        ? "bg-green-500 text-white" 
+                        : "bg-yellow-500 text-white"
+                    }`}>
+                      {stats.subscriptionActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <p className="text-sm text-primary-100">Current Plan</p>
+                      <p className="font-semibold text-lg capitalize">{stats.subscriptionPlan} Plan</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-primary-100">Active Listings</p>
+                      <p className="font-semibold text-lg">{stats.activeListings} / {stats.listingLimit === -1 ? "∞" : stats.listingLimit}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-primary-100">Remaining</p>
+                      <p className="font-semibold text-lg">{stats.listingsRemaining}</p>
+                    </div>
+                  </div>
+                  {stats.subscriptionEndDate && stats.subscriptionActive && !isNaN(new Date(stats.subscriptionEndDate).getTime()) && (
+                    <p className="text-sm text-primary-100 mb-4">
+                      Expires on: {new Date(stats.subscriptionEndDate).toLocaleDateString()}
+                    </p>
+                  )}
+                  {(!stats.subscriptionActive || !stats.canPostMore) && (
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="w-full md:w-auto px-6 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
+                    >
+                      {!stats.subscriptionActive ? "Upgrade Subscription" : "Manage Subscription"}
+                    </button>
+                  )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm text-primary-100">Current Plan</p>
-                    <p className="font-semibold text-lg capitalize">{stats.subscriptionPlan} Plan</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-primary-100">Active Listings</p>
-                    <p className="font-semibold text-lg">{stats.activeListings} / {stats.listingLimit === -1 ? "∞" : stats.listingLimit}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-primary-100">Remaining</p>
-                    <p className="font-semibold text-lg">{stats.listingsRemaining}</p>
-                  </div>
-                </div>
-                {stats.subscriptionEndDate && stats.subscriptionActive && !isNaN(new Date(stats.subscriptionEndDate).getTime()) && (
-                  <p className="text-sm text-primary-100 mb-4">
-                    Expires on: {new Date(stats.subscriptionEndDate).toLocaleDateString()}
-                  </p>
-                )}
-                {(!stats.subscriptionActive || !stats.canPostMore) && (
-                  <button
-                    onClick={() => navigate("/profile")}
-                    className="w-full md:w-auto px-6 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
-                  >
-                    {!stats.subscriptionActive ? "Upgrade Subscription" : "Manage Subscription"}
-                  </button>
-                )}
-              </div>
+              )}
 
               {/* Quick Stats Summary */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -541,7 +566,7 @@ const DealerDashboard = () => {
           {activeTab === "post-ad" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Post a New Listing</h3>
-              {!stats.canPostMore && !stats.subscriptionActive && (
+              {!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab && (
                 <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-start gap-3">
                     <FiClock className="text-yellow-600 mt-0.5" size={20} />
@@ -562,19 +587,19 @@ const DealerDashboard = () => {
               )}
               <button
                 onClick={() => {
-                  if (!stats.canPostMore && !stats.subscriptionActive) {
+                  if (!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab) {
                     toast.error(`You've reached your listing limit. Please upgrade your subscription.`);
                     navigate("/profile");
                     return;
                   }
                   navigate("/create-post");
                 }}
-                disabled={!stats.canPostMore && !stats.subscriptionActive}
+                disabled={!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab}
                 className="w-full py-12 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors flex flex-col items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FiPlus size={48} className="text-gray-400" />
                 <span className="text-lg font-medium text-gray-700">
-                  {!stats.canPostMore && !stats.subscriptionActive 
+                  {!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab
                     ? "Upgrade to Post More Listings" 
                     : "Click to Create New Listing"}
                 </span>
@@ -662,7 +687,7 @@ const DealerDashboard = () => {
             </div>
           )}
 
-          {activeTab === "payments" && (
+          {activeTab === "payments" && showSubscriptionTab && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Payments</h3>
               <p className="text-gray-600">Payment history and subscription management coming soon.</p>

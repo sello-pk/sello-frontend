@@ -50,18 +50,15 @@ const NotificationBell = () => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Notification socket connected');
       // Join user's notification room
       newSocket.emit('join-notifications');
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Notification socket disconnected');
     });
 
     // Listen for new notifications
     newSocket.on('new-notification', (data) => {
-      console.log('New notification received:', data);
       
       // Show toast notification
       toast.success(data.message || data.title || "New notification", {

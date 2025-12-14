@@ -48,7 +48,6 @@ const AdminRoute = () => {
         // If it's a network error, try to use cached user
         if (error?.status === 'FETCH_ERROR' || error?.data?.message?.includes('Failed to fetch') || error?.data?.error?.includes('Failed to fetch')) {
             if (cachedUser && cachedUser.role === "admin") {
-                console.warn("Using cached user data due to network error");
                 // Continue with cached user
             } else {
                 return (
@@ -68,7 +67,6 @@ const AdminRoute = () => {
         } else {
             // Other errors - try cached user if available
             if (cachedUser && cachedUser.role === "admin") {
-                console.warn("Using cached user data due to API error");
                 // Continue with cached user
             } else {
                 localStorage.removeItem("token");

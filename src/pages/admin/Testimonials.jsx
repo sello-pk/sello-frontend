@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
     useGetAllTestimonialsQuery,
@@ -7,15 +7,18 @@ import {
     useDeleteTestimonialMutation,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
+import Pagination from "../../components/admin/Pagination";
 import toast from "react-hot-toast";
 import { FiPlus, FiEdit, FiTrash2, FiX, FiStar, FiUser } from "react-icons/fi";
-import ConfirmationModal from "../../components/admin/ConfirmationModal";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Testimonials = () => {
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [testimonialToDelete, setTestimonialToDelete] = useState(null);
     const [editingTestimonial, setEditingTestimonial] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 12;
     const [formData, setFormData] = useState({
         name: "",
         role: "",
@@ -29,11 +32,25 @@ const Testimonials = () => {
     });
 
     const { data, isLoading, refetch } = useGetAllTestimonialsQuery({});
-    const [createTestimonial] = useCreateTestimonialMutation();
-    const [updateTestimonial] = useUpdateTestimonialMutation();
-    const [deleteTestimonial] = useDeleteTestimonialMutation();
+    const [createTestimonial, { isLoading: isCreating }] = useCreateTestimonialMutation();
+    const [updateTestimonial, { isLoading: isUpdating }] = useUpdateTestimonialMutation();
+    const [deleteTestimonial, { isLoading: isDeleting }] = useDeleteTestimonialMutation();
 
     const testimonials = data || [];
+    
+    // Client-side pagination
+    const totalPages = Math.max(1, Math.ceil(testimonials.length / pageSize));
+    const paginatedTestimonials = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return testimonials.slice(start, start + pageSize);
+    }, [testimonials, currentPage, pageSize]);
+    
+    // Reset to page 1 when testimonials change
+    useMemo(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(1);
+        }
+    }, [totalPages]);
 
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
@@ -158,12 +175,12 @@ const Testimonials = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Testimonials Management</h2>
-                        <p className="text-sm text-gray-500 mt-1">Manage customer testimonials and reviews</p>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testimonials Management</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage customer testimonials and reviews</p>
                     </div>
                     <button
                         onClick={handleOpenModal}
@@ -180,44 +197,44 @@ const Testimonials = () => {
                         <div className="col-span-full flex justify-center items-center h-64">
                             <Spinner fullScreen={false} />
                         </div>
-                    ) : testimonials.length === 0 ? (
-                        <div className="col-span-full text-center text-gray-500 py-12">
+                    ) : paginatedTestimonials.length === 0 ? (
+                        <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
                             No testimonials found
                         </div>
                     ) : (
-                        testimonials.map((testimonial) => (
-                            <div key={testimonial._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        paginatedTestimonials.map((testimonial) => (
+                            <div key={testimonial._id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                                 <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                         {testimonial.image ? (
                                             <img src={testimonial.image} alt={testimonial.name} className="w-full h-full rounded-full object-cover" />
                                         ) : (
-                                            <FiUser size={24} className="text-gray-400" />
+                                            <FiUser size={24} className="text-gray-400 dark:text-gray-500" />
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white">{testimonial.name}</h3>
                                         {testimonial.role && (
-                                            <p className="text-sm text-gray-500">{testimonial.role}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
                                         )}
                                         {testimonial.company && (
-                                            <p className="text-sm text-gray-500">{testimonial.company}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.company}</p>
                                         )}
                                         <div className="flex items-center gap-1 mt-1">
                                             {renderStars(testimonial.rating || 5)}
                                         </div>
                                     </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mb-4 line-clamp-3">{testimonial.text}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{testimonial.text}</p>
                                 <div className="flex items-center justify-between">
                                     <div className="flex gap-2">
                                         {testimonial.featured && (
-                                            <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                            <span className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full">
                                                 Featured
                                             </span>
                                         )}
                                         <span className={`px-2 py-1 text-xs rounded-full ${
-                                            testimonial.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                            testimonial.isActive ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
                                         }`}>
                                             {testimonial.isActive ? "Active" : "Inactive"}
                                         </span>
@@ -225,14 +242,14 @@ const Testimonials = () => {
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => handleEdit(testimonial)}
-                                            className="text-blue-600 hover:text-blue-900"
+                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                                             title="Edit"
                                         >
                                             <FiEdit size={18} />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteClick(testimonial._id)}
-                                            className="text-red-600 hover:text-red-900"
+                                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                                             title="Delete"
                                         >
                                             <FiTrash2 size={18} />
@@ -244,17 +261,26 @@ const Testimonials = () => {
                     )}
                 </div>
 
+                {/* Pagination */}
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={pageSize}
+                    totalItems={testimonials.length}
+                />
+
                 {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     {editingTestimonial ? "Edit Testimonial" : "Add New Testimonial"}
                                 </h3>
                                 <button
                                     onClick={() => setShowModal(false)}
-                                    className="text-gray-500 hover:text-gray-700"
+                                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                                 >
                                     <FiX size={20} />
                                 </button>
@@ -262,7 +288,7 @@ const Testimonials = () => {
                             
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Name *
                                     </label>
                                     <input
@@ -271,13 +297,13 @@ const Testimonials = () => {
                                         value={formData.name}
                                         onChange={handleInputChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Role
                                         </label>
                                         <input
@@ -286,12 +312,12 @@ const Testimonials = () => {
                                             value={formData.role}
                                             onChange={handleInputChange}
                                             placeholder="e.g. CEO, Customer"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Company
                                         </label>
                                         <input
@@ -300,13 +326,13 @@ const Testimonials = () => {
                                             value={formData.company}
                                             onChange={handleInputChange}
                                             placeholder="Company name"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Testimonial Text *
                                     </label>
                                     <textarea
@@ -316,19 +342,19 @@ const Testimonials = () => {
                                         required
                                         rows="4"
                                         placeholder="Enter the testimonial text..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Rating
                                     </label>
                                     <select
                                         name="rating"
                                         value={formData.rating}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     >
                                         <option value="5">5 Stars</option>
                                         <option value="4">4 Stars</option>
@@ -339,7 +365,7 @@ const Testimonials = () => {
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         User Image
                                     </label>
                                     <input
@@ -347,13 +373,13 @@ const Testimonials = () => {
                                         name="image"
                                         onChange={handleInputChange}
                                         accept="image/*"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 
                                 <div className="grid grid-cols-3 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Order
                                         </label>
                                         <input
@@ -362,19 +388,19 @@ const Testimonials = () => {
                                             value={formData.order}
                                             onChange={handleInputChange}
                                             min="0"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Status
                                         </label>
                                         <select
                                             name="isActive"
                                             value={formData.isActive}
                                             onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.value === "true" }))}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         >
                                             <option value="true">Active</option>
                                             <option value="false">Inactive</option>
@@ -382,14 +408,14 @@ const Testimonials = () => {
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Featured
                                         </label>
                                         <select
                                             name="featured"
                                             value={formData.featured}
                                             onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.value === "true" }))}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                         >
                                             <option value="false">No</option>
                                             <option value="true">Yes</option>
@@ -397,19 +423,21 @@ const Testimonials = () => {
                                     </div>
                                 </div>
                                 
-                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                        disabled={isCreating || isUpdating}
+                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
-                                        {editingTestimonial ? "Update" : "Create"}
+                                        {(isCreating || isUpdating) && <Spinner fullScreen={false} />}
+                                        {editingTestimonial ? (isUpdating ? "Updating..." : "Update") : (isCreating ? "Creating..." : "Create")}
                                     </button>
                                 </div>
                             </form>
@@ -418,14 +446,18 @@ const Testimonials = () => {
                 )}
 
                 {/* Delete Confirmation Modal */}
-                <ConfirmationModal
+                <ConfirmModal
                     isOpen={showDeleteModal}
-                    onClose={() => setShowDeleteModal(false)}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setTestimonialToDelete(null);
+                    }}
                     onConfirm={handleDeleteConfirm}
                     title="Delete Testimonial"
                     message="Are you sure you want to delete this testimonial? This action cannot be undone."
                     confirmText="Delete"
-                    confirmButtonClass="bg-red-500 hover:bg-red-600"
+                    variant="danger"
+                    isLoading={isDeleting}
                 />
             </div>
         </AdminLayout>

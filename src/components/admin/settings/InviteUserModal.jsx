@@ -31,10 +31,15 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
     
     if (name === "role") {
       // Find the selected role object to get its ID
-      const selectedRole = roles.find(r => r.name === value);
+      // Try matching by name, displayName, or _id
+      const selectedRole = roles.find(r => 
+        r.name === value || 
+        r.displayName === value || 
+        r._id === value
+      );
       setFormData(prev => ({
         ...prev,
-        role: value,
+        role: selectedRole ? (selectedRole.displayName || selectedRole.name) : value,
         roleId: selectedRole ? selectedRole._id : ""
       }));
     } else {
@@ -57,10 +62,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
       toast.error("Please enter a valid email address");
       return;
     }
-    if (!formData.phone?.trim()) {
-      toast.error("Phone number is required");
-      return;
-    }
+    // Phone is optional - removed required validation
     if (!formData.role) {
       toast.error("Please select a user role");
       return;
@@ -69,9 +71,19 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      
+      // Prepare data to send - use roleId if available, otherwise use role name
+      const inviteData = {
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone?.trim() || null,
+        role: formData.role, // Role name/displayName
+        roleId: formData.roleId || null // Role ID from database
+      };
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/invite`,
-        formData,
+        inviteData,
         { 
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` }
@@ -79,12 +91,62 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
       );
 
       if (response.data.success) {
-        toast.success("Invitation sent successfully!");
+        // Always show invite URL if available
+        if (response.data.inviteUrl) {
+          // Copy to clipboard
+          try {
+            await navigator.clipboard.writeText(response.data.inviteUrl);
+            toast.success("Invite URL copied to clipboard!", {
+              duration: 3000
+            });
+          } catch (err) {
+            // Failed to copy to clipboard
+          }
+          
+          // Show different messages based on email status
+          if (response.data.emailSent) {
+            toast.success("Invitation sent successfully! Invite URL copied to clipboard.", {
+              duration: 5000
+            });
+          } else {
+            toast.error("Email was NOT sent. Invite URL copied to clipboard - please share it manually.", {
+              duration: 8000,
+              icon: '⚠️'
+            });
+            
+            // Also show the URL in a more visible way
+            setTimeout(() => {
+              toast.info(
+                <div>
+                  <p className="font-semibold mb-2">Invite URL (copied to clipboard):</p>
+                  <p className="text-xs break-all bg-gray-100 p-2 rounded">{response.data.inviteUrl}</p>
+                </div>,
+                {
+                  duration: 15000,
+                  style: { maxWidth: '500px' }
+                }
+              );
+            }, 1000);
+          }
+        } else {
+          // Fallback if no URL in response
+          if (response.data.warning) {
+            toast.error(response.data.message || "Email could not be sent", {
+              duration: 5000
+            });
+          } else {
+            toast.success("Invitation created successfully!");
+          }
+        }
+        
         onInviteSuccess();
         onClose();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to send invitation");
+      console.error("Invite error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to send invitation";
+      toast.error(errorMessage);
+      
     } finally {
       setLoading(false);
     }
@@ -138,7 +200,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Phone Number
+              Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <input
               type="tel"
@@ -157,13 +219,13 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
             <div className="relative">
               <select
                 name="role"
-                value={formData.role}
+                value={formData.roleId || ""}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
               >
                 <option value="">Select a role</option>
                 {roles.map((role) => (
-                  <option key={role._id} value={role.name}>
+                  <option key={role._id} value={role._id}>
                     {role.displayName || role.name}
                   </option>
                 ))}

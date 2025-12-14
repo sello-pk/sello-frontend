@@ -139,6 +139,17 @@ const CarDetailsGallerySection = () => {
     return () => imageElement.removeEventListener('wheel', handleWheel);
   }, [isImageModalOpen, zoomLevel]);
 
+  // Cleanup effect to ensure body styles are restored on unmount
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount - restore body styles (don't set state as component is unmounting)
+      if (document.body) {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    };
+  }, []);
+
   // Force close modal and restore body styles when route changes
   useEffect(() => {
     // Close modal immediately on route change

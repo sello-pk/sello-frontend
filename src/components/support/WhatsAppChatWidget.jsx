@@ -88,26 +88,21 @@ const WhatsAppChatWidget = () => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Socket connected successfully');
             setSocketConnected(true);
             newSocket.emit('join-chats');
             if (selectedChat) {
-                console.log('Joining chat:', selectedChat);
                 newSocket.emit('join-chat', selectedChat);
             }
         });
 
         newSocket.on('disconnect', (reason) => {
-            console.log('Socket disconnected:', reason);
             setSocketConnected(false);
         });
 
         newSocket.on('joined-chat', (chatId) => {
-            console.log('Successfully joined chat:', chatId);
         });
 
         newSocket.on('new-message', (data) => {
-            console.log('New message received via socket:', data);
             const messageChatId = data.chatId || data.chat?._id;
             if (messageChatId === selectedChat) {
                 setMessages(prev => {
@@ -175,7 +170,6 @@ const WhatsAppChatWidget = () => {
             const messagesArray = Array.isArray(messagesData) 
                 ? messagesData 
                 : (messagesData?.data || []);
-            console.log('Loading messages:', messagesArray.length, messagesArray);
             setMessages(messagesArray);
         } else {
             setMessages([]);

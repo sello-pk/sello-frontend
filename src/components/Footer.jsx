@@ -1,7 +1,16 @@
 import React from "react";
 import { footerData } from "../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
-import { apple, android, facebook, twitter, instagram, linkedin } from "../assets/assets";
+import {
+  apple,
+  android,
+  facebook,
+  twitter,
+  instagram,
+  linkedin,
+} from "../assets/assets";
+import { FaYoutube } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa6";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -40,7 +49,9 @@ const Footer = () => {
                           {link.name}
                         </Link>
                       ) : (
-                        <span className="text-sm text-gray-300">{link.name}</span>
+                        <span className="text-sm text-gray-300">
+                          {link.name}
+                        </span>
                       )}
                     </li>
                   ))}
@@ -74,7 +85,7 @@ const Footer = () => {
                     href="tel:+97145061300"
                     className="hover:text-white transition-colors duration-200"
                   >
-                    +971 45 061 300
+                    +923134211023
                   </a>
                 </p>
                 <p>
@@ -83,7 +94,7 @@ const Footer = () => {
                     href="mailto:info@sello.ae"
                     className="hover:text-white transition-colors duration-200"
                   >
-                    info@sello.ae
+                    support@sello.pk
                   </a>
                 </p>
               </div>
@@ -152,7 +163,7 @@ const Footer = () => {
               </h4>
               <div className="flex items-center gap-3">
                 <a
-                  href="https://facebook.com/sello.ae"
+                  href="https://web.facebook.com/profile.php?id=61584930269294&mibextid=wwXIfr&rdid=6QUy9q5xMtmsDjOi&share_url=https%3A%2F%2Fweb.facebook.com%2Fshare%2F19jao3GFzS%2F%3Fmibextid%3DwwXIfr%26_rdc%3D1%26_rdr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110 border border-white/10 group"
@@ -164,21 +175,9 @@ const Footer = () => {
                     className="w-5 h-5 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity"
                   />
                 </a>
+
                 <a
-                  href="https://twitter.com/sello_ae"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110 border border-white/10 group"
-                  title="Twitter"
-                >
-                  <img
-                    src={twitter}
-                    alt="Twitter"
-                    className="w-5 h-5 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity"
-                  />
-                </a>
-                <a
-                  href="https://instagram.com/sello.ae"
+                  href="https://www.instagram.com/sello.p.k"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110 border border-white/10 group"
@@ -191,17 +190,22 @@ const Footer = () => {
                   />
                 </a>
                 <a
-                  href="https://linkedin.com/company/sello-ae"
+                  href="https://youtube.com/@sello.p.k?si=OxPdwNCh2HLERIt8"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110 border border-white/10 group"
                   title="LinkedIn"
                 >
-                  <img
-                    src={linkedin}
-                    alt="LinkedIn"
-                    className="w-5 h-5 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity"
-                  />
+                  <FaYoutube className="w-5 h-5 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity" />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@sello..pk?_r=1&_t=ZS-92DrKceCaAi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110 border border-white/10 group"
+                  title="LinkedIn"
+                >
+                  <FaTiktok className="w-5 h-5 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity" />
                 </a>
               </div>
             </div>
@@ -213,7 +217,7 @@ const Footer = () => {
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()}{" "}
             <a
-              href="https://sello.ae"
+              href="https://sello.pk"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-500 hover:text-primary-400 transition-colors duration-200 font-medium"

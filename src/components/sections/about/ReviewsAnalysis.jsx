@@ -1,132 +1,128 @@
 import React from "react";
+import { FiStar } from "react-icons/fi";
 
 const ReviewsAnalysis = () => {
+  const subRatings = [
+    { name: "Friendliness", rating: 5 },
+    { name: "Communication", rating: 5 },
+    { name: "Knowledge", rating: 5 },
+    { name: "Ordering process", rating: 5 },
+  ];
+
+  const ratingDistribution = [
+    { stars: 5, percentage: 89, color: "bg-green-500" },
+    { stars: 4, percentage: 9, color: "bg-primary-400" },
+    { stars: 3, percentage: 1, color: "bg-orange-400" },
+    { stars: 2, percentage: 0, color: "bg-red-400" },
+    { stars: 1, percentage: 0, color: "bg-red-600" },
+  ];
+
   return (
-    <div className="bg-[#D9D9D9] pt-5">
-      <div className="bg-[#272525] rounded-tl-[50px] px-4 sm:px-6 md:px-8 py-10 md:py-14">
-        <div>
-          {/* Title */}
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-medium text-gray-100 py-5">
-            Here's What Customers think of Sello Dealers
-          </h2>
-
-          {/* Rating summary */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between text-gray-100 gap-2">
-            <span className="text-lg sm:text-xl md:text-2xl">
-              <span className="text-primary-500">★★★★★</span> 4.8 out of 5
-            </span>
-            <span className="text-base sm:text-lg md:text-2xl">
-              209321 Carwow buyer reviews
-            </span>
-          </div>
-
-          {/* Sub ratings */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5 text-gray-100 text-lg sm:text-xl md:text-2xl my-5">
-            <div>
-              <span className="text-primary-500">★★★★★</span> Friendliness
-            </div>
-            <div>
-              <span className="text-primary-500">★★★★★</span> Communication
-            </div>
-            <div>
-              <span className="text-primary-500">★★★★★</span> Knowledge
-            </div>
-            <div>
-              <span className="text-primary-500">★★★★★</span> Ordering process
-            </div>
-          </div>
+    <div className="bg-gradient-to-b from-gray-100 to-gray-50 pt-8 md:pt-12">
+      <div className="bg-gradient-to-br from-[#272525] via-[#2a2a2a] to-[#1f1f1f] rounded-tl-[60px] md:rounded-tl-[80px] px-6 sm:px-8 md:px-12 lg:px-16 py-12 md:py-16 relative overflow-hidden">
+        {/* Decorative Background */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-10 right-10 w-72 h-72 bg-primary-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-primary-400 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Rating Distribution */}
-        <div>
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-100 my-5 md:my-7">
-            Rating Distribution
-          </h3>
-
-          <div className="p-2 sm:p-3 md:p-4 text-white w-full max-w-xl">
-            {/* 5 star */}
-            <div className="flex items-center mb-2">
-              <span className="w-12 sm:w-14 md:w-16 text-xs sm:text-sm font-bold text-gray-100">
-                5 star
-              </span>
-              <div className="w-1 bg-primary-500 h-3 sm:h-4 mx-1"></div>
-              <div className="flex-1 bg-transparent relative">
-                <div
-                  className="h-3 sm:h-4 bg-green-600 rounded-r-full"
-                  style={{ width: "89%" }}
-                ></div>
-              </div>
-              <span className="w-8 sm:w-10 text-xs sm:text-sm font-bold ml-1 sm:ml-2">
-                89%
+        <div className="relative">
+          {/* Title Section */}
+          <div className="mb-10 md:mb-12">
+            <div className="inline-block mb-4">
+              <span className="text-primary-400 font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-2 bg-primary-500/20 rounded-full">
+                Customer Satisfaction
               </span>
             </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight">
+              Here's What Customers Think of Sello
+            </h2>
 
-            {/* 4 star */}
-            <div className="flex items-center mb-2">
-              <span className="w-12 sm:w-14 md:w-16 text-xs sm:text-sm font-bold text-gray-100">
-                4 star
-              </span>
-              <div className="w-1 bg-primary-500 h-3 sm:h-4 mx-1"></div>
-              <div className="flex-1 bg-transparent relative">
-                <div
-                  className="h-3 sm:h-4 bg-yellow-400 rounded-r-full"
-                  style={{ width: "9%" }}
-                ></div>
+            {/* Rating Summary */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6 bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 text-primary-400">
+                  <FiStar className="w-full h-full" fill="currentColor" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-3xl md:text-4xl font-bold text-primary-400">
+                      4.8
+                    </span>
+                    <span className="text-xl md:text-2xl text-gray-300">out of 5</span>
+                  </div>
+                  <div className="flex text-primary-400 gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FiStar key={star} className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <span className="w-8 sm:w-10 text-xs sm:text-sm font-bold ml-1 sm:ml-2">
-                9%
-              </span>
+              <div className="text-left md:text-right">
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                  209,321
+                </div>
+                <div className="text-base md:text-lg text-gray-400">
+                  Sello Buyer Reviews
+                </div>
+              </div>
             </div>
+          </div>
 
-            {/* 3 star */}
-            <div className="flex items-center mb-2">
-              <span className="w-12 sm:w-14 md:w-16 text-xs sm:text-sm font-bold text-gray-100">
-                3 star
-              </span>
-              <div className="w-1 bg-primary-500 h-3 sm:h-4 mx-1"></div>
-              <div className="flex-1 bg-transparent relative">
-                <div
-                  className="h-3 sm:h-4 bg-red-400 rounded-r-full"
-                  style={{ width: "1%" }}
-                ></div>
+          {/* Sub Ratings */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-12">
+            {subRatings.map((rating, index) => (
+              <div
+                key={index}
+                className="bg-white/5 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-base md:text-lg font-semibold text-gray-200 capitalize">
+                    {rating.name}
+                  </span>
+                  <div className="flex text-primary-400 gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FiStar key={star} className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" />
+                    ))}
+                  </div>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-1000 group-hover:from-primary-300 group-hover:to-primary-400"
+                    style={{ width: "100%" }}
+                  ></div>
+                </div>
               </div>
-              <span className="w-8 sm:w-10 text-xs sm:text-sm font-bold ml-1 sm:ml-2">
-                1%
-              </span>
-            </div>
+            ))}
+          </div>
 
-            {/* 2 star */}
-            <div className="flex items-center mb-2">
-              <span className="w-12 sm:w-14 md:w-16 text-xs sm:text-sm font-bold text-gray-100">
-                2 star
-              </span>
-              <div className="w-1 bg-primary-500 h-3 sm:h-4 mx-1"></div>
-              <div className="flex-1 bg-transparent relative">
-                <div
-                  className="h-3 sm:h-4 bg-transparent rounded-r-full"
-                  style={{ width: "0%" }}
-                ></div>
-              </div>
-              <span className="w-8 sm:w-10 text-xs sm:text-sm font-bold ml-1 sm:ml-2">
-                0%
-              </span>
-            </div>
+          {/* Rating Distribution */}
+          <div>
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8">
+              Rating Distribution
+            </h3>
 
-            {/* 1 star */}
-            <div className="flex items-center">
-              <span className="w-12 sm:w-14 md:w-16 text-xs sm:text-sm font-bold text-gray-100">
-                1 star
-              </span>
-              <div className="w-1 bg-primary-500 h-3 sm:h-4 mx-1"></div>
-              <div className="flex-1 bg-transparent relative">
-                <div
-                  className="h-3 sm:h-4 bg-transparent rounded-r-full"
-                  style={{ width: "0%" }}
-                ></div>
-              </div>
-              <span className="w-8 sm:w-10 text-xs sm:text-sm font-bold ml-1 sm:ml-2">
-                0%
-              </span>
+            <div className="space-y-4 max-w-2xl">
+              {ratingDistribution.map((item, index) => (
+                <div key={index} className="group">
+                  <div className="flex items-center gap-4 mb-2">
+                    <span className="w-16 md:w-20 text-sm md:text-base font-bold text-gray-300">
+                      {item.stars} star{item.stars !== 1 ? "s" : ""}
+                    </span>
+                    <div className="flex-1 relative">
+                      <div className="h-4 md:h-5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                        <div
+                          className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out group-hover:shadow-lg group-hover:shadow-${item.color}/50`}
+                          style={{ width: `${item.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <span className="w-12 md:w-16 text-right text-sm md:text-base font-bold text-gray-200">
+                      {item.percentage}%
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

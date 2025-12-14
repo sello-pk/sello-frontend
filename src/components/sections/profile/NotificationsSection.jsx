@@ -51,16 +51,13 @@ const NotificationsSection = () => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Profile notification socket connected');
       newSocket.emit('join-notifications');
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Profile notification socket disconnected');
     });
 
     newSocket.on('new-notification', (data) => {
-      console.log('New notification received in profile:', data);
       toast.success(data.message || data.title || "New notification", {
         icon: '🔔',
         duration: 5000,

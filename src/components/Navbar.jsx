@@ -14,10 +14,10 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef(null);
   const linkRefs = useRef([]);
-  
+
   // Track token in state so skip option re-evaluates when token changes
   const [token, setToken] = useState(() => localStorage.getItem("token"));
-  
+
   // Get user from localStorage as fallback
   const getCachedUser = () => {
     try {
@@ -30,16 +30,20 @@ const Navbar = () => {
     }
     return null;
   };
-  
+
   // Only fetch if token exists
-  const { data: currentUser, isLoading, refetch } = useGetMeQuery(undefined, {
+  const {
+    data: currentUser,
+    isLoading,
+    refetch,
+  } = useGetMeQuery(undefined, {
     skip: !token,
   });
-  
+
   // Use cached user as fallback while loading or if query is skipped
   const cachedUser = getCachedUser();
   const user = currentUser || cachedUser;
-  
+
   // Update token state when localStorage changes (after login)
   useEffect(() => {
     const checkToken = () => {
@@ -48,24 +52,24 @@ const Navbar = () => {
         setToken(currentToken);
       }
     };
-    
+
     // Check immediately
     checkToken();
-    
+
     // Listen for storage events (from other tabs)
     const handleStorageChange = (e) => {
-      if (e.key === 'token') {
+      if (e.key === "token") {
         setToken(e.newValue);
       }
     };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
+
+    window.addEventListener("storage", handleStorageChange);
+
     // Also check periodically for same-tab changes (localStorage.setItem doesn't trigger storage event)
     const interval = setInterval(checkToken, 500);
-    
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
   }, [token]);
@@ -124,7 +128,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between sticky top-0 z-50  ${
+        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between sticky top-0 z-50 ${
           location.pathname === "/cars" ||
           location.pathname === "/users" ||
           location.pathname === "/blog"
@@ -133,8 +137,8 @@ const Navbar = () => {
         }`}
       >
         {/* Logo */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           onClick={(e) => {
             e.stopPropagation();
           }}
@@ -179,11 +183,9 @@ const Navbar = () => {
           ))}
         </div>
 
-       
-
         {/* User Avatar / Login + Actions */}
         <div className="flex items-center gap-4 text-white">
-           {/* Create Post Button (Desktop) */}
+          {/* Create Post Button (Desktop) */}
           <button
             onClick={() => navigate("/create-post")}
             className={`hover:placeholder-opacity-85 hidden md:flex gap-2 items-center ml-2 ${
@@ -196,11 +198,10 @@ const Navbar = () => {
             title="Create Post"
           >
             <FaCirclePlus />
-          <span className="">Sale Your Car</span>
+            <span className="">Sale Your Car</span>
           </button>
           {!isLoading && currentUser ? (
             <div className="flex items-center gap-4">
-              
               {/* Dashboard Links */}
               {currentUser.role === "admin" && (
                 <Link
@@ -210,7 +211,7 @@ const Navbar = () => {
                   Admin
                 </Link>
               )}
-              {user?.role === "dealer" && (
+              {user?.role === "dealer" && user?.dealerInfo?.verified && (
                 <Link
                   to="/dealer/dashboard"
                   className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
@@ -218,7 +219,7 @@ const Navbar = () => {
                   Dealer Dashboard
                 </Link>
               )}
-              {user.role === "individual" && (
+              {user?.role === "dealer" && !user?.dealerInfo?.verified && (
                 <Link
                   to="/seller/dashboard"
                   className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
@@ -226,6 +227,7 @@ const Navbar = () => {
                   My Dashboard
                 </Link>
               )}
+              {/* Individual users don't have a dashboard - removed My Dashboard link */}
               {/* Notification Bell */}
               <NotificationBell />
               {/* Avatar */}
@@ -249,8 +251,6 @@ const Navbar = () => {
               Login
             </button>
           )}
-
-          
 
           {/* Mobile Menu */}
           <button
@@ -325,7 +325,7 @@ const Navbar = () => {
                 <span>Admin Panel</span>
               </Link>
             )}
-            {!isLoading && user?.role === "dealer" && (
+            {!isLoading && user?.role === "dealer" && user?.dealerInfo?.verified && (
               <Link
                 to="/dealer/dashboard"
                 onClick={closeDrawer}
@@ -334,7 +334,7 @@ const Navbar = () => {
                 <span>Dealer Dashboard</span>
               </Link>
             )}
-            {!isLoading && user?.role === "individual" && (
+            {!isLoading && user?.role === "dealer" && !user?.dealerInfo?.verified && (
               <Link
                 to="/seller/dashboard"
                 onClick={closeDrawer}
@@ -343,6 +343,7 @@ const Navbar = () => {
                 <span>My Dashboard</span>
               </Link>
             )}
+            {/* Individual users don't have a dashboard */}
           </div>
         </div>
       )}

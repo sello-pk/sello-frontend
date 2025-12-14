@@ -119,7 +119,7 @@ const Reports = () => {
     if (isLoading) {
         return (
             <AdminLayout>
-                <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <Spinner fullScreen={false} />
                 </div>
             </AdminLayout>
@@ -130,18 +130,18 @@ const Reports = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             View site earnings and performance metrics
                         </p>
                     </div>
                     <button
                         onClick={handleExportPDF}
-                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 text-sm shadow-sm"
+                        className="px-4 py-2 bg-gray-900 dark:bg-primary-500 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-primary-600 flex items-center gap-2 text-sm shadow-sm"
                     >
                         <FiDownload size={18} />
                         Export Report
@@ -151,11 +151,11 @@ const Reports = () => {
                 {/* Key Metrics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Total Earnings */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                                <p className="text-xs text-gray-500 mb-2">Total Earnings</p>
-                                <p className="text-3xl font-bold text-gray-900">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Total Earnings</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatCurrency(analytics.earnings?.total || 0)}
                                 </p>
                             </div>
@@ -166,44 +166,44 @@ const Reports = () => {
                         <div className="flex items-center gap-2">
                             <FiTrendingUp size={14} className="text-green-500" />
                             <span className={`text-xs font-medium ${
-                                analytics.earnings?.change >= 0 ? 'text-green-600' : 'text-red-600'
+                                analytics.earnings?.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                             }`}>
                                 {analytics.earnings?.change >= 0 ? '+' : ''}{analytics.earnings?.change || 12}%
                             </span>
-                            <span className="text-xs text-gray-500">vs last month</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
                         </div>
                     </div>
 
                     {/* Total Promotions */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                                <p className="text-xs text-gray-500 mb-2">Total Promotions</p>
-                                <p className="text-3xl font-bold text-gray-900">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Total Promotions</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {analytics.promotions?.total || 0}
                                 </p>
                             </div>
-                            <div className="w-16 h-16 rounded-2xl bg-gray-900 flex items-center justify-center shadow-lg">
+                            <div className="w-16 h-16 rounded-2xl bg-gray-900 dark:bg-gray-700 flex items-center justify-center shadow-lg">
                                 <FiZap className="text-white" size={28} />
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <FiTrendingUp size={14} className="text-green-500" />
                             <span className={`text-xs font-medium ${
-                                analytics.promotions?.change >= 0 ? 'text-green-600' : 'text-red-600'
+                                analytics.promotions?.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                             }`}>
                                 {analytics.promotions?.change >= 0 ? '+' : ''}{analytics.promotions?.change || 12}%
                             </span>
-                            <span className="text-xs text-gray-500">vs last month</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
                         </div>
                     </div>
 
                     {/* Total Views */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                                <p className="text-xs text-gray-500 mb-2">Total Views</p>
-                                <p className="text-3xl font-bold text-gray-900">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Total Views</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatViews(analytics.views?.total || 0)}
                                 </p>
                             </div>
@@ -214,41 +214,41 @@ const Reports = () => {
                         <div className="flex items-center gap-2">
                             <FiTrendingUp size={14} className="text-green-500" />
                             <span className={`text-xs font-medium ${
-                                analytics.views?.change >= 0 ? 'text-green-600' : 'text-red-600'
+                                analytics.views?.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                             }`}>
                                 {analytics.views?.change >= 0 ? '+' : ''}{analytics.views?.change || 12}%
                             </span>
-                            <span className="text-xs text-gray-500">vs last month</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Most Viewed Cars Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200">
-                        <h3 className="text-lg font-bold text-gray-900">Most Viewed Cars</h3>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Most Viewed Cars</h3>
                     </div>
                     {mostViewedCars.length === 0 ? (
                         <div className="text-center py-20">
-                            <p className="text-gray-500 text-base">No found</p>
+                            <p className="text-gray-500 dark:text-gray-400 text-base">No found</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Car</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Brand</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Price</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Views</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Rank</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Car</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Brand</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Price</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Views</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {mostViewedCars.map((car, index) => (
-                                        <tr key={car._id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        <tr key={car._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                                 {index + 1}
                                             </td>
                                             <td className="px-6 py-4">
@@ -260,36 +260,36 @@ const Reports = () => {
                                                             className="w-12 h-12 object-cover rounded-lg"
                                                         />
                                                     ) : (
-                                                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                            <span className="text-xs text-gray-400">No Image</span>
+                                                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">No Image</span>
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-900">
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                             {car.title || `${car.make} ${car.model}`}
                                                         </p>
                                                         {car.postedBy && (
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
                                                                 {typeof car.postedBy === 'object' ? car.postedBy.name : 'N/A'}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
+                                            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                                 {car.make || 'N/A'}
                                             </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                                 {formatCurrency(car.price || 0)}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
+                                            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                                 {car.views?.toLocaleString() || '0'}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                     car.isSold
-                                                        ? 'bg-red-100 text-red-800'
-                                                        : 'bg-green-100 text-green-800'
+                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                                                        : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                                 }`}>
                                                     {car.isSold ? 'Sold' : 'Active'}
                                                 </span>

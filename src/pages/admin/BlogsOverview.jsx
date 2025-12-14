@@ -1,466 +1,560 @@
 import { useState } from "react";
 import {
-    useGetAllBlogsQuery,
-    useGetAllCategoriesQuery,
-    useDeleteBlogMutation
+  useGetAllBlogsQuery,
+  useGetAllCategoriesQuery,
+  useDeleteBlogMutation,
 } from "../../redux/services/adminApi";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
+import Pagination from "../../components/admin/Pagination";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { FiEdit, FiTrash2, FiEye, FiPlus, FiFilter, FiFileText, FiBook, FiCheckCircle, FiMessageSquare, FiClock, FiAlertCircle, FiGrid } from "react-icons/fi";
+import {
+  FiEdit,
+  FiTrash2,
+  FiEye,
+  FiPlus,
+  FiFilter,
+  FiFileText,
+  FiBook,
+  FiCheckCircle,
+  FiMessageSquare,
+  FiClock,
+  FiAlertCircle,
+  FiGrid,
+} from "react-icons/fi";
 import ConfirmationModal from "../../components/admin/ConfirmationModal";
 
 const BlogsOverview = () => {
-    const [page, setPage] = useState(1);
-    const [filter, setFilter] = useState("all");
-    const [categoryFilter, setCategoryFilter] = useState("");
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [blogToDelete, setBlogToDelete] = useState(null);
-    const { data: blogsData, isLoading: blogsLoading } = useGetAllBlogsQuery({ page, limit: 10 });
-    const { data: categoriesData, isLoading: categoriesLoading } = useGetAllCategoriesQuery({ type: "blog" });
-    const [deleteBlog] = useDeleteBlogMutation();
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState(null);
+  const { data: blogsData, isLoading: blogsLoading } = useGetAllBlogsQuery({
+    page,
+    limit: 10,
+  });
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useGetAllCategoriesQuery({ type: "blog" });
+  const [deleteBlog] = useDeleteBlogMutation();
 
-    const blogs = blogsData?.blogs || [];
-    const pagination = blogsData?.pagination || {};
-    const categories = categoriesData || [];
+  const blogs = blogsData?.blogs || [];
+  const pagination = blogsData?.pagination || {};
+  const categories = categoriesData || [];
 
-    // Calculate metrics - need to get all blogs for accurate counts
-    const totalBlogs = blogsData?.pagination?.total || 0;
-    const publishedBlogs = blogs.filter(blog => blog.status === "published").length;
-    const draftBlogs = blogs.filter(blog => blog.status === "draft").length;
-    const pendingBlogs = blogs.filter(blog => blog.status === "pending" || (!blog.status || blog.status === "")).length;
-    const reviewedBlogs = blogs.filter(blog => blog.status === "archived").length;
-    const totalCategories = categories.length;
-    const totalComments = 0; // Placeholder - would need comments API
-    const totalViews = blogs.reduce((sum, blog) => sum + (blog.views || 0), 0);
+  // Calculate metrics - need to get all blogs for accurate counts
+  const totalBlogs = blogsData?.pagination?.total || 0;
+  const publishedBlogs = blogs.filter(
+    (blog) => blog.status === "published"
+  ).length;
+  const draftBlogs = blogs.filter((blog) => blog.status === "draft").length;
+  const pendingBlogs = blogs.filter(
+    (blog) => blog.status === "pending" || !blog.status || blog.status === ""
+  ).length;
+  const reviewedBlogs = blogs.filter(
+    (blog) => blog.status === "archived"
+  ).length;
+  const totalCategories = categories.length;
+  const totalComments = 0; // Placeholder - would need comments API
+  const totalViews = blogs.reduce((sum, blog) => sum + (blog.views || 0), 0);
 
-    const handleDeleteClick = (blogId) => {
-        setBlogToDelete(blogId);
-        setShowDeleteModal(true);
-    };
+  const handleDeleteClick = (blogId) => {
+    setBlogToDelete(blogId);
+    setShowDeleteModal(true);
+  };
 
-    const handleDeleteConfirm = async () => {
-        if (!blogToDelete) return;
-        
-        try {
-            await deleteBlog(blogToDelete).unwrap();
-            toast.success("Blog deleted successfully");
-        } catch (error) {
-            toast.error(error?.data?.message || "Failed to delete blog");
-        } finally {
-            setShowDeleteModal(false);
-            setBlogToDelete(null);
-        }
-    };
+  const handleDeleteConfirm = async () => {
+    if (!blogToDelete) return;
 
-    // Filter blogs based on status
-    const filteredBlogs = blogs.filter(blog => {
-        if (filter === "all") return true;
-        if (filter === "published") return blog.status === "published";
-        if (filter === "draft") return blog.status === "draft";
-        if (filter === "scheduled") return blog.status === "scheduled";
-        if (filter === "pending") return blog.status === "pending" || (!blog.status || blog.status === "");
-        if (filter === "reviewed") return blog.status === "archived";
-        return true;
-    }).filter(blog => {
-        if (categoryFilter === "") return true;
-        return blog.category?._id === categoryFilter;
+    try {
+      await deleteBlog(blogToDelete).unwrap();
+      toast.success("Blog deleted successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete blog");
+    } finally {
+      setShowDeleteModal(false);
+      setBlogToDelete(null);
+    }
+  };
+
+  // Filter blogs based on status
+  const filteredBlogs = blogs
+    .filter((blog) => {
+      if (filter === "all") return true;
+      if (filter === "published") return blog.status === "published";
+      if (filter === "draft") return blog.status === "draft";
+      if (filter === "scheduled") return blog.status === "scheduled";
+      if (filter === "pending")
+        return blog.status === "pending" || !blog.status || blog.status === "";
+      if (filter === "reviewed") return blog.status === "archived";
+      return true;
+    })
+    .filter((blog) => {
+      if (categoryFilter === "") return true;
+      return blog.category?._id === categoryFilter;
     });
 
-    // Format date
-    const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    };
+  // Format date
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
-    return (
-        <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
-            {/* Header */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Content & Blog Management</h2>
-                <p className="text-sm text-gray-500 mt-1">Manage blog posts, categories, and engagement</p>
+  return (
+    <AdminLayout>
+      <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        {/* Header */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Content & Blog Management
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Manage blog posts, categories, and engagement
+          </p>
+        </div>
+
+        {/* Stats Cards - Match reference design exactly */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6">
+          {/* Total Posts */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Posts
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-10">
+                  {totalBlogs}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-blue-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiFileText size={28} />
+                </div>
+              </div>
             </div>
+          </div>
 
-            {/* Stats Cards - Match reference design exactly */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6">
-                {/* Total Posts */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Total Posts</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{totalBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-blue-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiFileText size={28} />
-                            </div>
-                        </div>
-                    </div>
+          {/* Published Posts */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Published Posts
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-6">
+                  {publishedBlogs}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-green-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiCheckCircle size={28} />
                 </div>
-
-                {/* Published Posts */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Published Posts</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{publishedBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-green-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiCheckCircle size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Draft Posts */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Draft Posts</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{draftBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiClock size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Pending Posts */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Pending Posts</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{pendingBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiAlertCircle size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Reviewed Posts */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Reviewed Posts</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{reviewedBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-green-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiCheckCircle size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Total Categories */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Total Categories</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{totalCategories}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-red-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-red-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiBook size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Total Comments */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Total Comments</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{totalComments}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiMessageSquare size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Total Views */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Total Views</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{totalViews}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiEye size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 mb-6">
-                <Link
-                    to="/admin/blog-categories"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
-                >
-                    <FiGrid size={18} />
-                    Categories
-                </Link>
-                <Link
-                    to="/admin/blog-comments"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
-                >
-                    <FiMessageSquare size={18} />
+          {/* Draft Posts */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Draft Posts
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-10">
+                  {draftBlogs}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiClock size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pending Posts */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Pending Posts
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-6">
+                  {pendingBlogs}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiAlertCircle size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Reviewed Posts */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Reviewed Posts
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-6">
+                  {reviewedBlogs}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-green-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiCheckCircle size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Categories */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Categories
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-6">
+                  {totalCategories}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-red-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiBook size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Comments */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Comments
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-6">
+                  {totalComments}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiMessageSquare size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Views */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Views
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-10">
+                  {totalViews}
+                </h3>
+              </div>
+              <div className="relative flex-shrink-0">
+                <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                <div className="relative w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FiEye size={28} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Link
+            to="/admin/blog-categories"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
+          >
+            <FiGrid size={18} />
+            Categories
+          </Link>
+          <Link
+            to="/admin/blog-comments"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
+          >
+            <FiMessageSquare size={18} />
+            Comments
+          </Link>
+          <Link
+            to="/admin/blogs/create"
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors"
+          >
+            <FiPlus size={18} />
+            New Post
+          </Link>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
+          <div className="flex flex-wrap gap-3 items-center">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Filter:
+            </span>
+
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "all"
+                  ? "bg-primary-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter all blogs"
+              aria-pressed={filter === "all"}
+            >
+              All
+            </button>
+
+            <button
+              onClick={() => setFilter("published")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "published"
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter published blogs"
+              aria-pressed={filter === "published"}
+            >
+              Published
+            </button>
+
+            <button
+              onClick={() => setFilter("draft")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "draft"
+                  ? "bg-yellow-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter draft blogs"
+              aria-pressed={filter === "draft"}
+            >
+              Draft
+            </button>
+
+            <button
+              onClick={() => setFilter("scheduled")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "scheduled"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter scheduled blogs"
+              aria-pressed={filter === "scheduled"}
+            >
+              Scheduled
+            </button>
+
+            <button
+              onClick={() => setFilter("pending")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "pending"
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter pending blogs"
+              aria-pressed={filter === "pending"}
+            >
+              Pending
+            </button>
+
+            <button
+              onClick={() => setFilter("reviewed")}
+              className={`px-3 py-1.5 text-sm rounded-lg ${
+                filter === "reviewed"
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              }`}
+              aria-label="Filter reviewed blogs"
+              aria-pressed={filter === "reviewed"}
+            >
+              Reviewed
+            </button>
+
+            <div className="ml-auto">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                aria-label="Filter by category"
+              >
+                <option value="">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Blogs Table */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Author
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Views
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Comments
-                </Link>
-                <Link
-                    to="/admin/blogs/create"
-                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors"
-                >
-                    <FiPlus size={18} />
-                    New Post
-                </Link>
-            </div>
-
-            {/* Filter Bar */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-                <div className="flex flex-wrap gap-3 items-center">
-                    <span className="text-sm font-medium text-gray-700">Filter:</span>
-                    
-                    <button
-                        onClick={() => setFilter("all")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "all"
-                                ? "bg-primary-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {blogsLoading ? (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-8 text-center">
+                      <Spinner fullScreen={false} />
+                    </td>
+                  </tr>
+                ) : filteredBlogs.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                     >
-                        All
-                    </button>
-                    
-                    <button
-                        onClick={() => setFilter("published")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "published"
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                      No data available
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBlogs.map((blog) => (
+                    <tr
+                      key={blog._id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                        Published
-                    </button>
-                    
-                    <button
-                        onClick={() => setFilter("draft")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "draft"
-                                ? "bg-yellow-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                        Draft
-                    </button>
-                    
-                    <button
-                        onClick={() => setFilter("scheduled")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "scheduled"
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                        Scheduled
-                    </button>
-                    
-                    <button
-                        onClick={() => setFilter("pending")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "pending"
-                                ? "bg-orange-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                        Pending
-                    </button>
-                    
-                    <button
-                        onClick={() => setFilter("reviewed")}
-                        className={`px-3 py-1.5 text-sm rounded-lg ${
-                            filter === "reviewed"
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                        Reviewed
-                    </button>
-                    
-                    <div className="ml-auto">
-                        <select
-                            value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {blog.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                          {blog.author?.name || "Admin"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(blog.createdAt)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            blog.status === "published"
+                              ? "bg-green-100 text-green-800"
+                              : blog.status === "draft"
+                              ? "bg-purple-100 text-purple-800"
+                              : blog.status === "pending" || !blog.status
+                              ? "bg-orange-100 text-orange-800"
+                              : blog.status === "archived"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                         >
-                            <option value="">All Categories</option>
-                            {categories.map((category) => (
-                                <option key={category._id} value={category._id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
+                          {blog.status
+                            ? blog.status.charAt(0).toUpperCase() +
+                              blog.status.slice(1)
+                            : "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                        {blog.views || 0}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                        0
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Link
+                            to={`/admin/blogs/${blog._id}/edit`}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                            title="Edit"
+                            aria-label={`Edit blog post ${blog.title}`}
+                          >
+                            <FiEdit size={18} aria-hidden="true" />
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteClick(blog._id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                            title="Delete"
+                            aria-label={`Delete blog post ${blog.title}`}
+                          >
+                            <FiTrash2 size={18} aria-hidden="true" />
+                          </button>
+                          <a
+                            href={`/blog/${blog.slug || blog._id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                            title="View"
+                            aria-label={`View blog post ${blog.title} in new tab`}
+                          >
+                            <FiEye size={18} aria-hidden="true" />
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-            {/* Blogs Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Author</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Views</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Comments</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {blogsLoading ? (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-8 text-center">
-                                        <Spinner fullScreen={false} />
-                                    </td>
-                                </tr>
-                            ) : filteredBlogs.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                                        No data available
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredBlogs.map((blog) => (
-                                    <tr key={blog._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{blog.title}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-600">
-                                                {blog.author?.name || "Admin"}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                            {formatDate(blog.createdAt)}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 text-xs rounded-full ${
-                                                blog.status === "published"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : blog.status === "draft"
-                                                    ? "bg-purple-100 text-purple-800"
-                                                    : blog.status === "pending" || !blog.status
-                                                    ? "bg-orange-100 text-orange-800"
-                                                    : blog.status === "archived"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : "bg-gray-100 text-gray-800"
-                                            }`}>
-                                                {blog.status ? blog.status.charAt(0).toUpperCase() + blog.status.slice(1) : "Pending"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {blog.views || 0}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            0
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <Link
-                                                    to={`/admin/blogs/${blog._id}/edit`}
-                                                    className="text-blue-600 hover:text-blue-900"
-                                                    title="Edit"
-                                                >
-                                                    <FiEdit size={18} />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDeleteClick(blog._id)}
-                                                    className="text-red-600 hover:text-red-900"
-                                                    title="Delete"
-                                                >
-                                                    <FiTrash2 size={18} />
-                                                </button>
-                                                <a
-                                                    href={`/blog/${blog.slug || blog._id}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-green-600 hover:text-green-900"
-                                                    title="View"
-                                                >
-                                                    <FiEye size={18} />
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        {/* Pagination */}
+        <Pagination
+          currentPage={page}
+          totalPages={pagination.pages || 1}
+          onPageChange={setPage}
+          itemsPerPage={20}
+          totalItems={pagination.total || 0}
+        />
 
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-                <div className="mt-6 flex justify-center space-x-2">
-                    <button
-                        onClick={() => setPage(page - 1)}
-                        disabled={page === 1}
-                        className="px-4 py-2 border rounded-lg disabled:opacity-50"
-                    >
-                        Previous
-                    </button>
-                    <span className="px-4 py-2">
-                        Page {page} of {pagination.pages}
-                    </span>
-                    <button
-                        onClick={() => setPage(page + 1)}
-                        disabled={page >= pagination.pages}
-                        className="px-4 py-2 border rounded-lg disabled:opacity-50"
-                    >
-                        Next
-                    </button>
-                </div>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={showDeleteModal}
-                onClose={() => setShowDeleteModal(false)}
-                onConfirm={handleDeleteConfirm}
-                title="Delete Blog"
-                message="Are you sure you want to delete this blog? This action cannot be undone."
-                confirmText="Delete"
-                confirmButtonClass="bg-red-500 hover:bg-red-600"
-            />
-            </div>
-        </AdminLayout>
-    );
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Blog"
+          message="Are you sure you want to delete this blog? This action cannot be undone."
+          confirmText="Delete"
+          confirmButtonClass="bg-red-500 hover:bg-red-600"
+        />
+      </div>
+    </AdminLayout>
+  );
 };
 
 export default BlogsOverview;

@@ -36,7 +36,7 @@ const ImagesUpload = ({ onImagesChange }) => {
   const processFiles = (files) => {
     // Validate file types and sizes
     const maxSize = 20 * 1024 * 1024; // 20MB
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const maxFiles = 20;
 
     const validFiles = files.filter((file) => {
@@ -162,7 +162,7 @@ const ImagesUpload = ({ onImagesChange }) => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="box md:h-16 md:w-16 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-9 z-50 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-gray-300"></div>
+        <div className="box md:h-16 md:w-16 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-9 z-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-gray-300"></div>
         {/* Preview */}
         <div className="bg-white rounded-xl  border-2 border-primary-300 border-dashed  h-64 flex items-center justify-center  overflow-hidden group relative">
           {activeIndex !== null ? (

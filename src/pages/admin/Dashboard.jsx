@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetDashboardStatsQuery } from "../../redux/services/adminApi";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
+import { StatsCardSkeleton, CardSkeleton } from "../../components/Skeleton";
 import { 
     FiUsers, 
     FiTrendingUp, 
@@ -14,6 +15,7 @@ import {
     FiGrid,
     FiLayout
 } from "react-icons/fi";
+import TooltipComponent from "../../components/admin/Tooltip";
 import { BiSolidCarGarage } from "react-icons/bi";
 import {
     AreaChart,
@@ -61,8 +63,13 @@ const Dashboard = () => {
     if (isLoading) {
         return (
             <AdminLayout>
-                <div className="flex justify-center items-center h-64">
-                    <Spinner fullScreen={false} />
+                <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+                    <div className="mb-6">
+                        <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
+                    </div>
+                    <StatsCardSkeleton count={8} />
+                    <CardSkeleton count={2} />
                 </div>
             </AdminLayout>
         );
@@ -105,7 +112,7 @@ const Dashboard = () => {
         return (
             <AdminLayout>
                 <div className="flex flex-col justify-center items-center h-64">
-                    <p className="text-gray-600 text-sm">No data available</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">No data available</p>
                 </div>
             </AdminLayout>
         );
@@ -186,36 +193,44 @@ const Dashboard = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+            <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-                        <p className="text-sm text-gray-500 mt-1">Welcome back! Here's what's happening with your platform today.</p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">Welcome back! Here's what's happening with your platform today.</p>
                     </div>
                     <div className="flex gap-2">
-                        <button
-                            onClick={() => setIsCompactView(false)}
-                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                                !isCompactView 
-                                    ? "bg-primary-500 text-white shadow-md" 
-                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                            }`}
-                        >
-                            <FiLayout size={18} />
-                            Expanded
-                        </button>
-                        <button
-                            onClick={() => setIsCompactView(true)}
-                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                                isCompactView 
-                                    ? "bg-primary-500 text-white shadow-md" 
-                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                            }`}
-                        >
-                            <FiGrid size={18} />
-                            Compact
-                        </button>
+                        <TooltipComponent content="Expanded view shows detailed metrics with charts">
+                            <button
+                                onClick={() => setIsCompactView(false)}
+                                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                                    !isCompactView 
+                                        ? "bg-primary-500 text-white shadow-md" 
+                                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                }`}
+                                aria-label="Switch to expanded view"
+                                aria-pressed={!isCompactView}
+                            >
+                                <FiLayout size={18} aria-hidden="true" />
+                                Expanded
+                            </button>
+                        </TooltipComponent>
+                        <TooltipComponent content="Compact view shows summary cards only">
+                            <button
+                                onClick={() => setIsCompactView(true)}
+                                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                                    isCompactView 
+                                        ? "bg-primary-500 text-white shadow-md" 
+                                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                }`}
+                                aria-label="Switch to compact view"
+                                aria-pressed={isCompactView}
+                            >
+                                <FiGrid size={18} aria-hidden="true" />
+                                Compact
+                            </button>
+                        </TooltipComponent>
                     </div>
                 </div>
 
@@ -232,15 +247,15 @@ const Dashboard = () => {
                             return (
                                 <div
                                     key={index}
-                                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 border border-gray-100"
+                                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 border border-gray-100 dark:border-gray-700"
                                 >
                                     {/* Icon and Title Row */}
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex-1">
-                                            <p className="text-xs font-medium text-gray-500 mb-1">
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                 {metric.title}
                                             </p>
-                                            <h3 className="text-2xl font-bold text-gray-900">
+                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                                                 {metric.value.toLocaleString()}
                                             </h3>
                                         </div>
@@ -271,7 +286,7 @@ const Dashboard = () => {
                                         }`}>
                                             {isPositive ? "+" : ""}{changeText}%
                                         </span>
-                                        <span className="text-xs text-gray-500">vs last month</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
                                     </div>
                                 </div>
                             );
@@ -289,7 +304,7 @@ const Dashboard = () => {
                             return (
                                 <div
                                     key={index}
-                                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 border border-gray-100"
+                                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 border border-gray-100 dark:border-gray-700"
                                 >
                                     {/* Icon with layered background effect */}
                                     <div className="relative mb-3">
@@ -307,7 +322,7 @@ const Dashboard = () => {
                                     </p>
                                     
                                     {/* Value */}
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                                         {metric.value.toLocaleString()}
                                     </h3>
                                     
@@ -339,8 +354,8 @@ const Dashboard = () => {
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                     {/* Sales Trends Chart */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="text-base font-semibold text-gray-900 mb-6">Sales Trends</h3>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Sales Trends</h3>
                         <ResponsiveContainer width="100%" height={280}>
                             <AreaChart data={salesTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
@@ -385,8 +400,8 @@ const Dashboard = () => {
                     </div>
 
                     {/* Users Growth Chart */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="text-base font-semibold text-gray-900 mb-6">Users Growth</h3>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Users Growth</h3>
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={userGrowth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barGap={2}>
                                 <CartesianGrid strokeDasharray="0" stroke="#f3f4f6" vertical={false} />

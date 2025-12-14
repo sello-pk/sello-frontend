@@ -133,23 +133,34 @@ const LocationPicker = ({ onLocationChange, initialLocation = null }) => {
   });
   const [mapZoom, setMapZoom] = useState(13);
 
-  // Try to get user's current location on mount
+  // Try to get user's current location on mount, or use default
   useEffect(() => {
-    if (!location && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const coords = [lng, lat]; // [longitude, latitude] for backend
-          setLocation(coords);
-          setMapCenter([lat, lng]);
-          onLocationChange(JSON.stringify(coords));
-        },
-        () => {
-          // If geolocation fails, use default center
-          setMapCenter(defaultCenter);
-        }
-      );
+    if (!location) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const coords = [lng, lat]; // [longitude, latitude] for backend
+            setLocation(coords);
+            setMapCenter([lat, lng]);
+            onLocationChange(JSON.stringify(coords));
+          },
+          () => {
+            // If geolocation fails, use default center and set it
+            const defaultCoords = [defaultCenter[1], defaultCenter[0]]; // [longitude, latitude]
+            setLocation(defaultCoords);
+            setMapCenter(defaultCenter);
+            onLocationChange(JSON.stringify(defaultCoords));
+          }
+        );
+      } else {
+        // Geolocation not supported, use default
+        const defaultCoords = [defaultCenter[1], defaultCenter[0]]; // [longitude, latitude]
+        setLocation(defaultCoords);
+        setMapCenter(defaultCenter);
+        onLocationChange(JSON.stringify(defaultCoords));
+      }
     }
   }, []);
 

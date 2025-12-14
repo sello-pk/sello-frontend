@@ -112,7 +112,6 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
             });
 
             newSocket.on('connect', () => {
-                console.log('Car chat socket connected');
                 setSocketConnected(true);
                 if (chatId) {
                     newSocket.emit('join-chat', chatId);
@@ -120,7 +119,6 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
             });
 
             newSocket.on('disconnect', (reason) => {
-                console.log('Car chat socket disconnected:', reason);
                 setSocketConnected(false);
             });
 

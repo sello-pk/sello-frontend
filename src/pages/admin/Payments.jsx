@@ -12,8 +12,9 @@ import {
     useToggleSubscriptionPlanStatusMutation,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
+import { exportToCSV, formatDateForExport, formatCurrencyForExport } from "../../utils/exportUtils";
 import toast from "react-hot-toast";
-import { FiDollarSign, FiCreditCard, FiCalendar, FiUser, FiCheckCircle, FiXCircle, FiPlus, FiEdit2, FiTrash2, FiToggleLeft, FiToggleRight } from "react-icons/fi";
+import { FiDollarSign, FiCreditCard, FiCalendar, FiUser, FiCheckCircle, FiXCircle, FiPlus, FiEdit2, FiTrash2, FiToggleLeft, FiToggleRight, FiDownload } from "react-icons/fi";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 import PromptModal from "../../components/admin/PromptModal";
 
@@ -148,19 +149,85 @@ const Payments = () => {
         return badges[status] || "bg-gray-100 text-gray-800";
     };
 
+    const handleExportPayments = () => {
+        if (payments.length === 0) {
+            toast.error("No payments to export");
+            return;
+        }
+
+        const headers = [
+            { label: 'Payment ID', accessor: '_id' },
+            { label: 'User', accessor: (payment) => payment.user?.name || payment.userId || 'N/A' },
+            { label: 'Email', accessor: (payment) => payment.user?.email || 'N/A' },
+            { label: 'Amount', accessor: (payment) => formatCurrencyForExport(payment.amount) },
+            { label: 'Currency', accessor: 'currency' },
+            { label: 'Status', accessor: 'status' },
+            { label: 'Payment Method', accessor: 'paymentMethod' },
+            { label: 'Transaction ID', accessor: 'transactionId' },
+            { label: 'Description', accessor: 'description' },
+            { label: 'Date', accessor: (payment) => formatDateForExport(payment.createdAt) }
+        ];
+
+        exportToCSV(payments, headers, `payments_export_${new Date().toISOString().split('T')[0]}`);
+        toast.success("Payments exported successfully");
+    };
+
+    const handleExportSubscriptions = () => {
+        if (subscriptions.length === 0) {
+            toast.error("No subscriptions to export");
+            return;
+        }
+
+        const headers = [
+            { label: 'User', accessor: (sub) => sub.user?.name || sub.userId || 'N/A' },
+            { label: 'Email', accessor: (sub) => sub.user?.email || 'N/A' },
+            { label: 'Plan', accessor: 'plan' },
+            { label: 'Status', accessor: (sub) => sub.isActive ? 'Active' : 'Inactive' },
+            { label: 'Start Date', accessor: (sub) => formatDateForExport(sub.startDate) },
+            { label: 'End Date', accessor: (sub) => formatDateForExport(sub.endDate) },
+            { label: 'Auto Renewal', accessor: (sub) => sub.autoRenewal ? 'Yes' : 'No' },
+            { label: 'Created Date', accessor: (sub) => formatDateForExport(sub.createdAt) }
+        ];
+
+        exportToCSV(subscriptions, headers, `subscriptions_export_${new Date().toISOString().split('T')[0]}`);
+        toast.success("Subscriptions exported successfully");
+    };
+
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Payment Management</h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Manage all payments and subscriptions
-                    </p>
+                <div className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Management</h2>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                            Manage all payments and subscriptions
+                        </p>
+                    </div>
+                    {activeTab === "payments" && (
+                        <button
+                            onClick={handleExportPayments}
+                            disabled={payments.length === 0 || paymentsLoading}
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                        >
+                            <FiDownload size={18} />
+                            Export CSV
+                        </button>
+                    )}
+                    {activeTab === "subscriptions" && (
+                        <button
+                            onClick={handleExportSubscriptions}
+                            disabled={subscriptions.length === 0 || subscriptionsLoading}
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                        >
+                            <FiDownload size={18} />
+                            Export CSV
+                        </button>
+                    )}
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
                     <div className="border-b border-gray-200">
                         <div className="flex">
                             <button

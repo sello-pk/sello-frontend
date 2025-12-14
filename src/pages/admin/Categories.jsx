@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Fragment } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
     useGetAllCategoriesQuery,
@@ -7,12 +7,13 @@ import {
     useDeleteCategoryMutation,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
+import Pagination from "../../components/admin/Pagination";
 import toast from "react-hot-toast";
 import { FiGrid, FiUpload, FiX, FiEdit2, FiTrash2, FiEye, FiEyeOff } from "react-icons/fi";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Categories = () => {
-    const [activeTab, setActiveTab] = useState("brands"); // brands, models, years, city, state, country
+    const [activeTab, setActiveTab] = useState("brands"); // brands, models, years, country, state, city
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ const Categories = () => {
         model: "",
         year: "",
         country: "",
+        state: "",
         display: "show",
         status: "active",
         image: null,
@@ -107,21 +109,61 @@ const Categories = () => {
         return categories.filter(cat => cat.subType === "make" && cat.isActive);
     }, [categories]);
 
-    // Get models for year parent selection
-    const models = useMemo(() => {
-        if (!formData.brand) return [];
-        const selectedBrand = brands.find(b => b._id === formData.brand);
-        if (!selectedBrand) return [];
-        return categories.filter(cat =>
-            cat.subType === "model" &&
-            (cat.parentCategory?._id === selectedBrand._id || cat.parentCategory === selectedBrand._id) &&
-            cat.isActive
-        );
-    }, [categories, brands, formData.brand]);
+    // Get models for year parent selection (currently not used in form, but kept for potential future use)
+    // const models = useMemo(() => {
+    //     if (!formData.brand) return [];
+    //     const selectedBrand = brands.find(b => b._id === formData.brand);
+    //     if (!selectedBrand) return [];
+    //     return categories.filter(cat =>
+    //         cat.subType === "model" &&
+    //         (cat.parentCategory?._id === selectedBrand._id || cat.parentCategory === selectedBrand._id) &&
+    //         cat.isActive
+    //     );
+    // }, [categories, brands, formData.brand]);
 
-    // Countries for city parent selection
+    // Countries for state parent selection
     const countries = useMemo(() => {
         return categories.filter(cat => cat.subType === "country" && cat.isActive);
+    }, [categories]);
+
+    // States for city parent selection
+    const states = useMemo(() => {
+        return categories.filter(cat => cat.subType === "state" && cat.isActive);
+    }, [categories]);
+
+    // Get states filtered by country
+    const getStatesByCountry = useMemo(() => {
+        const map = {};
+        states.forEach(state => {
+            const countryId = typeof state.parentCategory === 'object' 
+                ? state.parentCategory._id 
+                : state.parentCategory;
+            if (countryId) {
+                if (!map[countryId]) {
+                    map[countryId] = [];
+                }
+                map[countryId].push(state);
+            }
+        });
+        return map;
+    }, [states]);
+
+    // Get cities filtered by state
+    const getCitiesByState = useMemo(() => {
+        const map = {};
+        const cities = categories.filter(cat => cat.subType === "city" && cat.isActive);
+        cities.forEach(city => {
+            const stateId = typeof city.parentCategory === 'object' 
+                ? city.parentCategory._id 
+                : city.parentCategory;
+            if (stateId) {
+                if (!map[stateId]) {
+                    map[stateId] = [];
+                }
+                map[stateId].push(city);
+            }
+        });
+        return map;
     }, [categories]);
 
     const handleImageChange = (e) => {
@@ -150,6 +192,8 @@ const Categories = () => {
             brand: "",
             model: "",
             year: "",
+            country: "",
+            state: "",
             display: "show",
             status: "active",
             image: null,
@@ -167,6 +211,7 @@ const Categories = () => {
             model: "",
             year: "",
             country: "",
+            state: "",
             display: category.isActive ? "show" : "hide",
             status: category.isActive ? "active" : "inactive",
             image: null,
@@ -178,8 +223,10 @@ const Categories = () => {
         } else if (category.subType === "year") {
             baseForm.year = category.name || "";
             // Years are independent, no parent category
-        } else if (category.subType === "city") {
+        } else if (category.subType === "state") {
             baseForm.country = category.parentCategory?._id || category.parentCategory || "";
+        } else if (category.subType === "city") {
+            baseForm.state = category.parentCategory?._id || category.parentCategory || "";
         }
 
         setFormData(baseForm);
@@ -219,20 +266,25 @@ const Categories = () => {
                 submitData.append("subType", "year");
                 // No parentCategory - years are independent
                 submitData.append("isActive", formData.status === "active");
-            } else if (activeTab === "city") {
+            } else if (activeTab === "state") {
                 if (!formData.country) {
                     toast.error("Please select a country");
                     return;
                 }
                 submitData.append("name", formData.name);
                 submitData.append("type", "location");
-                submitData.append("subType", "city");
+                submitData.append("subType", "state");
                 submitData.append("parentCategory", formData.country);
                 submitData.append("isActive", formData.status === "active");
-            } else if (activeTab === "state") {
+            } else if (activeTab === "city") {
+                if (!formData.state) {
+                    toast.error("Please select a state");
+                    return;
+                }
                 submitData.append("name", formData.name);
                 submitData.append("type", "location");
-                submitData.append("subType", "state");
+                submitData.append("subType", "city");
+                submitData.append("parentCategory", formData.state);
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "country") {
                 submitData.append("name", formData.name);
@@ -264,6 +316,7 @@ const Categories = () => {
                 model: "",
                 year: "",
                 country: "",
+                state: "",
                 display: "show",
                 status: "active",
                 image: null,
@@ -275,14 +328,22 @@ const Categories = () => {
         }
     };
 
-    const handleDelete = async (categoryId) => {
-        if (!window.confirm("Are you sure you want to delete this category?")) return;
+    const handleDelete = (categoryId) => {
+        setCategoryToDelete(categoryId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!categoryToDelete) return;
         try {
-            await deleteCategory(categoryId).unwrap();
+            await deleteCategory(categoryToDelete).unwrap();
             toast.success("Category deleted successfully");
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete category");
+        } finally {
+            setShowDeleteModal(false);
+            setCategoryToDelete(null);
         }
     };
 
@@ -301,17 +362,17 @@ const Categories = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Category Management</h2>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Category Management</h2>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                         Manage car brands, models, and years
                     </p>
                 </div>
 
                 {/* Tabs and Add Button */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
                     <div className="p-4">
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex gap-2">
@@ -322,7 +383,7 @@ const Categories = () => {
                                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                                             activeTab === tab
                                                 ? 'bg-primary-500 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                         }`}
                                     >
                                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -335,11 +396,11 @@ const Categories = () => {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search by name"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                 />
                                 <button
                                     onClick={handleOpenModal}
-                                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 text-sm"
+                                    className="px-4 py-2 bg-gray-900 dark:bg-primary-500 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-primary-600 flex items-center gap-2 text-sm"
                                 >
                                     <span className="text-lg">+</span>
                                     Add New Category
@@ -351,21 +412,21 @@ const Categories = () => {
 
                 {/* Table */}
                 {isLoading ? (
-                    <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                         <Spinner fullScreen={false} />
                     </div>
                 ) : processedCategories.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                        <p className="text-gray-500 text-lg">No categories found</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">No categories found</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
+                                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                                         <th
-                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer"
+                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer"
                                             onClick={() => {
                                                 setSortField("name");
                                                 setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
@@ -374,10 +435,10 @@ const Categories = () => {
                                             Name
                                         </th>
                                         {activeTab === "brands" && (
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Logo</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Logo</th>
                                         )}
                                         <th
-                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer"
+                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer"
                                             onClick={() => {
                                                 setSortField("status");
                                                 setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
@@ -385,25 +446,25 @@ const Categories = () => {
                                         >
                                             Status
                                         </th>
-                                        {(activeTab === "models" || activeTab === "city") && (
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">
-                                                {activeTab === "models" ? "Brand" : "Country"}
+                                        {(activeTab === "models" || activeTab === "state" || activeTab === "city") && (
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                                {activeTab === "models" ? "Brand" : activeTab === "state" ? "Country" : "State"}
                                             </th>
                                         )}
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Display</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Display</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {pagedCategories.map((category) => (
-                                        <tr key={category._id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={category._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                         {category.name}
                                                     </p>
                                                     {category.parentCategory && (
-                                                        <p className="text-xs text-gray-500">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
                                                             {typeof category.parentCategory === 'object' 
                                                                 ? category.parentCategory.name 
                                                                 : 'Parent'}
@@ -427,15 +488,15 @@ const Categories = () => {
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                     category.isActive
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-gray-100 text-gray-800"
+                                                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
                                                 }`}>
                                                     {category.isActive ? "Active" : "Inactive"}
                                                 </span>
                                             </td>
-                                            {(activeTab === "models" || activeTab === "city") && (
+                                            {(activeTab === "models" || activeTab === "state" || activeTab === "city") && (
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm text-gray-700">
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300">
                                                         {category.parentCategory 
                                                             ? (typeof category.parentCategory === 'object' 
                                                                 ? category.parentCategory.name 
@@ -449,8 +510,8 @@ const Categories = () => {
                                                     onClick={() => handleToggleStatus(category)}
                                                     className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                                                         category.isActive
-                                                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"
+                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                                                     }`}
                                                 >
                                                     {category.isActive ? (
@@ -470,14 +531,14 @@ const Categories = () => {
                                                 <div className="flex items-center gap-3">
                                                     <button
                                                         onClick={() => handleEdit(category)}
-                                                        className="text-blue-600 hover:text-blue-700 transition-colors"
+                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                                                         title="Edit"
                                                     >
                                                         <FiEdit2 size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(category._id)}
-                                                        className="text-red-600 hover:text-red-700 transition-colors"
+                                                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                                                         title="Delete"
                                                     >
                                                         <FiTrash2 size={18} />
@@ -489,34 +550,20 @@ const Categories = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 text-sm text-gray-600">
-                            <span>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                    className="px-2 py-1 border rounded disabled:opacity-50"
-                                >
-                                    Prev
-                                </button>
-                                <button
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                    className="px-2 py-1 border rounded disabled:opacity-50"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                            itemsPerPage={pageSize}
+                            totalItems={processedCategories.length}
+                        />
                     </div>
                 )}
 
                 {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto relative">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto relative">
                             <button
                                 onClick={() => {
                                     setShowModal(false);
@@ -526,18 +573,20 @@ const Categories = () => {
                                         brand: "",
                                         model: "",
                                         year: "",
+                                        country: "",
+                                        state: "",
                                         display: "show",
                                         status: "active",
                                         image: null,
                                         imagePreview: null
                                     });
                                 }}
-                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                                className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                             >
                                 <FiX size={24} />
                             </button>
 
-                            <h3 className="text-xl font-bold mb-4">
+                            <h3 className="text-xl font-bold mb-4 dark:text-white">
                                 {editingCategory ? "Edit Category" : "Add New Category"}
                             </h3>
 
@@ -545,7 +594,7 @@ const Categories = () => {
                                 {activeTab === "brands" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Brand Name *
                                             </label>
                                             <input
@@ -555,14 +604,14 @@ const Categories = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="Enter brand name"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Logo
                                             </label>
-                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
                                                 {formData.imagePreview ? (
                                                     <div className="space-y-2">
                                                         <img
@@ -579,15 +628,15 @@ const Categories = () => {
                                                                     imagePreview: null
                                                                 });
                                                             }}
-                                                            className="text-sm text-red-600 hover:text-red-800"
+                                                            className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                                                         >
                                                             Remove
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <FiUpload className="mx-auto mb-2 text-gray-400" size={32} />
-                                                        <p className="text-sm text-gray-600 mb-2">Upload Logo Here</p>
+                                                        <FiUpload className="mx-auto mb-2 text-gray-400 dark:text-gray-500" size={32} />
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Upload Logo Here</p>
                                                         <input
                                                             type="file"
                                                             accept="image/*"
@@ -606,14 +655,14 @@ const Categories = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -625,7 +674,7 @@ const Categories = () => {
                                 {activeTab === "models" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Brand *
                                             </label>
                                             <select
@@ -633,7 +682,7 @@ const Categories = () => {
                                                 value={formData.brand}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="">Select Brand</option>
                                                 {brands.map((brand) => (
@@ -644,7 +693,7 @@ const Categories = () => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Model Name *
                                             </label>
                                             <input
@@ -654,32 +703,32 @@ const Categories = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="Enter model name"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Display
                                             </label>
                                             <select
                                                 name="display"
                                                 value={formData.display}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="show">Show</option>
                                                 <option value="hide">Hide</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -691,7 +740,7 @@ const Categories = () => {
                                 {activeTab === "years" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Year *
                                             </label>
                                             <input
@@ -709,18 +758,18 @@ const Categories = () => {
                                                 min="1900"
                                                 max="2100"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -732,7 +781,7 @@ const Categories = () => {
                                 {activeTab === "city" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 City Name *
                                             </label>
                                             <input
@@ -742,37 +791,37 @@ const Categories = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="Enter city name"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Country *
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                State *
                                             </label>
                                             <select
-                                                name="country"
-                                                value={formData.country}
+                                                name="state"
+                                                value={formData.state}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
-                                                <option value="">Select Country</option>
-                                                {countries.map((country) => (
-                                                    <option key={country._id} value={country._id}>
-                                                        {country.name}
+                                                <option value="">Select State</option>
+                                                {states.map((state) => (
+                                                    <option key={state._id} value={state._id}>
+                                                        {state.name}
                                                     </option>
                                                 ))}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -784,7 +833,7 @@ const Categories = () => {
                                 {activeTab === "state" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 State Name *
                                             </label>
                                             <input
@@ -794,18 +843,37 @@ const Categories = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="Enter state name"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Country *
+                                            </label>
+                                            <select
+                                                name="country"
+                                                value={formData.country}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                            >
+                                                <option value="">Select Country</option>
+                                                {countries.map((country) => (
+                                                    <option key={country._id} value={country._id}>
+                                                        {country.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -817,7 +885,7 @@ const Categories = () => {
                                 {activeTab === "country" && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Country Name *
                                             </label>
                                             <input
@@ -827,18 +895,18 @@ const Categories = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="Enter country name"
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Status
                                             </label>
                                             <select
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                             >
                                                 <option value="active">Active</option>
                                                 <option value="inactive">Inactive</option>
@@ -858,6 +926,8 @@ const Categories = () => {
                                                 brand: "",
                                                 model: "",
                                                 year: "",
+                                                country: "",
+                                                state: "",
                                                 display: "show",
                                                 status: "active",
                                                 image: null,

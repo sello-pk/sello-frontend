@@ -205,22 +205,6 @@ export const useCarCategories = () => {
         return map;
     }, [cities, states]);
 
-    // Debug logging (remove in production)
-    useEffect(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Categories Data:', {
-                makes: makes.length,
-                models: models.length,
-                years: years.length,
-                countries: countries.length,
-                cities: cities.length,
-                isLoading,
-                carError,
-                locationError
-            });
-        }
-    }, [makes.length, models.length, years.length, countries.length, cities.length, isLoading, carError, locationError]);
-
     return {
         makes,
         models,

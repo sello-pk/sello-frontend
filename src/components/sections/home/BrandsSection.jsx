@@ -8,32 +8,35 @@ import RecentlyViewedCars from "./RecentlyViewedCars";
 const BrandsSection = () => {
   const navigate = useNavigate();
 
-  const categoryMeta = useMemo(() => ({
-    "Car": {
-      slug: "car",
-      description: "Cars, sedans, SUVs, and other passenger vehicles"
-    },
-    "Bus": {
-      slug: "bus",
-      description: "Buses and commercial passenger vehicles"
-    },
-    "Truck": {
-      slug: "truck",
-      description: "Trucks and heavy-duty vehicles"
-    },
-    "Van": {
-      slug: "van",
-      description: "Vans and utility vehicles"
-    },
-    "Bike": {
-      slug: "bike",
-      description: "Motorcycles and bikes"
-    },
-    "E-Bike": {
-      slug: "e-bike",
-      description: "Electric bikes and scooters"
-    },
-  }), []);
+  const categoryMeta = useMemo(
+    () => ({
+      Car: {
+        slug: "car",
+        description: "Cars, sedans, SUVs, and other passenger vehicles",
+      },
+      Bus: {
+        slug: "bus",
+        description: "Buses and commercial passenger vehicles",
+      },
+      Truck: {
+        slug: "truck",
+        description: "Trucks and heavy-duty vehicles",
+      },
+      Van: {
+        slug: "van",
+        description: "Vans and utility vehicles",
+      },
+      Bike: {
+        slug: "bike",
+        description: "Motorcycles and bikes",
+      },
+      "E-Bike": {
+        slug: "e-bike",
+        description: "Electric bikes and scooters",
+      },
+    }),
+    []
+  );
 
   const handleCategoryClick = (title) => {
     const meta = categoryMeta[title];
@@ -57,9 +60,9 @@ const BrandsSection = () => {
       </div>
       {/* BrandMarquee will fetch brands from admin categories automatically */}
       <BrandMarquee />
-      
+
       {/* Recently Viewed Cars and Brand Categories Grid */}
-      <div className="py-5">
+      <div className="py-5 md:w-[70%]">
         <div className="grid md:grid-cols-4 grid-cols-2 gap-6">
           {/* Brand Categories */}
           {brandsCategory.map((brand, index) => {
@@ -71,7 +74,7 @@ const BrandsSection = () => {
               <button
                 type="button"
                 className={`
-          bg-[#DADADA] flex flex-col items-center justify-center rounded-2xl
+          bg-white shadow-xl shadow-gray-200 flex flex-col items-center justify-center rounded-2xl
           ${isLastItem && isOddNumberOfItems ? "md:col-span-2 col-span-2" : ""}
           transition shadow-sm hover:shadow-md
         `}
@@ -85,7 +88,9 @@ const BrandsSection = () => {
                   alt="brand"
                   loading="lazy"
                 />
-                <span className="pb-1 text-xl font-semibold text-gray-800">{brand.title}</span>
+                <span className="pb-1 text-xl font-semibold text-gray-800">
+                  {brand.title}
+                </span>
                 {meta?.description && (
                   <span className="pb-3 px-4 text-sm text-gray-600 text-center leading-snug">
                     {meta.description}
@@ -94,7 +99,7 @@ const BrandsSection = () => {
               </button>
             );
           })}
-          
+
           {/* Recently Viewed Cars - Takes 2 columns on desktop */}
           <RecentlyViewedCars />
         </div>

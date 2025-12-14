@@ -3,7 +3,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useGetMyCarsQuery } from "../../redux/services/api";
+import { useGetMyCarsQuery, useRelistCarMutation } from "../../redux/services/api";
 import LazyImage from "../../components/common/LazyImage";
 import { images } from "../../assets/assets";
 import toast from "react-hot-toast";
@@ -11,11 +11,15 @@ import BoostModal from "../listings/BoostModal";
 
 const UserListings = () => {
   const navigate = useNavigate();
-  const { data, isLoading, error, refetch } = useGetMyCarsQuery();
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'sold', 'expired'
+  const { data, isLoading, error, refetch } = useGetMyCarsQuery(
+    statusFilter !== 'all' ? { status: statusFilter } : {}
+  );
   const [savedCars, setSavedCars] = useState([]);
   const [updatingCars, setUpdatingCars] = useState(new Set());
   const [boostModalOpen, setBoostModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
+  const [relistCar, { isLoading: isRelisting }] = useRelistCarMutation();
 
   const toggleSave = (id) => {
     setSavedCars((prev) =>
@@ -219,17 +223,45 @@ const UserListings = () => {
                           disabled={updatingCars.has(car._id)}
                           className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             car?.isSold 
-                              ? 'bg-primary-500 hover:bg-primary-600 text-white' 
-                              : 'bg-primary-500 hover:bg-primary-600 text-white'
+                              ? 'bg-green-500 hover:bg-green-600 text-white' 
+                              : 'bg-orange-500 hover:bg-orange-600 text-white'
                           } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {updatingCars.has(car._id) 
                             ? 'Updating...' 
                             : car?.isSold 
-                              ? 'Available' 
-                              : 'Sold'}
+                              ? 'Mark as Available' 
+                              : 'Mark as Sold'}
                         </button>
                       </div>
+                      
+                      {/* Relist button for sold/expired listings */}
+                      {(car?.status === 'sold' || car?.status === 'expired') && (
+                        <button
+                          onClick={async () => {
+                            if (window.confirm('Relist this car? A new active listing will be created.')) {
+                              try {
+                                setUpdatingCars(prev => new Set(prev).add(car._id));
+                                await relistCar(car._id).unwrap();
+                                toast.success('Car relisted successfully!');
+                                refetch();
+                              } catch (error) {
+                                toast.error(error?.data?.message || 'Failed to relist car');
+                              } finally {
+                                setUpdatingCars(prev => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(car._id);
+                                  return newSet;
+                                });
+                              }
+                            }
+                          }}
+                          disabled={isRelisting || updatingCars.has(car?._id)}
+                          className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                        >
+                          {isRelisting || updatingCars.has(car?._id) ? 'Relisting...' : 'Relist'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

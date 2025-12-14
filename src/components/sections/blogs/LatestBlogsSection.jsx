@@ -5,35 +5,29 @@ import { formatDate } from "../../../utils/format";
 
 const LatestBlogsSection = () => {
   const { data, isLoading } = useGetBlogsQuery({ 
-    limit: 5, 
+    limit: 12, 
     status: 'published' 
   });
 
   const blogs = data?.blogs || [];
-  const latestBlog = blogs[0];
-  const trendingBlogs = blogs.slice(1, 4);
-  const highlightedBlog = blogs[4] || blogs[3];
 
   // Show skeleton while loading
   if (isLoading) {
     return (
-      <div className="w-full p-4 min-h-[400px] animate-pulse">
-        <div className="flex flex-col md:flex-row w-full h-full p-3 gap-10">
-          <div className="w-full md:w-1/2">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-5"></div>
-            <div className="w-full h-64 bg-gray-200 rounded-lg"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3 mt-3"></div>
-            <div className="h-8 bg-gray-200 rounded w-3/4 mt-3"></div>
-          </div>
-          <div className="w-full md:w-1/2">
-            <div className="h-6 bg-gray-200 rounded w-1/3 mb-5"></div>
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="mb-10">
-                <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
-                <div className="h-8 bg-gray-200 rounded w-full"></div>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6 animate-pulse"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+              <div className="w-full h-48 bg-gray-200"></div>
+              <div className="p-6">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -44,93 +38,84 @@ const LatestBlogsSection = () => {
   }
 
   return (
-    <div className="md:h-[125vh] w-full p-4">
-      {/* 👉 stack on small screens, row only on md+ */}
-      <div className="flex flex-col md:flex-row w-full h-full p-3 gap-10">
-        {/* Left section - Latest Blog */}
-        {latestBlog && (
-          <div className="w-full md:w-1/2 h-full">
-            <div className="w-full">
-              <h2 className="text-2xl md:text-3xl font-semibold my-5">Latest</h2>
-              {latestBlog.featuredImage && (
-                <img
-                  className="w-full h-auto object-cover rounded-lg"
-                  src={latestBlog.featuredImage}
-                  alt={latestBlog.title}
-                />
-              )}
-            </div>
-            <div className="w-full py-3 text-gray-500 text-sm md:text-base">
-              By{" "}
-              <span className="text-base md:text-lg text-primary-500 font-medium">
-                {latestBlog.author?.name || "Sello"}
-              </span>{" "}
-              | {formatDate(latestBlog.publishedAt || latestBlog.createdAt)}
-            </div>
-            <div>
-              <h2 className="text-2xl md:text-3xl font-semibold my-3">
-                {latestBlog.title}
-              </h2>
-              <p className="text-base md:text-lg text-gray-700 py-2 line-clamp-3">
-                {latestBlog.excerpt || latestBlog.content?.replace(/<[^>]*>/g, '').substring(0, 200) + "..."}
-              </p>
-              <Link
-                to={`/blog/${latestBlog.slug || latestBlog._id}`}
-                className="inline-block px-5 md:px-6 py-2 text-base md:text-lg font-medium bg-primary-500 text-white rounded-lg my-5 hover:opacity-90"
-              >
-                Read more
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Right section - Trending Blogs */}
-        <div className="w-full md:w-1/2 h-full">
-          <div className="flex flex-col md:flex-row mt-5 items-start md:items-center justify-between w-full gap-2 md:gap-0">
-            <h2 className="text-2xl md:text-3xl font-semibold">
-              Trending Blogs
-            </h2>
-            <Link to="/blog/all" className="text-sm md:text-base text-primary-500 hover:underline">
-              See all
-            </Link>
-          </div>
-
-          {/* Trending blogs list */}
-          {trendingBlogs.map((blog, index) => (
-            <div key={blog._id} className={index > 0 ? "mt-10" : ""}>
-              <div className="w-full py-3 text-gray-500 text-sm md:text-base">
-                By{" "}
-                <span className="text-base md:text-lg text-primary-500 font-medium">
-                  {blog.author?.name || "Sello"}
-                </span>{" "}
-                | {formatDate(blog.publishedAt || blog.createdAt)}
-              </div>
-              <Link to={`/blog/${blog.slug || blog._id}`}>
-                <h3 className="text-2xl md:text-3xl font-semibold pr-0 md:pr-7 hover:text-primary-500 transition-colors">
-                  {blog.title}
-                </h3>
-              </Link>
-            </div>
-          ))}
-
-          {/* Highlighted blog */}
-          {highlightedBlog && (
-            <Link to={`/blog/${highlightedBlog.slug || highlightedBlog._id}`}>
-              <div className="bg-primary-500 flex items-start justify-center flex-col my-10 rounded-tr-[40px] rounded-bl-[40px] px-5 py-3 hover:opacity-90 transition-opacity">
-                <div className="py-3 text-gray-50 text-sm md:text-base">
-                  By{" "}
-                  <span className="text-base md:text-lg text-black my-3 font-medium">
-                    {highlightedBlog.author?.name || "Sello"}
-                  </span>{" "}
-                  | {formatDate(highlightedBlog.publishedAt || highlightedBlog.createdAt)}
-                </div>
-                <h3 className="text-2xl md:text-3xl font-medium py-4 md:py-6 text-white">
-                  {highlightedBlog.title}
-                </h3>
-              </div>
-            </Link>
-          )}
+    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+      {/* Header Section */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Latest Blog Posts</h2>
+          <p className="text-gray-600">Stay updated with our latest articles and insights</p>
         </div>
+        <Link 
+          to="/blog/all" 
+          className="text-primary-500 hover:text-primary-600 font-medium flex items-center gap-2 transition-colors"
+        >
+          View All
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+
+      {/* Blog Posts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {blogs.map((blog) => (
+          <Link
+            key={blog._id}
+            to={`/blog/${blog.slug || blog._id}`}
+            className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
+          >
+            {/* Blog Image */}
+            <div className="w-full h-48 md:h-56 overflow-hidden bg-gray-200">
+              <img
+                src={blog.featuredImage || "https://via.placeholder.com/600x400?text=No+Image"}
+                alt={blog.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </div>
+
+            {/* Blog Content */}
+            <div className="p-6 flex-1 flex flex-col">
+              {/* Category */}
+              {blog.category && (
+                <span className="inline-block text-xs font-semibold text-primary-500 mb-3 uppercase tracking-wide">
+                  {blog.category.name}
+                </span>
+              )}
+
+              {/* Title */}
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-primary-500 transition-colors leading-tight">
+                {blog.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3 flex-1">
+                {blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').substring(0, 150) + "..."}
+              </p>
+
+              {/* Author and Date Info */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-3">
+                  {blog.author?.avatar ? (
+                    <img
+                      src={blog.author.avatar}
+                      alt={blog.author.name || "Author"}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold">
+                      {(blog.author?.name || "A")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{blog.author?.name || "Admin"}</p>
+                    <p className="text-xs text-gray-500">{formatDate(blog.publishedAt || blog.createdAt)}</p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-500">{blog.readTime || 5} min</span>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

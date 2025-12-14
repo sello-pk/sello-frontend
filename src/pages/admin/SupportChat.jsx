@@ -119,26 +119,21 @@ const SupportChat = () => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Admin socket connected successfully');
             setSocketConnected(true);
             newSocket.emit('join-chats');
             if (selectedChat) {
-                console.log('Admin joining chat:', selectedChat);
                 newSocket.emit('join-chat', selectedChat);
             }
         });
 
         newSocket.on('disconnect', (reason) => {
-            console.log('Admin socket disconnected:', reason);
             setSocketConnected(false);
         });
 
         newSocket.on('joined-chat', (chatId) => {
-            console.log('Admin successfully joined chat:', chatId);
         });
 
         newSocket.on('new-message', (data) => {
-            console.log('New message received via socket:', data);
             if (data.chatId === selectedChat || data.chat?._id === selectedChat) {
                 setMessages(prev => {
                     const exists = prev.find(m => m._id === data.message._id);
@@ -310,7 +305,9 @@ const SupportChat = () => {
                 refetchChats();
             }
         } catch (error) {
-            console.error('Send message error:', error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Send message error:', error);
+            }
             toast.error(error?.data?.message || error?.message || "Failed to send message");
         }
     };
@@ -430,26 +427,26 @@ const SupportChat = () => {
 
     return (
         <AdminLayout>
-            <div className="flex h-[calc(100vh-80px)] bg-gray-100">
+            <div className="flex h-[calc(100vh-80px)] bg-gray-100 dark:bg-gray-900">
                 {/* Left Sidebar - User List */}
-                <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+                <div className="w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
                     {/* Search Bar */}
-                    <div className="p-4 border-b border-gray-200">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="relative">
-                            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                                 type="text"
                                 placeholder="Search chats..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div className="mt-2 flex gap-2">
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white text-sm"
                             >
                                 <option value="all">All</option>
                                 <option value="open">Open</option>
@@ -466,7 +463,7 @@ const SupportChat = () => {
                                 <Spinner fullScreen={false} />
                             </div>
                         ) : filteredChats.length === 0 ? (
-                            <div className="text-center text-gray-500 py-8">
+                            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                                 No chats found
                             </div>
                         ) : (
@@ -480,8 +477,8 @@ const SupportChat = () => {
                                     <div
                                         key={chat._id}
                                         onClick={() => handleSelectChat(chat._id)}
-                                        className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition ${
-                                            isSelected ? 'bg-[#E5E5E5]' : ''
+                                        className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition ${
+                                            isSelected ? 'bg-[#E5E5E5] dark:bg-gray-700' : ''
                                         }`}
                                     >
                                         <div className="flex items-start gap-3">
@@ -498,17 +495,17 @@ const SupportChat = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <p className="font-semibold text-gray-800 truncate">
+                                                    <p className="font-semibold text-gray-800 dark:text-white truncate">
                                                         {getUserName(chat)}
                                                     </p>
-                                                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
                                                         {formatTime(chat.lastMessageAt)}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-gray-600 truncate mb-1">
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
                                                     {chat.subject || 'No subject'}
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                                     {chat.lastMessage || 'No messages'}
                                                 </p>
                                                 {unreadCount > 0 && (
@@ -529,9 +526,9 @@ const SupportChat = () => {
                 <div className="flex-1 flex flex-col bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
                     {!selectedChat ? (
                         <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center text-gray-500">
-                                <p className="text-lg font-semibold mb-2">Select a chat to start</p>
-                                <p className="text-sm">Choose a conversation from the sidebar</p>
+                            <div className="text-center text-gray-500 dark:text-gray-400">
+                                <p className="text-lg font-semibold mb-2 dark:text-white">Select a chat to start</p>
+                                <p className="text-sm dark:text-gray-400">Choose a conversation from the sidebar</p>
                             </div>
                         </div>
                     ) : isChatLoading ? (
@@ -540,9 +537,9 @@ const SupportChat = () => {
                         </div>
                     ) : !selectedChatData ? (
                         <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center text-gray-500">
-                                <p className="text-lg font-semibold mb-2">Chat not found</p>
-                                <p className="text-sm">The chat you're looking for doesn't exist or has been deleted.</p>
+                            <div className="text-center text-gray-500 dark:text-gray-400">
+                                <p className="text-lg font-semibold mb-2 dark:text-white">Chat not found</p>
+                                <p className="text-sm dark:text-gray-400">The chat you're looking for doesn't exist or has been deleted.</p>
                                 <button
                                     onClick={() => {
                                         setSelectedChat(null);
@@ -601,7 +598,7 @@ const SupportChat = () => {
                                         <Spinner fullScreen={false} />
                                     </div>
                                 ) : messages.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-8">
+                                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                                         No messages yet
                                     </div>
                                 ) : (
@@ -663,19 +660,19 @@ const SupportChat = () => {
                                                     <div
                                                     className={`rounded-lg px-3 py-2 ${
                                                         isCurrentAdmin
-                                                            ? "bg-primary-100 rounded-tr-none"
+                                                            ? "bg-primary-100 dark:bg-primary-900/30 rounded-tr-none"
                                                             : isBot
-                                                            ? "bg-gray-200 rounded-tl-none"
-                                                            : "bg-white rounded-tl-none"
+                                                            ? "bg-gray-200 dark:bg-gray-700 rounded-tl-none"
+                                                            : "bg-white dark:bg-gray-800 rounded-tl-none"
                                                     } shadow-sm`}
                                                     >
                                                         {!isCurrentAdmin && !isBot && (
-                                                            <p className="text-xs font-semibold text-gray-700 mb-1">
+                                                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                                                                 {msg.sender?.name || 'User'}
                                                             </p>
                                                         )}
                                                         {isBot && (
-                                                            <p className="text-xs font-semibold text-gray-700 mb-1">
+                                                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                                                                 🤖 AI Assistant
                                                             </p>
                                                         )}
@@ -734,7 +731,7 @@ const SupportChat = () => {
                                                                             setEditingMessageId(null);
                                                                             setEditMessageText("");
                                                                         }}
-                                                                        className="text-xs px-2 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                                                                        className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
                                                                     >
                                                                         Cancel
                                                                     </button>
@@ -753,7 +750,7 @@ const SupportChat = () => {
                                                             </>
                                                         )}
                                                         <div className="flex items-center justify-end gap-1 mt-1">
-                                                            <span className="text-xs text-gray-500">
+                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
                                                                 {formatMessageTime(msg.createdAt)}
                                                             </span>
                                                         {isCurrentAdmin && (
@@ -800,8 +797,8 @@ const SupportChat = () => {
                                 )}
                                 {typingUsers.length > 0 && (
                                     <div className="flex justify-start">
-                                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                                            <p className="text-xs text-gray-500 italic">
+                                        <div className="bg-white dark:bg-gray-800 rounded-lg px-3 py-2 shadow-sm">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                                                 {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
                                             </p>
                                         </div>
@@ -811,7 +808,7 @@ const SupportChat = () => {
                             </div>
 
                             {/* Message Input */}
-                            <div className="p-4 border-t border-gray-200 bg-white">
+                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                                 <div className="flex gap-2 items-center">
                                     <input
                                         ref={fileInputRef}
@@ -822,7 +819,7 @@ const SupportChat = () => {
                                     />
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="p-2 text-gray-600 hover:text-gray-800"
+                                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
                                     >
                                         <FiPaperclip size={20} />
                                     </button>
@@ -840,7 +837,7 @@ const SupportChat = () => {
                                             }
                                         }}
                                         placeholder="Type a message..."
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                                     />
                                     <button
                                         onClick={handleSendMessage}

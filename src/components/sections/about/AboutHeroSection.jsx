@@ -15,13 +15,14 @@ const AboutHeroSection = () => {
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight text-white">
           About Us
         </h1>
-        <p className="mt-6 text-sm md:text-base lg:text-lg text-gray-300 leading-relaxed max-w-xl">
-          At Sello we’re building the world’s most trusted and transparent
-          automotive marketplace. We make it easy to find great deals from
-          top-rated dealers and provide the guidance consumers need to make a
-          more informed purchase. We also help dealers quickly and easily market
-          their vehicles and connect with ready-to-buy shoppers.
-        </p>
+        <div className="mt-3 text-sm md:text-base lg:text-lg text-gray-300 leading-relaxed max-w-xl space-y-4">
+          <p>
+            At Sello, we are building Pakistan's most trusted and transparent online car marketplace. Our mission is to make it simple, safe, and reliable to buy and sell cars online in Pakistan. Whether you're searching for used cars for sale, new cars in Pakistan, or looking to sell your vehicle quickly, Sello connects buyers and sellers with confidence.
+          </p>
+          <p>
+            We help customers find the best car deals in Pakistan by offering verified listings from trusted dealers and individual sellers. Our platform provides detailed car information, competitive pricing, and easy-to-use tools so buyers can make informed decisions without hassle.
+          </p>
+        </div>
       </div>
 
       {/* Car Image */}

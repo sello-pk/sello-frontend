@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiHome,
@@ -61,14 +61,67 @@ const SellerDashboard = () => {
     }
   };
 
+  // Redirect logic based on user role and verification status
+  useEffect(() => {
+    if (!userLoading && user) {
+      // Redirect individual users to home page
+      if (user.role === "individual") {
+        navigate("/", { replace: true });
+        return;
+      }
+      
+      // Redirect admins to admin dashboard
+      if (user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+        return;
+      }
+      
+      // Redirect verified dealers to dealer dashboard
+      if (user.role === "dealer" && user.dealerInfo?.verified) {
+        navigate("/dealer/dashboard", { replace: true });
+        return;
+      }
+    }
+  }, [user, userLoading, navigate]);
+
   // Don't show full-page loader - let page render normally
   if (userLoading) {
     return null;
   }
 
-  // Individual users and dealers can access this dashboard (dealers can also use dealer dashboard)
-  // Admins are redirected to admin dashboard, so they shouldn't reach here
-  if (!user || (user.role !== "individual" && user.role !== "dealer")) {
+  // Only unverified dealers can access this dashboard
+  // All other users are redirected (handled in useEffect above)
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div className="mb-4">
+            <svg className="mx-auto h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-6">
+            Please login with an appropriate account.
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect individual users, admins, and verified dealers (handled in useEffect above)
+  if (user.role === "individual" || user.role === "admin" || (user.role === "dealer" && user.dealerInfo?.verified)) {
+    return null; // Will redirect in useEffect
+  }
+
+  // Only unverified dealers can access this dashboard
+  if (user.role !== "dealer" || user.dealerInfo?.verified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
@@ -81,14 +134,27 @@ const SellerDashboard = () => {
           <p className="text-gray-600 mb-6">
             {user?.role === "admin" 
               ? "Admins should use the admin dashboard." 
-              : "This dashboard is only accessible to individual users and dealers. Please login with an appropriate account."}
+              : user?.dealerInfo?.verified
+              ? "Verified dealers should use the dealer dashboard."
+              : "This dashboard is only accessible to unverified dealers."}
           </p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-          >
-            Go Home
-          </button>
+          <div className="flex gap-3 justify-center">
+            {user?.dealerInfo?.verified ? (
+              <button
+                onClick={() => navigate("/dealer/dashboard")}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Go to Dealer Dashboard
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/")}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Go Home
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );

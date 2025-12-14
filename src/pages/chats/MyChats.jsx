@@ -66,7 +66,6 @@ const MyChats = () => {
             });
 
             newSocket.on('connect', () => {
-                console.log('Car chat socket connected');
                 setSocketConnected(true);
                 if (selectedChat) {
                     newSocket.emit('join-chat', selectedChat);
@@ -74,7 +73,6 @@ const MyChats = () => {
             });
 
             newSocket.on('disconnect', () => {
-                console.log('Car chat socket disconnected');
                 setSocketConnected(false);
             });
 

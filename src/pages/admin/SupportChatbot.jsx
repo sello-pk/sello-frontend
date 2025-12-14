@@ -7,9 +7,10 @@ import {
     useSendAdminResponseMutation,
     useUpdateSupportChatStatusMutation,
 } from "../../redux/services/adminApi";
+import { useGetMeQuery } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSend, FiUser, FiClock, FiAlertTriangle, FiCheckCircle, FiSearch, FiArrowLeft, FiMessageSquare, FiPaperclip, FiX, FiTrendingDown } from "react-icons/fi";
+import { FiSend, FiUser, FiClock, FiAlertTriangle, FiCheckCircle, FiSearch, FiArrowLeft, FiMessageSquare, FiPaperclip, FiX, FiTrendingDown, FiTrendingUp } from "react-icons/fi";
 import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { formatDistanceToNow } from "date-fns";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -30,10 +31,14 @@ const SupportChatbot = () => {
     const [isAdminTyping, setIsAdminTyping] = useState(false);
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const [chatUserNames, setChatUserNames] = useState({}); // Store user names by chatId
 
     const token = localStorage.getItem("token");
     const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
     const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
+    
+    // Get current admin user
+    const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
 
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery({
         status: activeTab === "all" ? undefined : activeTab,
@@ -49,11 +54,195 @@ const SupportChatbot = () => {
         }
     );
 
-    const [sendAdminResponse] = useSendAdminResponseMutation();
+    const [sendAdminResponse, { isLoading: isSendingMessage }] = useSendAdminResponseMutation();
     const [updateChatStatus] = useUpdateSupportChatStatusMutation();
 
     const chats = chatsData?.chats || [];
     const chatMessages = messages;
+    
+    // Extract user names from all chats when chats data loads
+    useEffect(() => {
+        if (chats.length > 0) {
+            const newUserNames = {};
+            
+            chats.forEach(chat => {
+                if (!chat._id) return;
+                
+                // Skip if we already have the name cached
+                if (chatUserNames[chat._id]) return;
+                
+                // Try to get name from participants
+                if (Array.isArray(chat.participants) && chat.participants.length > 0) {
+                    // Find non-admin participant
+                    const userParticipant = chat.participants.find(p => {
+                        if (typeof p === 'object' && p !== null) {
+                            // Check by role
+                            if (p.role && p.role !== 'admin') {
+                                return true;
+                            }
+                            // Check by ID (not current admin)
+                            if (currentUser?._id && p._id) {
+                                return p._id.toString() !== currentUser._id.toString();
+                            }
+                        }
+                        return false;
+                    });
+                    
+                    if (userParticipant?.name) {
+                        newUserNames[chat._id] = userParticipant.name;
+                    } else {
+                        // Try first participant that's not admin
+                        for (let i = 0; i < chat.participants.length; i++) {
+                            const p = chat.participants[i];
+                            if (typeof p === 'object' && p !== null && p.name) {
+                                if (currentUser?._id && p._id?.toString() === currentUser._id.toString()) {
+                                    continue; // Skip admin
+                                }
+                                newUserNames[chat._id] = p.name;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Update state with all found names
+            if (Object.keys(newUserNames).length > 0) {
+                setChatUserNames(prev => ({ ...prev, ...newUserNames }));
+            }
+        }
+    }, [chats, currentUser, chatUserNames]);
+
+    // Helper function to get user name from chat - with comprehensive fallbacks
+    const getUserNameFromChat = (chat) => {
+        if (!chat) return "Unknown User";
+        
+        // Method 1: Check stored user name from messages (most reliable - cached)
+        if (chat._id && chatUserNames[chat._id]) {
+            return chatUserNames[chat._id];
+        }
+        
+        // Method 2: Check participants array (if populated with objects)
+        if (Array.isArray(chat.participants) && chat.participants.length > 0) {
+            // Check if participants are objects (populated) or just IDs (strings)
+            const firstParticipant = chat.participants[0];
+            
+            // If participants are objects with name property
+            if (typeof firstParticipant === 'object' && firstParticipant !== null) {
+                // Try to find non-admin participant by role
+                const userParticipant = chat.participants.find(p => {
+                    if (typeof p === 'object' && p !== null && p.role) {
+                        return p.role !== 'admin';
+                    }
+                    return false;
+                });
+                if (userParticipant?.name) {
+                    // Store it for future use
+                    if (chat._id) {
+                        setChatUserNames(prev => ({ ...prev, [chat._id]: userParticipant.name }));
+                    }
+                    return userParticipant.name;
+                }
+                
+                // Try to find non-admin by comparing with current admin ID
+                if (currentUser?._id) {
+                    const nonAdminParticipant = chat.participants.find(p => {
+                        if (typeof p === 'object' && p !== null) {
+                            const participantId = p._id?.toString() || (p._id ? String(p._id) : null);
+                            if (participantId) {
+                                return participantId !== currentUser._id.toString();
+                            }
+                        }
+                        return false;
+                    });
+                    if (nonAdminParticipant?.name) {
+                        // Store it for future use
+                        if (chat._id) {
+                            setChatUserNames(prev => ({ ...prev, [chat._id]: nonAdminParticipant.name }));
+                        }
+                        return nonAdminParticipant.name;
+                    }
+                }
+                
+                // If participants exist but no role info, get first non-null name (skip admin)
+                for (let i = 0; i < chat.participants.length; i++) {
+                    const p = chat.participants[i];
+                    if (typeof p === 'object' && p !== null && p.name) {
+                        // Double check it's not the admin
+                        if (currentUser?._id && p._id?.toString() === currentUser._id.toString()) {
+                            continue; // Skip admin
+                        }
+                        // Store it for future use
+                        if (chat._id) {
+                            setChatUserNames(prev => ({ ...prev, [chat._id]: p.name }));
+                        }
+                        return p.name;
+                    }
+                }
+            }
+        }
+        
+        // Method 3: Get user name from messages (reliable fallback - messages always have sender populated)
+        if (chat._id === selectedChatId && chatMessages && Array.isArray(chatMessages) && chatMessages.length > 0) {
+            // Find first message from a non-admin, non-bot sender
+            for (let i = 0; i < chatMessages.length; i++) {
+                const msg = chatMessages[i];
+                if (msg.isBot) continue;
+                
+                const isAdmin = msg.sender === 'admin' || 
+                               msg.isAdminResponse === true || 
+                               msg.senderId === currentUser?._id ||
+                               (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
+                
+                if (!isAdmin && msg.sender) {
+                    // Check if sender is an object with name (populated)
+                    if (typeof msg.sender === 'object' && msg.sender?.name) {
+                        // Store it for future use
+                        if (chat._id) {
+                            setChatUserNames(prev => ({ ...prev, [chat._id]: msg.sender.name }));
+                        }
+                        return msg.sender.name;
+                    }
+                    // Check if sender is populated in a different way
+                    if (msg.senderName) {
+                        if (chat._id) {
+                            setChatUserNames(prev => ({ ...prev, [chat._id]: msg.senderName }));
+                        }
+                        return msg.senderName;
+                    }
+                }
+            }
+        }
+        
+        // Method 4: Check direct user fields (legacy support)
+        if (chat.user) {
+            if (typeof chat.user === 'object' && chat.user?.name) {
+                if (chat._id) {
+                    setChatUserNames(prev => ({ ...prev, [chat._id]: chat.user.name }));
+                }
+                return chat.user.name;
+            }
+        }
+        
+        if (chat.userId) {
+            if (typeof chat.userId === 'object' && chat.userId?.name) {
+                if (chat._id) {
+                    setChatUserNames(prev => ({ ...prev, [chat._id]: chat.userId.name }));
+                }
+                return chat.userId.name;
+            }
+        }
+        
+        if (chat.userName && typeof chat.userName === 'string') {
+            if (chat._id) {
+                setChatUserNames(prev => ({ ...prev, [chat._id]: chat.userName }));
+            }
+            return chat.userName;
+        }
+        
+        // If still unknown, return unknown (will be updated when messages load)
+        return "Unknown User";
+    };
 
     // Initialize Socket.IO
     useEffect(() => {
@@ -72,7 +261,6 @@ const SupportChatbot = () => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Admin support socket connected');
             setSocketConnected(true);
             newSocket.emit('join-chats');
             if (selectedChatId) {
@@ -81,7 +269,6 @@ const SupportChatbot = () => {
         });
 
         newSocket.on('disconnect', (reason) => {
-            console.log('Admin support socket disconnected:', reason);
             setSocketConnected(false);
             // Attempt to reconnect
             if (reason === 'io server disconnect') {
@@ -91,26 +278,21 @@ const SupportChatbot = () => {
         });
 
         newSocket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
             toast.error('Connection failed. Retrying...');
         });
 
         newSocket.on('connect_timeout', (timeout) => {
-            console.error('Socket connection timeout:', timeout);
             toast.error('Connection timeout. Retrying...');
         });
 
         newSocket.on('error', (error) => {
-            console.error('Socket error:', error);
             toast.error('Connection error occurred');
         });
 
         newSocket.on('joined-chat', (chatId) => {
-            console.log('Admin joined chat:', chatId);
         });
 
         newSocket.on('new-message', (data) => {
-            console.log('New support message received:', data);
             if (data.chatId === selectedChatId || data.chat?._id === selectedChatId) {
                 setMessages(prev => {
                     // Filter out temporary messages and duplicates
@@ -119,6 +301,27 @@ const SupportChatbot = () => {
                     );
                     return [...filteredMessages, data.message];
                 });
+                
+                // Extract user name from message if it's from a user (not admin/bot)
+                if (data.message && !data.message.isBot) {
+                    const isAdmin = data.message.sender === 'admin' || 
+                                   data.message.isAdminResponse === true || 
+                                   data.message.senderId === currentUser?._id ||
+                                   (typeof data.message.sender === 'object' && data.message.sender?.role === 'admin');
+                    
+                    if (!isAdmin && data.message.sender) {
+                        const chatId = data.chatId || data.chat?._id;
+                        if (chatId) {
+                            if (typeof data.message.sender === 'object' && data.message.sender?.name) {
+                                setChatUserNames(prev => ({
+                                    ...prev,
+                                    [chatId]: data.message.sender.name
+                                }));
+                            }
+                        }
+                    }
+                }
+                
                 // Scroll to bottom when new message arrives
                 setTimeout(() => {
                     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -168,10 +371,30 @@ const SupportChatbot = () => {
                 const filteredPrev = prev.filter(msg => !msg._id?.startsWith('temp-'));
                 return [...filteredPrev, ...messagesArray];
             });
+            
+            // Extract user name from messages and store it
+            if (selectedChatId && messagesArray.length > 0) {
+                // Find first non-admin, non-bot message to get user name
+                const userMessage = messagesArray.find(msg => {
+                    if (msg.isBot) return false;
+                    const isAdmin = msg.sender === 'admin' || 
+                                   msg.isAdminResponse === true || 
+                                   msg.senderId === currentUser?._id ||
+                                   (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
+                    return !isAdmin && msg.sender;
+                });
+                
+                if (userMessage && typeof userMessage.sender === 'object' && userMessage.sender?.name) {
+                    setChatUserNames(prev => ({
+                        ...prev,
+                        [selectedChatId]: userMessage.sender.name
+                    }));
+                }
+            }
         } else {
             setMessages([]);
         }
-    }, [messagesData, selectedChatId]);
+    }, [messagesData, selectedChatId, currentUser]);
 
     // Select chat from URL on mount
     useEffect(() => {
@@ -442,7 +665,7 @@ const SupportChatbot = () => {
                                         chats
                                             .filter((chat) =>
                                                 searchQuery
-                                                    ? chat.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                    ? getUserNameFromChat(chat).toLowerCase().includes(searchQuery.toLowerCase()) ||
                                                       chat.subject?.toLowerCase().includes(searchQuery.toLowerCase())
                                                     : true
                                             )
@@ -459,7 +682,7 @@ const SupportChatbot = () => {
                                                     <div className="flex items-start gap-3">
                                                         <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 relative">
                                                             <span className="text-base font-semibold text-primary-700">
-                                                                {(chat.user?.name || 'U').charAt(0).toUpperCase()}
+                                                                {getUserNameFromChat(chat).charAt(0).toUpperCase()}
                                                             </span>
                                                             {chat.unreadCount > 0 && (
                                                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -470,7 +693,7 @@ const SupportChatbot = () => {
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1">
                                                                 <p className="text-sm font-semibold text-gray-900 truncate">
-                                                                    {chat.user?.name || "Unknown User"}
+                                                                    {getUserNameFromChat(chat)}
                                                                 </p>
                                                                 <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                                                                     {chat.lastMessageAt
@@ -531,15 +754,15 @@ const SupportChatbot = () => {
                                     <div className="p-4 border-b border-gray-200 bg-gray-50">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center relative">
+                                                        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center relative">
                                                     <span className="text-lg font-bold text-primary-700">
-                                                        {(chats.find((c) => c._id === selectedChatId)?.user?.name || 'U').charAt(0).toUpperCase()}
+                                                        {getUserNameFromChat(chats.find((c) => c._id === selectedChatId)).charAt(0).toUpperCase()}
                                                     </span>
                                                     <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
                                                 </div>
                                                 <div>
                                                     <p className="text-base font-semibold text-gray-900">
-                                                        {chats.find((c) => c._id === selectedChatId)?.user?.name || "Unknown User"}
+                                                        {getUserNameFromChat(chats.find((c) => c._id === selectedChatId))}
                                                     </p>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-2 h-2 rounded-full bg-green-500"></div>
@@ -587,7 +810,11 @@ const SupportChatbot = () => {
                                             </div>
                                         ) : (
                                             chatMessages.map((msg) => {
-                                                const isAdmin = msg.sender === 'admin' || msg.isAdminResponse;
+                                                // Check if message is from admin - check multiple conditions
+                                                const isAdmin = msg.sender === 'admin' || 
+                                                               msg.isAdminResponse === true || 
+                                                               msg.senderId === currentUser?._id ||
+                                                               (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
                                                 const isBot = msg.isBot;
                                                 const timeStr = msg.createdAt
                                                     ? new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -711,11 +938,15 @@ const SupportChatbot = () => {
                                             />
                                             <button
                                                 type="submit"
-                                                disabled={!message.trim()}
-                                                className="p-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shadow-lg"
+                                                disabled={!message.trim() || isSendingMessage}
+                                                className="p-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center"
                                                 title="Send message"
                                             >
-                                                <FiSend size={20} />
+                                                {isSendingMessage ? (
+                                                    <Spinner fullScreen={false} />
+                                                ) : (
+                                                    <FiSend size={20} />
+                                                )}
                                             </button>
                                         </div>
                                         {isAdminTyping && (

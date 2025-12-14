@@ -26,7 +26,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -39,6 +38,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "carDoors",
       "horsepower",
       "numberOfCylinders",
+      "geoLocation", // Made optional - will use default if not provided
     ],
     fields: {
       bodyType: { visible: true, required: true },
@@ -71,7 +71,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -83,6 +82,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "horsepower",
       "numberOfCylinders",
+      "geoLocation", // Made optional
     ],
     fields: {
       bodyType: { visible: false, required: false },
@@ -114,7 +114,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -126,6 +125,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "horsepower",
       "numberOfCylinders",
+      "geoLocation", // Made optional
     ],
     fields: {
       bodyType: { visible: false, required: false },
@@ -202,7 +202,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -213,6 +212,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "features",
       "location",
       "horsepower",
+      "geoLocation", // Made optional
     ],
     fields: {
       bodyType: { visible: false, required: false },
@@ -243,7 +243,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -255,6 +254,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "batteryRange",
       "motorPower",
+      "geoLocation", // Made optional
     ],
     fields: {
       bodyType: { visible: false, required: false },

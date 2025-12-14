@@ -54,7 +54,7 @@ const Btns = () => {
         toast.success("Link copied to clipboard!");
       }
     } catch (error) {
-      console.log("Share Failed ", error);
+      // Share failed
     }
   };
   

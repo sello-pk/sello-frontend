@@ -71,7 +71,6 @@ const SellerChats = () => {
             });
 
             newSocket.on('connect', () => {
-                console.log('Seller socket connected');
                 setSocketConnected(true);
                 newSocket.emit('join-chats');
                 if (selectedChat) {
@@ -80,7 +79,6 @@ const SellerChats = () => {
             });
 
             newSocket.on('disconnect', () => {
-                console.log('Seller socket disconnected');
                 setSocketConnected(false);
             });
 

@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, lazy, Suspense } from "react";
 import { Route, Routes, useLocation, Navigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import Spinner from "./components/Spinner";
 
 // Components
 import Navbar from "./components/Navbar.jsx";
@@ -66,43 +67,50 @@ import SubscriptionSuccess from "./pages/payments/SubscriptionSuccess.jsx";
 import BoostSuccess from "./pages/payments/BoostSuccess.jsx";
 
 // Admin Pages
-import AdminDashboard from "./pages/admin/Dashboard.jsx";
-import AdminUsers from "./pages/admin/Users.jsx";
-import AdminListings from "./pages/admin/Listings.jsx";
-import AdminDealers from "./pages/admin/Dealers.jsx";
-import AdminCategories from "./pages/admin/Categories.jsx";
-import BlogEdit from "./pages/admin/BlogEdit.jsx";
-import AdminReports from "./pages/admin/Reports.jsx";
-import AdminChatMonitoring from "./pages/admin/ChatMonitoring.jsx";
-import AdminChatbot from "./pages/admin/Chatbot.jsx";
-import AdminPromotions from "./pages/admin/Promotions.jsx";
-import AdminPayments from "./pages/admin/Payments.jsx";
-import AdminNotifications from "./pages/admin/Notifications.jsx";
-import SupportChat from "./pages/admin/SupportChat.jsx";
-import SupportChatbot from "./pages/admin/SupportChatbot.jsx";
-import ContactFormManagement from "./pages/admin/ContactFormManagement.jsx";
-import CustomerRequests from "./pages/admin/CustomerRequests.jsx";
-import Banners from "./pages/admin/Banners.jsx";
-import Testimonials from "./pages/admin/Testimonials.jsx";
-import Settings from "./pages/admin/Settings.jsx";
+// Lazy load admin pages for code splitting
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard.jsx"));
+const AdminUsers = lazy(() => import("./pages/admin/Users.jsx"));
+const AdminListings = lazy(() => import("./pages/admin/Listings.jsx"));
+const AdminDealers = lazy(() => import("./pages/admin/Dealers.jsx"));
+const AdminCategories = lazy(() => import("./pages/admin/Categories.jsx"));
+const BlogEdit = lazy(() => import("./pages/admin/BlogEdit.jsx"));
+const AdminReports = lazy(() => import("./pages/admin/Reports.jsx"));
+const AdminChatMonitoring = lazy(() => import("./pages/admin/ChatMonitoring.jsx"));
+const AdminChatbot = lazy(() => import("./pages/admin/Chatbot.jsx"));
+const AdminPromotions = lazy(() => import("./pages/admin/Promotions.jsx"));
+const AdminPayments = lazy(() => import("./pages/admin/Payments.jsx"));
+const AdminNotifications = lazy(() => import("./pages/admin/Notifications.jsx"));
+const SupportChat = lazy(() => import("./pages/admin/SupportChat.jsx"));
+const SupportChatbot = lazy(() => import("./pages/admin/SupportChatbot.jsx"));
+const CustomerRequests = lazy(() => import("./pages/admin/CustomerRequests.jsx"));
+const Banners = lazy(() => import("./pages/admin/Banners.jsx"));
+const Testimonials = lazy(() => import("./pages/admin/Testimonials.jsx"));
+const Settings = lazy(() => import("./pages/admin/Settings.jsx"));
+const ActivityLog = lazy(() => import("./pages/admin/ActivityLog.jsx"));
 
-// New Blog Management Pages
-import BlogsOverview from "./pages/admin/BlogsOverview.jsx";
-import BlogCategories from "./pages/admin/BlogCategories.jsx";
-import BlogCreateEnhanced from "./pages/admin/BlogCreateEnhanced.jsx";
-import BlogComments from "./pages/admin/BlogComments.jsx";
-import BlogMediaLibrary from "./pages/admin/BlogMediaLibrary.jsx";
+// New Blog Management Pages - Lazy loaded
+const BlogsOverview = lazy(() => import("./pages/admin/BlogsOverview.jsx"));
+const BlogCategories = lazy(() => import("./pages/admin/BlogCategories.jsx"));
+const BlogCreateEnhanced = lazy(() => import("./pages/admin/BlogCreateEnhanced.jsx"));
+const BlogComments = lazy(() => import("./pages/admin/BlogComments.jsx"));
+const BlogMediaLibrary = lazy(() => import("./pages/admin/BlogMediaLibrary.jsx"));
 
 // Protected Routes
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import AdminRoute from "./components/common/AdminRoute.jsx";
 import { ErrorPage } from "./components/common/ErrorBoundary.jsx";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 
 // ScrollToTop component to scroll to top on route change
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // Don't scroll to top for admin routes - AdminLayout handles its own scrolling
+    if (pathname.startsWith("/admin")) {
+      return;
+    }
+    
     // Scroll to top immediately on route change
     window.scrollTo({
       top: 0,
@@ -168,7 +176,7 @@ const App = () => {
   ];
 
   return (
-    <>
+    <ThemeProvider>
       <ScrollToTop />
       <Toaster />
 
@@ -324,33 +332,33 @@ const App = () => {
 
         {/* Admin Routes */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/users/:userId" element={<AdminUsers />} />
-          <Route path="/admin/listings" element={<AdminListings />} />
-          <Route path="/admin/dealers" element={<AdminDealers />} />
-          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/dashboard" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminDashboard /></Suspense>} />
+          <Route path="/admin/users" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminUsers /></Suspense>} />
+          <Route path="/admin/users/:userId" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminUsers /></Suspense>} />
+          <Route path="/admin/listings" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminListings /></Suspense>} />
+          <Route path="/admin/dealers" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminDealers /></Suspense>} />
+          <Route path="/admin/categories" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminCategories /></Suspense>} />
           {/* Blog Management Routes */}
-          <Route path="/admin/blogs" element={<BlogsOverview />} />
-          <Route path="/admin/blog-categories" element={<BlogCategories />} />
-          <Route path="/admin/blogs/create" element={<BlogCreateEnhanced />} />
-          <Route path="/admin/blogs/:id/edit" element={<BlogEdit />} />
-          <Route path="/admin/blog-comments" element={<BlogComments />} />
-          <Route path="/admin/blog-media" element={<BlogMediaLibrary />} />
-          <Route path="/admin/analytics" element={<AdminReports />} />
-          <Route path="/admin/chat" element={<AdminChatMonitoring />} />
-          <Route path="/admin/chatbot" element={<AdminChatbot />} />
-          <Route path="/admin/promotions" element={<AdminPromotions />} />
-          <Route path="/admin/payments" element={<AdminPayments />} />
-          <Route path="/admin/notifications" element={<AdminNotifications />} />
-          <Route path="/admin/support-chat" element={<SupportChat />} />
-          <Route path="/admin/support-chatbot" element={<SupportChatbot />} />
-          <Route path="/admin/contact-forms" element={<ContactFormManagement />} />
-          <Route path="/admin/customer-requests" element={<CustomerRequests />} />
+          <Route path="/admin/blogs" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogsOverview /></Suspense>} />
+          <Route path="/admin/blog-categories" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogCategories /></Suspense>} />
+          <Route path="/admin/blogs/create" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogCreateEnhanced /></Suspense>} />
+          <Route path="/admin/blogs/:id/edit" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogEdit /></Suspense>} />
+          <Route path="/admin/blog-comments" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogComments /></Suspense>} />
+          <Route path="/admin/blog-media" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogMediaLibrary /></Suspense>} />
+          <Route path="/admin/analytics" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminReports /></Suspense>} />
+          <Route path="/admin/activity-log" element={<Suspense fallback={<Spinner fullScreen={true} />}><ActivityLog /></Suspense>} />
+          <Route path="/admin/chat" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminChatMonitoring /></Suspense>} />
+          <Route path="/admin/chatbot" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminChatbot /></Suspense>} />
+          <Route path="/admin/promotions" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminPromotions /></Suspense>} />
+          <Route path="/admin/payments" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminPayments /></Suspense>} />
+          <Route path="/admin/notifications" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminNotifications /></Suspense>} />
+          <Route path="/admin/support-chat" element={<Suspense fallback={<Spinner fullScreen={true} />}><SupportChat /></Suspense>} />
+          <Route path="/admin/support-chatbot" element={<Suspense fallback={<Spinner fullScreen={true} />}><SupportChatbot /></Suspense>} />
+          <Route path="/admin/customer-requests" element={<Suspense fallback={<Spinner fullScreen={true} />}><CustomerRequests /></Suspense>} />
           <Route path="/admin/customers" element={<Navigate to="/admin/customer-requests" replace />} />
-          <Route path="/admin/banners" element={<Banners />} />
-          <Route path="/admin/testimonials" element={<Testimonials />} />
-          <Route path="/admin/settings" element={<Settings />} />
+          <Route path="/admin/banners" element={<Suspense fallback={<Spinner fullScreen={true} />}><Banners /></Suspense>} />
+          <Route path="/admin/testimonials" element={<Suspense fallback={<Spinner fullScreen={true} />}><Testimonials /></Suspense>} />
+          <Route path="/admin/settings" element={<Suspense fallback={<Spinner fullScreen={true} />}><Settings /></Suspense>} />
         </Route>
       </Routes>
 
@@ -361,7 +369,7 @@ const App = () => {
       {/* Support Chat Widget - Show on all pages except auth and admin */}
       {!hideNavbarFooter.includes(location.pathname) &&
         !location.pathname.startsWith("/admin") && <WhatsAppChatWidget />}
-    </>
+    </ThemeProvider>
   );
 };
 

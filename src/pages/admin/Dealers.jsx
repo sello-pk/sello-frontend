@@ -61,7 +61,7 @@ const Dealers = () => {
 
     const getPlanBadge = (plan) => {
         const planColors = {
-            free: "bg-gray-100 text-gray-800",
+            free: "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300",
             basic: "bg-blue-100 text-blue-800",
             premium: "bg-purple-100 text-purple-800",
             dealer: "bg-primary-100 text-primary-800"
@@ -79,7 +79,7 @@ const Dealers = () => {
             );
         }
         return (
-            <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800 flex items-center gap-1">
+            <span className="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 flex items-center gap-1">
                 <FiXCircle size={12} />
                 Not Verified
             </span>
@@ -88,20 +88,20 @@ const Dealers = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 {/* Header */}
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Dealer Management</h2>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dealer Management</h2>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                         Manage verified dealers and subscriptions
                     </p>
                 </div>
 
                 {/* All Dealers Label and Search */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
                     <div className="p-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-base font-semibold text-gray-900">All Dealers</h3>
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-white">All Dealers</h3>
                             <div className="flex-1 max-w-md ml-4">
                                 <div className="relative">
                                     <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -110,7 +110,7 @@ const Dealers = () => {
                                         placeholder="Search by name or email..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white text-sm"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                                     />
                                 </div>
                             </div>
@@ -120,32 +120,32 @@ const Dealers = () => {
 
                 {/* Table */}
                 {isLoading ? (
-                    <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                         <Spinner fullScreen={false} />
                     </div>
                 ) : dealers.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                        <p className="text-gray-500 text-lg">No dealers found</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+                        <p className="text-gray-700 dark:text-gray-300 text-lg">No dealers found</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Business Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Contact</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Location</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Plan</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Listings Limit</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Sales</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
+                                    <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Business Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Contact</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Location</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Plan</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Listings Limit</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Sales</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                     {dealers.map((dealer) => (
-                                        <tr key={dealer._id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={dealer._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-semibold flex-shrink-0 overflow-hidden">
@@ -160,10 +160,10 @@ const Dealers = () => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-900">
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                             {dealer.dealerInfo?.businessName || dealer.name || "N/A"}
                                                         </p>
-                                                        <p className="text-xs text-gray-500">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
                                                             {dealer.name}
                                                         </p>
                                                     </div>
@@ -171,14 +171,14 @@ const Dealers = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <p className="text-sm text-gray-900">{dealer.email || "N/A"}</p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-sm text-gray-900 dark:text-white">{dealer.email || "N/A"}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {dealer.dealerInfo?.businessPhone || dealer.contactNumber || "N/A"}
                                                     </p>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-600">
+                                                <span className="text-sm text-gray-600 dark:text-gray-300">
                                                     {dealer.dealerInfo?.businessAddress || dealer.city || "N/A"}
                                                 </span>
                                             </td>
@@ -188,11 +188,11 @@ const Dealers = () => {
                                                         {(dealer.subscription?.plan || 'free').charAt(0).toUpperCase() + (dealer.subscription?.plan || 'free').slice(1)}
                                                     </span>
                                                     {dealer.subscription?.isActive && dealer.subscription?.endDate && new Date(dealer.subscription.endDate) > new Date() ? (
-                                                        <span className="text-xs text-green-600 font-medium">
+                                                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                                                             Active until {new Date(dealer.subscription.endDate).toLocaleDateString()}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-xs text-gray-500">Inactive</span>
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">Inactive</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -201,18 +201,18 @@ const Dealers = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-gray-900">
+                                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                                                         {dealer.listingsCount || 0}
                                                     </span>
                                                     {dealer.subscription?.plan === 'free' && dealer.listingsCount >= 5 && (
-                                                        <span className="text-xs text-yellow-600 font-medium">
+                                                        <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
                                                             Limit reached
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm font-medium text-gray-900">
+                                                <span className="text-sm font-medium text-gray-900 dark:text-white">
                                                     {dealer.salesCount || 0}
                                                 </span>
                                             </td>
@@ -226,26 +226,29 @@ const Dealers = () => {
                                                                 : 'text-green-600 hover:text-green-700'
                                                         } transition-colors`}
                                                         title={dealer.dealerInfo?.verified ? "Unverify" : "Verify"}
+                                                        aria-label={dealer.dealerInfo?.verified ? `Unverify dealer ${dealer.dealerInfo?.businessName || dealer.name}` : `Verify dealer ${dealer.dealerInfo?.businessName || dealer.name}`}
                                                     >
                                                         {dealer.dealerInfo?.verified ? (
-                                                            <FiXCircle size={18} />
+                                                            <FiXCircle size={18} aria-hidden="true" />
                                                         ) : (
-                                                            <FiCheckCircle size={18} />
+                                                            <FiCheckCircle size={18} aria-hidden="true" />
                                                         )}
                                                     </button>
                                                     <button
                                                         onClick={() => handleViewDetails(dealer._id)}
                                                         className="text-blue-600 hover:text-blue-700 transition-colors"
                                                         title="View Details"
+                                                        aria-label={`View details for dealer ${dealer.dealerInfo?.businessName || dealer.name}`}
                                                     >
-                                                        <FiEye size={18} />
+                                                        <FiEye size={18} aria-hidden="true" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleEdit(dealer._id)}
-                                                        className="text-gray-600 hover:text-gray-700 transition-colors"
+                                                        className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                                                         title="Edit"
+                                                        aria-label={`Edit dealer ${dealer.dealerInfo?.businessName || dealer.name}`}
                                                     >
-                                                        <FiEdit2 size={18} />
+                                                        <FiEdit2 size={18} aria-hidden="true" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -263,17 +266,19 @@ const Dealers = () => {
                         <button
                             onClick={() => setPage(page - 1)}
                             disabled={page === 1}
-                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                            aria-label="Go to previous page"
                         >
                             Previous
                         </button>
-                        <span className="px-4 py-2 text-sm text-gray-700">
+                        <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                             Page {page} of {pagination.pages}
                         </span>
                         <button
                             onClick={() => setPage(page + 1)}
                             disabled={page >= pagination.pages}
-                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                            aria-label="Go to next page"
                         >
                             Next
                         </button>
@@ -283,14 +288,15 @@ const Dealers = () => {
                 {/* Dealer Details Modal */}
                 {showDetailsModal && selectedDealer && (
                     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-gray-900">Dealer Details</h3>
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Dealer Details</h3>
                                 <button
                                     onClick={handleCloseModal}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                    aria-label="Close dealer details modal"
                                 >
-                                    <FiX size={24} />
+                                    <FiX size={24} aria-hidden="true" />
                                 </button>
                             </div>
                             <div className="p-6">
@@ -302,31 +308,31 @@ const Dealers = () => {
                                     <div className="space-y-6">
                                         {/* Basic Information */}
                                         <div>
-                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h4>
+                                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h4>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <p className="text-sm text-gray-600">Business Name</p>
-                                                    <p className="font-medium">{dealerDetails.dealerInfo?.businessName || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Business Name</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.dealerInfo?.businessName || "N/A"}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">Owner Name</p>
-                                                    <p className="font-medium">{dealerDetails.name || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Owner Name</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.name || "N/A"}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">Email</p>
-                                                    <p className="font-medium">{dealerDetails.email || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.email || "N/A"}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">Phone</p>
-                                                    <p className="font-medium">{dealerDetails.dealerInfo?.businessPhone || dealerDetails.phone || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Phone</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.dealerInfo?.businessPhone || dealerDetails.phone || "N/A"}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">WhatsApp</p>
-                                                    <p className="font-medium">{dealerDetails.dealerInfo?.whatsappNumber || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">WhatsApp</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.dealerInfo?.whatsappNumber || "N/A"}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">Location</p>
-                                                    <p className="font-medium">{dealerDetails.dealerInfo?.area || "N/A"}, {dealerDetails.dealerInfo?.city || "N/A"}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Location</p>
+                                                    <p className="font-medium dark:text-white">{dealerDetails.dealerInfo?.area || "N/A"}, {dealerDetails.dealerInfo?.city || "N/A"}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -334,32 +340,32 @@ const Dealers = () => {
                                         {/* Business Details */}
                                         {(dealerDetails.dealerInfo?.description || dealerDetails.dealerInfo?.website || dealerDetails.dealerInfo?.establishedYear) && (
                                             <div>
-                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Business Details</h4>
+                                                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Business Details</h4>
                                                 <div className="space-y-3">
                                                     {dealerDetails.dealerInfo?.description && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Description</p>
-                                                            <p className="font-medium">{dealerDetails.dealerInfo.description}</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Description</p>
+                                                            <p className="font-medium dark:text-white">{dealerDetails.dealerInfo.description}</p>
                                                         </div>
                                                     )}
                                                     {dealerDetails.dealerInfo?.website && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Website</p>
-                                                            <a href={dealerDetails.dealerInfo.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Website</p>
+                                                            <a href={dealerDetails.dealerInfo.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
                                                                 {dealerDetails.dealerInfo.website}
                                                             </a>
                                                         </div>
                                                     )}
                                                     {dealerDetails.dealerInfo?.establishedYear && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Established Year</p>
-                                                            <p className="font-medium">{dealerDetails.dealerInfo.establishedYear}</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Established Year</p>
+                                                            <p className="font-medium dark:text-white">{dealerDetails.dealerInfo.establishedYear}</p>
                                                         </div>
                                                     )}
                                                     {dealerDetails.dealerInfo?.employeeCount && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Employee Count</p>
-                                                            <p className="font-medium">{dealerDetails.dealerInfo.employeeCount}</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Employee Count</p>
+                                                            <p className="font-medium dark:text-white">{dealerDetails.dealerInfo.employeeCount}</p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -369,7 +375,7 @@ const Dealers = () => {
                                         {/* Specialties & Services */}
                                         {(dealerDetails.dealerInfo?.specialties?.length > 0 || dealerDetails.dealerInfo?.services?.length > 0 || dealerDetails.dealerInfo?.languages?.length > 0) && (
                                             <div>
-                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Specialties & Services</h4>
+                                                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Specialties & Services</h4>
                                                 <div className="space-y-3">
                                                     {dealerDetails.dealerInfo?.specialties?.length > 0 && (
                                                         <div>
@@ -385,7 +391,7 @@ const Dealers = () => {
                                                     )}
                                                     {dealerDetails.dealerInfo?.services?.length > 0 && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Services</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Services</p>
                                                             <div className="flex flex-wrap gap-2 mt-1">
                                                                 {dealerDetails.dealerInfo.services.map((service, idx) => (
                                                                     <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
@@ -397,7 +403,7 @@ const Dealers = () => {
                                                     )}
                                                     {dealerDetails.dealerInfo?.languages?.length > 0 && (
                                                         <div>
-                                                            <p className="text-sm text-gray-600">Languages</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">Languages</p>
                                                             <div className="flex flex-wrap gap-2 mt-1">
                                                                 {dealerDetails.dealerInfo.languages.map((lang, idx) => (
                                                                     <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -414,7 +420,7 @@ const Dealers = () => {
                                         {/* Social Media */}
                                         {(dealerDetails.dealerInfo?.socialMedia?.facebook || dealerDetails.dealerInfo?.socialMedia?.instagram || dealerDetails.dealerInfo?.socialMedia?.twitter) && (
                                             <div>
-                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Social Media</h4>
+                                                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Social Media</h4>
                                                 <div className="space-y-2">
                                                     {dealerDetails.dealerInfo.socialMedia.facebook && (
                                                         <a href={dealerDetails.dealerInfo.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="block text-blue-600 hover:underline">

@@ -15,24 +15,24 @@ import Video from "../components/sections/home/Video";
 
 const Home = () => {
   const location = useLocation();
-  
+
   useEffect(() => {
     // Ensure we scroll to top when Home component renders
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location.pathname]);
-  
+
   return (
     <div className="">
       <SEO
-        title="Sello - Buy and Sell Cars in UAE"
-        description="Find your perfect car on Sello. Browse thousands of new and used cars from trusted sellers in UAE. Buy or sell your car today with confidence!"
-        keywords="buy cars UAE, sell cars Dubai, used cars, new cars, car marketplace UAE, car dealers Dubai"
+        title="Sello - Buy and Sell Cars in Pakistan"
+        description="Find your perfect car on Sello. Browse thousands of new and used cars from trusted sellers in Pakistan. Buy or sell your car today with confidence!"
+        keywords="buy cars Pakistan, sell cars Pakistan , used cars, new cars, car marketplace Pakistan, car dealers Pakistan"
       />
       <div className="">
         <Hero />
         <BrandsSection />
-        <Video/>
-        <BannerCarousal/>
+        <Video />
+        <BannerCarousal />
         <FeaturedCarsCarousel />
         <ShopBoxCar />
         <GetAllCarsSection />
