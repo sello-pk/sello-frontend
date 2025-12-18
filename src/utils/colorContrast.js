@@ -101,8 +101,8 @@ export const contrastFixes = {
     
     // Link colors
     link: {
-        default: 'text-primary-600 hover:text-primary-700',
-        muted: 'text-primary-500 hover:text-primary-600',
+        default: 'text-primary-500 hover:text-primary-500',
+        muted: 'text-primary-500 hover:text-primary-500',
     },
 };
 

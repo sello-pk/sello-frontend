@@ -217,7 +217,7 @@ const FeaturedCarsCarousel = () => {
                 className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white backdrop-blur-sm p-3 rounded-full shadow-lg transition-all transform hover:scale-110"
                 aria-label="Previous"
               >
-                <IoIosArrowBack className="text-2xl text-primary-600" />
+                <IoIosArrowBack className="text-2xl text-primary-500" />
               </button>
               <button
                 onClick={handleNext}

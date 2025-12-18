@@ -93,7 +93,7 @@ const FilteredResults = () => {
               </h3>
               <button
                 onClick={() => navigate("/filter", { replace: true })}
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 Clear All
               </button>
@@ -102,12 +102,12 @@ const FilteredResults = () => {
               {activeFilters.map(([key, value]) => (
                 <span
                   key={key}
-                  className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium"
+                  className="inline-flex items-center gap-2 bg-primary-50 text-primary-500 px-3 py-1 rounded-full text-sm font-medium"
                 >
                   <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}: {value}</span>
                   <button
                     onClick={() => removeFilter(key)}
-                    className="hover:text-primary-900"
+                    className="hover:text-primary-500"
                   >
                     <FiX size={14} />
                   </button>

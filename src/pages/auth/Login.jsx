@@ -50,9 +50,10 @@ const Login = () => {
         throw new Error("Invalid response from server. Missing user data.");
       }
 
-      // Store token in the Local Storage
-      const token = res.token || res.data?.token;
+      // Store tokens in the Local Storage
+      const token = res.token || res.accessToken || res.data?.token;
       const user = res.user || res.data?.user;
+      const refreshToken = res.refreshToken || res.data?.refreshToken;
       
       if (!token || !user) {
         throw new Error("Failed to extract login credentials from response.");
@@ -60,6 +61,10 @@ const Login = () => {
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      // Store refresh token if provided (new system)
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
 
       // Invalidate and refetch user queries (mutation already does this, but ensure it happens)
       try {

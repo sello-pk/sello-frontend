@@ -26,7 +26,7 @@ const UserListingHero = () => {
             </button>
             <button
               onClick={() => navigate("/contact")}
-              className="flex items-center justify-center space-x-3 bg-white text-primary-600 px-5 py-2.5 rounded text-base md:text-lg hover:bg-primary-500 hover:text-white font-medium border-[1px] border-primary-500 w-full sm:w-auto transition-colors"
+              className="flex items-center justify-center space-x-3 bg-white text-primary-500 px-5 py-2.5 rounded text-base md:text-lg hover:bg-primary-500 hover:text-white font-medium border-[1px] border-primary-500 w-full sm:w-auto transition-colors"
             >
               <span>Contact Us</span>
               <GoArrowUpRight />

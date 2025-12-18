@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { SOCKET_BASE_URL } from "../../redux/config";
 import { FaBell, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { MdNotifications, MdNotificationsActive } from "react-icons/md";
 import {
@@ -12,14 +13,11 @@ import toast from "react-hot-toast";
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [socket, setSocket] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-  const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
   const { data: notificationsData, refetch } = useGetUserNotificationsQuery(
     { page: 1, limit: 10 },
@@ -40,7 +38,7 @@ const NotificationBell = () => {
   useEffect(() => {
     if (!token) return;
 
-    const newSocket = io(SOCKET_URL, {
+    const newSocket = io(SOCKET_BASE_URL, {
       auth: { token },
       query: { token },
       transports: ['websocket', 'polling'],
@@ -59,25 +57,23 @@ const NotificationBell = () => {
 
     // Listen for new notifications
     newSocket.on('new-notification', (data) => {
-      
-      // Show toast notification
+      // WhatsApp-style bubble toast (bottom-right, richer preview)
       toast.success(data.message || data.title || "New notification", {
         icon: '🔔',
-        duration: 5000,
+        duration: 7000,
+        position: 'bottom-right',
       });
 
-      // Refetch notifications
+      // Refetch notifications so the bell counter updates instantly
       refetch();
     });
-
-    setSocket(newSocket);
 
     return () => {
       if (newSocket) {
         newSocket.close();
       }
     };
-  }, [token, SOCKET_URL, refetch]);
+  }, [token, refetch]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -116,7 +112,7 @@ const NotificationBell = () => {
       await markAllAsRead().unwrap();
       refetch();
       toast.success("All notifications marked as read");
-    } catch (err) {
+    } catch {
       toast.error("Failed to mark all as read");
     }
   };
@@ -132,20 +128,6 @@ const NotificationBell = () => {
       case 'info':
       default:
         return 'ℹ️';
-    }
-  };
-
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'error':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'info':
-      default:
-        return 'bg-blue-100 text-blue-800 border-blue-200';
     }
   };
 
@@ -166,19 +148,21 @@ const NotificationBell = () => {
       {/* Notification Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-100 hover:text-primary-500 transition-colors rounded-full hover:bg-gray-100"
+        className="relative p-2 text-current hover:opacity-80 transition-all rounded-full hover:bg-black/10 dark:hover:bg-white/10"
         aria-label="Notifications"
       >
-        {unreadCount > 0 ? (
-          <MdNotificationsActive className="text-2xl text-primary-500" />
-        ) : (
-          <MdNotifications className="text-2xl" />
-        )}
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
+        <div className="relative">
+          {unreadCount > 0 ? (
+            <MdNotificationsActive className="text-2xl text-current" />
+          ) : (
+            <MdNotifications className="text-2xl text-current" />
+          )}
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-lg border-2 border-white transform translate-x-1/2 -translate-y-1/2 z-10">
+              {unreadCount > 99 ? '99+' : unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
       </button>
 
       {/* Dropdown */}
@@ -192,7 +176,7 @@ const NotificationBell = () => {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+                className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 Mark all read
               </button>
@@ -257,7 +241,7 @@ const NotificationBell = () => {
             <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
               <button
                 onClick={() => navigate('/notifications')}
-                className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+                className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 View all notifications
               </button>

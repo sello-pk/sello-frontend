@@ -28,7 +28,7 @@ const DetailItem = ({ icon, label, value, badge = false }) => {
           {label}
         </p>
         {badge ? (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-primary-100 text-primary-700">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-primary-100 text-primary-500">
             {value}
           </span>
         ) : (
@@ -96,8 +96,12 @@ const AcceptInvite = () => {
       localStorage.removeItem("otp");
 
 
-      // STEP 2: Store token and user data
+      // STEP 2: Store tokens and user data
       localStorage.setItem("token", tokenData);
+      // Store refresh token if provided (new system)
+      if (res.refreshToken) {
+        localStorage.setItem("refreshToken", res.refreshToken);
+      }
 
       const completeUserData = {
         ...userData,

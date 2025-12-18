@@ -158,7 +158,7 @@ const Btns = () => {
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 bg-primary-100 text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-200 transition-colors"
+              className="flex items-center gap-2 bg-primary-100 text-primary-500 px-6 py-3 rounded-lg font-semibold hover:bg-primary-200 transition-colors"
             >
               <FaShareAlt />
               Share

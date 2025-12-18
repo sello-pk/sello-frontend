@@ -234,7 +234,7 @@ const Payments = () => {
                                 onClick={() => setActiveTab("payments")}
                                 className={`px-6 py-3 font-medium text-sm ${
                                     activeTab === "payments"
-                                        ? "border-b-2 border-primary-500 text-primary-600"
+                                        ? "border-b-2 border-primary-500 text-primary-500"
                                         : "text-gray-500 hover:text-gray-700"
                                 }`}
                             >
@@ -245,7 +245,7 @@ const Payments = () => {
                                 onClick={() => setActiveTab("subscriptions")}
                                 className={`px-6 py-3 font-medium text-sm ${
                                     activeTab === "subscriptions"
-                                        ? "border-b-2 border-primary-500 text-primary-600"
+                                        ? "border-b-2 border-primary-500 text-primary-500"
                                         : "text-gray-500 hover:text-gray-700"
                                 }`}
                             >
@@ -405,7 +405,7 @@ const Payments = () => {
                                                             {!sub.isActive && (
                                                                 <button
                                                                     onClick={() => handleUpdateClick(sub.userId)}
-                                                                    className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                                                                    className="text-primary-500 hover:text-primary-500 text-sm font-medium"
                                                                 >
                                                                     Activate
                                                                 </button>
@@ -555,7 +555,7 @@ const Payments = () => {
                                             <div>Max Listings: {plan.maxListings === -1 ? "Unlimited" : plan.maxListings}</div>
                                             <div>Boost Credits: {plan.boostCredits}</div>
                                             {plan.isDefault && (
-                                                <div className="text-primary-600 font-semibold">Default Plan</div>
+                                                <div className="text-primary-500 font-semibold">Default Plan</div>
                                             )}
                                             {plan.visible === false && (
                                                 <div className="text-red-600 font-semibold">Hidden from Users</div>
@@ -882,7 +882,7 @@ const Payments = () => {
                                         <button
                                             type="button"
                                             onClick={() => setPlanFormData({ ...planFormData, features: [...planFormData.features, ""] })}
-                                            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                                            className="text-sm text-primary-500 hover:text-primary-500 font-medium"
                                         >
                                             + Add Feature
                                         </button>

@@ -3,6 +3,8 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { FaSave, FaSpinner, FaGlobe, FaShieldAlt, FaCheckCircle, FaBell, FaCamera, FaUpload, FaDollarSign } from "react-icons/fa";
 import Tooltip from "../Tooltip";
+import { API_BASE_URL } from "../../../redux/config";
+import { getAccessToken } from "../../../utils/tokenRefresh";
 
 const ToggleSwitch = ({ checked, onChange }) => (
   <button
@@ -61,9 +63,13 @@ const GeneralSettingsTab = () => {
 
   const fetchSettings = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        return;
+      }
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
+        `${API_BASE_URL}/settings`,
         { 
           withCredentials: true,
           headers: {
@@ -127,9 +133,14 @@ const GeneralSettingsTab = () => {
 
     setUploading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setUploading(false);
+        return;
+      }
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/upload`,
+        `${API_BASE_URL}/upload`,
         formData,
         {
           headers: { 
@@ -198,7 +209,7 @@ const GeneralSettingsTab = () => {
     if (settings.siteLogo && settings.siteLogo.trim()) {
       try {
         new URL(settings.siteLogo);
-      } catch (e) {
+      } catch {
         errors.push("Site logo must be a valid URL");
       }
     }
@@ -216,6 +227,12 @@ const GeneralSettingsTab = () => {
 
     setSaving(true);
     try {
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setSaving(false);
+        return;
+      }
       const settingsToSave = [
         { key: "siteName", value: settings.siteName, category: "general", type: "string" },
         { key: "contactEmail", value: settings.contactEmail, category: "general", type: "string" },
@@ -240,9 +257,14 @@ const GeneralSettingsTab = () => {
 
       const promises = settingsToSave.map(setting => 
         axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
+          `${API_BASE_URL}/settings`,
           setting,
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         )
       );
 

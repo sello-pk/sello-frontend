@@ -14,6 +14,7 @@ import { FiSend, FiUser, FiClock, FiAlertTriangle, FiCheckCircle, FiSearch, FiAr
 import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { formatDistanceToNow } from "date-fns";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { SOCKET_BASE_URL } from "../../redux/config";
 
 const SupportChatbot = () => {
     const navigate = useNavigate();
@@ -30,12 +31,12 @@ const SupportChatbot = () => {
     const [typingUsers, setTypingUsers] = useState([]);
     const [isAdminTyping, setIsAdminTyping] = useState(false);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
     const [chatUserNames, setChatUserNames] = useState({}); // Store user names by chatId
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-    const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
     
     // Get current admin user
     const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
@@ -248,7 +249,7 @@ const SupportChatbot = () => {
     useEffect(() => {
         if (!token) return;
 
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_BASE_URL, {
             auth: { token },
             query: { token },
             transports: ['websocket', 'polling'],
@@ -322,10 +323,15 @@ const SupportChatbot = () => {
                     }
                 }
                 
-                // Scroll to bottom when new message arrives
-                setTimeout(() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                }, 100);
+                // Only auto-scroll if user is near bottom
+                if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+                    setTimeout(() => {
+                        const container = messagesContainerRef.current;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 100);
+                }
             }
             // Refetch chats to update unread counts
             refetchChats();
@@ -394,6 +400,8 @@ const SupportChatbot = () => {
         } else {
             setMessages([]);
         }
+        // Reset auto-scroll when switching chats or loading new messages
+        shouldAutoScrollRef.current = true;
     }, [messagesData, selectedChatId, currentUser]);
 
     // Select chat from URL on mount
@@ -403,15 +411,39 @@ const SupportChatbot = () => {
         }
     }, [chatIdFromUrl]);
 
-    // Auto-scroll to bottom when new messages arrive
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChatId]);
+
+    // Auto-scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || chatMessages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [chatMessages, typingUsers]);
 
     const handleSelectChat = (chatId) => {
         setSelectedChatId(chatId);
         // Clear messages but keep temporary messages
         setMessages(prev => prev.filter(msg => msg._id?.startsWith('temp-')));
+        // Reset auto-scroll when switching chats
+        shouldAutoScrollRef.current = true;
         if (socket) {
             socket.emit('join-chat', chatId);
         }
@@ -460,10 +492,15 @@ const SupportChatbot = () => {
                     createdAt: new Date()
                 };
                 setMessages(prev => [...prev, tempMessage]);
-                // Scroll to bottom
-                setTimeout(() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                }, 100);
+                // Only auto-scroll if user is near bottom
+                if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+                    setTimeout(() => {
+                        const container = messagesContainerRef.current;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 100);
+                }
             } else {
                 // Fallback to HTTP if socket not connected
                 const result = await sendAdminResponse({
@@ -545,7 +582,7 @@ const SupportChatbot = () => {
                                 <p className="text-2xl font-bold text-gray-900">{stats.open}</p>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                <FiClock className="text-primary-600" size={20} />
+                                <FiClock className="text-primary-500" size={20} />
                             </div>
                         </div>
                         <div className="flex items-center gap-1 mt-2">
@@ -681,7 +718,7 @@ const SupportChatbot = () => {
                                                 >
                                                     <div className="flex items-start gap-3">
                                                         <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 relative">
-                                                            <span className="text-base font-semibold text-primary-700">
+                                                            <span className="text-base font-semibold text-primary-500">
                                                                 {getUserNameFromChat(chat).charAt(0).toUpperCase()}
                                                             </span>
                                                             {chat.unreadCount > 0 && (
@@ -712,7 +749,7 @@ const SupportChatbot = () => {
                                                             <div className="flex items-center gap-2 mt-1">
                                                                 <span className={`text-xs px-2 py-0.5 rounded-full ${{
                                                                     open: 'bg-green-100 text-green-800',
-                                                                    pending: 'bg-primary-100 text-primary-800',
+                                                                    pending: 'bg-primary-100 text-primary-500',
                                                                     resolved: 'bg-gray-100 text-gray-800'
                                                                 }[chat.status] || 'bg-gray-100 text-gray-800'}
                                                                 `}>
@@ -755,7 +792,7 @@ const SupportChatbot = () => {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                         <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center relative">
-                                                    <span className="text-lg font-bold text-primary-700">
+                                                    <span className="text-lg font-bold text-primary-500">
                                                         {getUserNameFromChat(chats.find((c) => c._id === selectedChatId)).charAt(0).toUpperCase()}
                                                     </span>
                                                     <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
@@ -795,7 +832,7 @@ const SupportChatbot = () => {
                                     </div>
 
                                     {/* Messages - WhatsApp Style Background */}
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
+                                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
                                         {messagesLoading ? (
                                             <div className="flex justify-center py-12">
                                                 <Spinner fullScreen={false} />
@@ -829,7 +866,7 @@ const SupportChatbot = () => {
                                                     >
                                                         {!isAdmin && !isBot && (
                                                             <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-2 flex-shrink-0 self-end">
-                                                                <span className="text-xs font-semibold text-primary-700">
+                                                                <span className="text-xs font-semibold text-primary-500">
                                                                     {(msg.sender?.name || 'U').charAt(0).toUpperCase()}
                                                                 </span>
                                                             </div>
@@ -895,7 +932,7 @@ const SupportChatbot = () => {
                                         {typingUsers.length > 0 && (
                                             <div className="flex justify-start items-end">
                                                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-2">
-                                                    <span className="text-xs font-semibold text-primary-700">...</span>
+                                                    <span className="text-xs font-semibold text-primary-500">...</span>
                                                 </div>
                                                 <div className="bg-white px-4 py-2 rounded-lg rounded-tl-none shadow-md">
                                                     <div className="flex gap-1">

@@ -150,7 +150,7 @@ const Dashboard = () => {
             { bg: "bg-green-50", icon: "bg-green-500", text: "text-green-700" }, // Active Listings - Green
             { bg: "bg-red-50", icon: "bg-red-500", text: "text-red-700" }, // Customer Requests - Red
             { bg: "bg-purple-50", icon: "bg-purple-500", text: "text-purple-700" }, // Total Cars Sold - Purple
-            { bg: "bg-primary-50", icon: "bg-primary-500", text: "text-primary-700" } // Revenue - Primary
+            { bg: "bg-primary-50", icon: "bg-primary-500", text: "text-primary-500" } // Revenue - Primary
         ];
         return colors[index % colors.length];
     };

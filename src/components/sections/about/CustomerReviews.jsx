@@ -38,7 +38,7 @@ const CustomerReviews = () => {
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <div className="inline-block mb-4">
-            <span className="text-primary-600 font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-2 bg-primary-100 rounded-full">
+            <span className="text-primary-500 font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-2 bg-primary-100 rounded-full">
               Customer Testimonials
             </span>
           </div>
@@ -94,7 +94,7 @@ const CustomerReviews = () => {
                               clipRule="evenodd"
                             />
                           </svg>
-                          <p className="font-semibold text-base md:text-lg text-primary-600">
+                          <p className="font-semibold text-base md:text-lg text-primary-500">
                             {review.location}
                           </p>
                         </div>

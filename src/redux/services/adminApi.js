@@ -1,11 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { API_BASE_URL } from "../config";
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens, refreshAccessToken, shouldRefreshToken } from "../../utils/tokenRefresh.js";
 
-// Use environment variable or default to match api.js BASE_URL
-// Note: Should match the production backend URL or localhost for development
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
-
+// Track if we're currently refreshing to avoid multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshPromise = null;
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
@@ -17,10 +16,10 @@ export const adminApi = createApi({
     baseQuery: async (args, api, extraOptions) => {
         try {
             const baseResult = await fetchBaseQuery({
-                baseUrl: BASE_URL,
+                baseUrl: API_BASE_URL,
                 credentials: "include",
-                prepareHeaders: (headers, { extra, endpoint }) => {
-                    const token = localStorage.getItem("token");
+                prepareHeaders: (headers, { extra }) => {
+                    const token = getAccessToken();
                     if (token) {
                         headers.set("Authorization", `Bearer ${token}`);
                     }
@@ -32,18 +31,62 @@ export const adminApi = createApi({
                     }
                     return headers;
                 },
-                // Add credentials to ensure cookies are sent if backend uses them
-                credentials: "include",
             })(args, api, extraOptions);
 
-            // Handle 401 errors - token expired or invalid
+            // Handle 401 errors - try to refresh token
             if (baseResult.error && baseResult.error.status === 401) {
-                const url = args?.url || '';
-                const token = localStorage.getItem("token");
+                const url = args?.url || "";
+                const refreshToken = getRefreshToken();
+
+                // Try to refresh token if we have a refresh token and this isn't an auth endpoint
+                if (refreshToken && shouldRefreshToken(401, url)) {
+                    try {
+                        // If already refreshing, wait for that promise
+                        if (isRefreshing && refreshPromise) {
+                            await refreshPromise;
+                        } else if (!isRefreshing) {
+                            // Start refresh process
+                            isRefreshing = true;
+                            refreshPromise = refreshAccessToken(refreshToken);
+                            
+                            try {
+                                await refreshPromise;
+                            } finally {
+                                isRefreshing = false;
+                                refreshPromise = null;
+                            }
+                        }
+
+                        // Retry original request with new token
+                        const newToken = getAccessToken();
+                        if (newToken) {
+                            return fetchBaseQuery({
+                                baseUrl: API_BASE_URL,
+                                credentials: "include",
+                                prepareHeaders: (headers) => {
+                                    headers.set("Authorization", `Bearer ${newToken}`);
+                                    const body = args?.body || extra?.body;
+                                    if (!(body instanceof FormData)) {
+                                        headers.set("Content-Type", "application/json");
+                                    }
+                                    return headers;
+                                },
+                            })(args, api, extraOptions);
+                        }
+                    } catch (refreshError) {
+                        // Refresh failed, clear tokens and let it fall through to 401 handling
+                        clearTokens();
+                        localStorage.removeItem("user");
+                    }
+                }
+
+                // Safely extract error data from backend response (if any)
+                const errorData =
+                    (baseResult.error && baseResult.error.data) || {};
 
                 // Only clear token for auth-related endpoints
-                if (url.includes('/admin/') || url.includes('/auth/')) {
-                    localStorage.removeItem("token");
+                if (url.includes("/admin/") || url.includes("/auth/")) {
+                    clearTokens();
                     localStorage.removeItem("user");
 
                     // Return a modified error that components can handle
@@ -51,17 +94,23 @@ export const adminApi = createApi({
                         ...baseResult.error,
                         data: {
                             ...baseResult.error.data,
-                            message: errorData?.message || "Authentication failed. Please login again.",
-                            shouldRedirect: true
-                        }
+                            message:
+                                errorData?.message ||
+                                "Authentication failed. Please login again.",
+                            shouldRedirect: true,
+                        },
                     };
                 }
 
                 // Ensure error message is properly extracted from backend response
-                if (errorData.message && !baseResult.error.data.message) {
+                if (
+                    errorData?.message &&
+                    (!baseResult.error.data ||
+                        !baseResult.error.data.message)
+                ) {
                     baseResult.error.data = {
-                        ...baseResult.error.data,
-                        message: errorData.message
+                        ...(baseResult.error.data || {}),
+                        message: errorData.message,
                     };
                 }
                 // Don't redirect automatically - let components handle it
@@ -103,7 +152,7 @@ export const adminApi = createApi({
             query: () => "/admin/dashboard",
             providesTags: ["Admin"],
             transformResponse: (response) => response?.data || response,
-            transformErrorResponse: (response, meta, arg) => {
+            transformErrorResponse: (response) => {
                 // Handle error responses from backend
                 const errorData = response?.data || response;
                 return {
@@ -275,6 +324,8 @@ export const adminApi = createApi({
             },
             providesTags: ["Blogs"],
             transformResponse: (response) => response?.data || response,
+            // Refetch when component mounts or args change to ensure fresh data
+            refetchOnMountOrArgChange: true,
         }),
         createBlog: builder.mutation({
             query: (formData) => ({
@@ -282,7 +333,17 @@ export const adminApi = createApi({
                 method: "POST",
                 body: formData,
             }),
-            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            invalidatesTags: ["Blogs"], // Invalidate admin cache
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    // Manually invalidate public API cache for blogs - this ensures client-side blog pages refresh immediately
+                    const { api } = await import('./api');
+                    dispatch(api.util.invalidateTags(["Blog"]));
+                } catch {
+                    // Error handling is done by the mutation itself
+                }
+            },
             transformResponse: (response) => response?.data || response,
         }),
         updateBlog: builder.mutation({
@@ -291,7 +352,17 @@ export const adminApi = createApi({
                 method: "PUT",
                 body: formData,
             }),
-            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            invalidatesTags: ["Blogs"], // Invalidate admin cache
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    // Manually invalidate public API cache for blogs - this ensures client-side blog pages refresh immediately
+                    const { api } = await import('./api');
+                    dispatch(api.util.invalidateTags(["Blog"]));
+                } catch {
+                    // Error handling is done by the mutation itself
+                }
+            },
             transformResponse: (response) => response?.data || response,
         }),
         deleteBlog: builder.mutation({
@@ -299,7 +370,17 @@ export const adminApi = createApi({
                 url: `/blogs/${blogId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            invalidatesTags: ["Blogs"], // Invalidate admin cache
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    // Manually invalidate public API cache for blogs using store
+                    const { api } = await import('./api');
+                    dispatch(api.util.invalidateTags(["Blog"]));
+                } catch {
+                    // Error handling is done by the mutation itself
+                }
+            },
             transformResponse: (response) => response?.data || response,
         }),
 
@@ -544,13 +625,13 @@ export const adminApi = createApi({
             query: (params = {}) => {
                 // Remove undefined values
                 const cleanParams = Object.fromEntries(
-                    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+                    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
                 );
                 const searchParams = new URLSearchParams(cleanParams).toString();
                 return `/contact-form${searchParams ? `?${searchParams}` : ''}`;
             },
             providesTags: ["ContactForms"],
-            transformResponse: (response, meta, arg) => {
+            transformResponse: (response) => {
                 // Backend returns: { success: true, data: { contactForms: [...], pagination: {...} } }
                 // Return the data object directly so contactForms and pagination are accessible
                 if (response && response.data) {
@@ -772,9 +853,12 @@ export const adminApi = createApi({
                 body: { password },
             }),
             transformResponse: (response) => {
-                // Server returns: { success, message, data: { user, token } }
-                // Extract data field
+                // Server returns: { success, message, data: { user, token, accessToken, refreshToken } }
+                // Extract data field and store refresh token if provided
                 if (response?.data) {
+                    if (response.data.refreshToken) {
+                        setRefreshToken(response.data.refreshToken);
+                    }
                     return response.data;
                 }
                 return response;

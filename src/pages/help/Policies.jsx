@@ -14,7 +14,7 @@ const Policies = () => {
         </p>
         <button
           onClick={() => navigate("/terms-conditon")}
-          className="text-primary-600 hover:text-primary-700 font-medium underline"
+          className="text-primary-500 hover:text-primary-500 font-medium underline"
         >
           Read Full Terms & Conditions →
         </button>
@@ -27,7 +27,7 @@ const Policies = () => {
         </p>
         <button
           onClick={() => navigate("/privacy-policy")}
-          className="text-primary-600 hover:text-primary-700 font-medium underline"
+          className="text-primary-500 hover:text-primary-500 font-medium underline"
         >
           Read Full Privacy Policy →
         </button>

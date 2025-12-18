@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { FiMessageSquare, FiX, FiSend, FiPaperclip, FiTrash2 } from "react-icons/fi";
 import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { io } from "socket.io-client";
+import { SOCKET_BASE_URL } from "../../redux/config";
 import {
     useCreateSupportChatMutation,
     useGetUserSupportChatsQuery,
@@ -33,12 +34,12 @@ const WhatsAppChatWidget = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [socketConnected, setSocketConnected] = useState(false);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-    const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present for socket
     const [userId, setUserId] = useState(null);
 
     const { data: user } = useGetMeQuery(undefined, { skip: !token });
@@ -77,7 +78,7 @@ const WhatsAppChatWidget = () => {
     useEffect(() => {
         if (!token || !isOpen) return;
 
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_BASE_URL, {
             auth: { token },
             query: { token },
             transports: ['websocket', 'polling'],
@@ -112,10 +113,15 @@ const WhatsAppChatWidget = () => {
                     const filtered = prev.filter(m => !m._id?.startsWith('temp-'));
                     return [...filtered, data.message];
                 });
-                // Scroll to bottom
-                setTimeout(() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                }, 100);
+                // Only auto-scroll if user is near bottom
+                if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+                    setTimeout(() => {
+                        const container = messagesContainerRef.current;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 100);
+                }
             }
             refetchChats();
             // Refetch messages to ensure we have the latest
@@ -171,14 +177,38 @@ const WhatsAppChatWidget = () => {
                 ? messagesData 
                 : (messagesData?.data || []);
             setMessages(messagesArray);
+            // Reset auto-scroll when switching chats
+            shouldAutoScrollRef.current = true;
         } else {
             setMessages([]);
         }
     }, [messagesData, selectedChat]);
 
-    // Auto scroll to bottom
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChat, isOpen]);
+
+    // Auto scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     // Mark messages as seen
@@ -528,7 +558,7 @@ const WhatsAppChatWidget = () => {
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
+                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
                                 {messagesLoading ? (
                                     <div className="flex justify-center py-8">
                                         <Spinner fullScreen={false} />

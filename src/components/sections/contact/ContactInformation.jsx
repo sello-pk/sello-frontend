@@ -75,7 +75,7 @@ const ContactInformation = () => {
                           {item.link ? (
                             <a
                               href={item.link}
-                              className="block text-gray-700 hover:text-primary-600 transition-colors"
+                              className="block text-gray-700 hover:text-primary-500 transition-colors"
                             >
                               <span className="text-sm font-medium text-gray-500 block mb-1">
                                 {item.label}:
@@ -109,7 +109,7 @@ const ContactInformation = () => {
         </p>
         <a
           href="tel:+97145061300"
-          className="inline-flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          className="inline-flex items-center gap-2 bg-white text-primary-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
         >
           <FiPhone size={20} />
           Call Now: +971 45 061 300

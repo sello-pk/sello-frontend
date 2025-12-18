@@ -64,7 +64,7 @@ const HelpArticlePage = ({ title, content, category }) => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 md:p-12">
           <div className="mb-6">
             {category && (
-              <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
+              <span className="inline-block px-3 py-1 bg-primary-100 text-primary-500 rounded-full text-sm font-medium mb-4">
                 {category}
               </span>
             )}

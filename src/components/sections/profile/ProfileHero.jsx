@@ -26,6 +26,7 @@ import {
   useGetSavedCarsQuery,
   useGetMySubscriptionQuery,
 } from "../../../redux/services/api";
+import { clearTokens } from "../../../utils/tokenRefresh";
 import { useSupportChat } from "../../../contexts/SupportChatContext";
 import NotificationsSection from "./NotificationsSection";
 import DealerRequestForm from "../../profile/DealerRequestForm";
@@ -226,11 +227,14 @@ const ProfileHero = () => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      localStorage.removeItem("token");
+      clearTokens();
+      localStorage.removeItem("user");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
-      localStorage.removeItem("token");
+      // Clear tokens even if logout request fails
+      clearTokens();
+      localStorage.removeItem("user");
       navigate("/login");
     }
   };
@@ -473,15 +477,15 @@ const ProfileHero = () => {
                       onClick={item.onClick}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-primary-50 text-primary-700"
+                          ? "bg-primary-50 text-primary-500"
                           : item.highlight
-                          ? "text-primary-600 hover:bg-primary-50"
+                          ? "text-primary-500 hover:bg-primary-50"
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <Icon
-                          className={isActive ? "text-primary-600" : ""}
+                          className={isActive ? "text-primary-500" : ""}
                           size={18}
                         />
                         <span>{item.label}</span>
@@ -568,7 +572,7 @@ const ProfileHero = () => {
                                 navigate("/seller/dashboard");
                               }
                             }}
-                            className="px-4 py-2 border border-primary-500 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium"
+                            className="px-4 py-2 border border-primary-500 text-primary-500 rounded-lg hover:bg-primary-50 text-sm font-medium"
                           >
                             View Dashboard
                           </button>
@@ -590,7 +594,7 @@ const ProfileHero = () => {
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-sm text-gray-500">Total Posts</span>
                           <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-                            <FiFileText className="text-primary-600" size={20} />
+                            <FiFileText className="text-primary-500" size={20} />
                           </div>
                         </div>
                         <div className="text-3xl font-semibold text-gray-900">

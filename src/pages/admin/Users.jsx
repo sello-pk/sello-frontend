@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { ROUTES } from "../../routes";
 import { usePolling } from "../../hooks/usePolling";
 import {
     useGetAllUsersQuery,
@@ -15,6 +16,7 @@ import FilterPanel from "../../components/admin/FilterPanel";
 import DataTable from "../../components/admin/DataTable";
 import Tooltip from "../../components/admin/Tooltip";
 import { exportToCSV, formatDateForExport } from "../../utils/exportUtils";
+import { notifyActionSuccess, notifyActionError, notifyError } from "../../utils/notifications";
 import toast from "react-hot-toast";
 import { FiSearch, FiEdit2, FiTrash2, FiX, FiSave, FiDownload } from "react-icons/fi";
 import { MdBlock, MdCheckCircle } from "react-icons/md";
@@ -106,7 +108,7 @@ const Users = () => {
         setShowEditModal(true);
         // Update URL if not already there
         if (!userId) {
-            navigate(`/admin/users/${user._id}`);
+            navigate(ROUTES.admin.userDetail(user._id));
         }
     }, [userId, navigate]);
     
@@ -406,7 +408,7 @@ const Users = () => {
                                                 <Tooltip content="Edit user">
                                                     <button
                                                         onClick={() => handleEdit(user)}
-                                                        className="text-gray-600 hover:text-primary-600 transition-colors"
+                                                        className="text-gray-600 hover:text-primary-500 transition-colors"
                                                         aria-label="Edit user"
                                                     >
                                                         <FiEdit2 size={18} />

@@ -264,7 +264,7 @@ const HelpCenter = () => {
                   >
                     <IconComponent className="text-white text-2xl" />
                   </div>
-                  <h3 className="text-center font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-center font-semibold text-gray-900 group-hover:text-primary-500 transition-colors">
                     {topic.title}
                   </h3>
                 </div>
@@ -290,11 +290,11 @@ const HelpCenter = () => {
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                        <IconComponent className="text-primary-600 text-xl" />
+                        <IconComponent className="text-primary-500 text-xl" />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-500 transition-colors">
                         {category.title}
                       </h3>
                       <p className="text-sm text-gray-600">{category.description}</p>
@@ -318,7 +318,7 @@ const HelpCenter = () => {
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8">
               <button
                 onClick={() => navigate("/contact")}
-                className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
+                className="bg-white text-primary-500 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
               >
                 <FiMessageCircle className="text-xl" />
                 Contact Support

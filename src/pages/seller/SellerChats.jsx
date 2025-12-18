@@ -12,6 +12,7 @@ import {
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { SOCKET_BASE_URL } from "../../redux/config";
 
 const SellerChats = () => {
     const navigate = useNavigate();
@@ -23,6 +24,8 @@ const SellerChats = () => {
     const [socketConnected, setSocketConnected] = useState(false);
     const [messages, setMessages] = useState([]);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
 
     const { data: currentUser } = useGetMeQuery();
     const { data: chats = [], isLoading: chatsLoading, refetch: refetchChats } = useGetSellerBuyerChatsQuery(
@@ -43,13 +46,13 @@ const SellerChats = () => {
     const [deleteMessage] = useDeleteCarChatMessageMutation();
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-    const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
     // Update messages when data changes
     useEffect(() => {
         if (messagesData && Array.isArray(messagesData)) {
             setMessages(messagesData.filter(msg => !msg.isDeleted));
+            // Reset auto-scroll when switching chats
+            shouldAutoScrollRef.current = true;
         }
     }, [messagesData]);
 
@@ -59,7 +62,7 @@ const SellerChats = () => {
 
         let newSocket;
         try {
-            newSocket = io(SOCKET_URL, {
+            newSocket = io(SOCKET_BASE_URL, {
                 auth: { token },
                 query: { token },
                 transports: ['websocket', 'polling'],
@@ -87,9 +90,15 @@ const SellerChats = () => {
                     // Refetch messages - RTK Query will deduplicate based on message IDs
                     // The useEffect will sync messagesData to local messages state
                     refetchMessages();
-                    setTimeout(() => {
-                        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                    }, 100);
+                    // Only auto-scroll if user is near bottom
+                    if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+                        setTimeout(() => {
+                            const container = messagesContainerRef.current;
+                            if (container) {
+                                container.scrollTop = container.scrollHeight;
+                            }
+                        }, 100);
+                    }
                 }
                 refetchChats();
             });
@@ -124,7 +133,7 @@ const SellerChats = () => {
                 newSocket.close();
             }
         };
-    }, [token, selectedChat, SOCKET_URL]);
+    }, [token, selectedChat]);
 
     // Join chat room when selected chat changes
     useEffect(() => {
@@ -134,9 +143,31 @@ const SellerChats = () => {
         }
     }, [selectedChat, socket]);
 
-    // Auto-scroll to bottom
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChat]);
+
+    // Auto-scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     const handleSendMessage = async () => {
@@ -335,7 +366,7 @@ const SellerChats = () => {
                                     </div>
 
                                     {/* Messages */}
-                                    <div className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-3">
+                                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-3">
                                         {messagesLoading ? (
                                             <div className="flex justify-center py-8">
                                                 <Spinner fullScreen={false} />

@@ -104,8 +104,9 @@ const SignUp = () => {
       const res = await googleLogin(token).unwrap();
 
       // Check response structure - handle both transformed and raw responses
-      const responseToken = res?.token || res?.data?.token;
+      const responseToken = res?.token || res?.accessToken || res?.data?.token;
       const responseUser = res?.user || res?.data?.user;
+      const responseRefreshToken = res?.refreshToken || res?.data?.refreshToken;
 
       if (!responseToken || !responseUser) {
         console.error("Invalid response structure:", res);
@@ -114,6 +115,10 @@ const SignUp = () => {
 
       localStorage.setItem("token", responseToken);
       localStorage.setItem("user", JSON.stringify(responseUser));
+      // Store refresh token if provided (new system)
+      if (responseRefreshToken) {
+        localStorage.setItem("refreshToken", responseRefreshToken);
+      }
 
       toast.success("Google sign-up successful!");
       

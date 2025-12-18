@@ -206,7 +206,7 @@ const CarDetails = () => {
           </div>
           <Link 
             to="/view-all-brands"
-            className="text-primary-500 hover:text-primary-600 font-semibold flex items-center gap-2 transition-colors"
+            className="text-primary-500 hover:text-primary-500 font-semibold flex items-center gap-2 transition-colors"
           >
             Show All Brands
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

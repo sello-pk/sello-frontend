@@ -133,7 +133,7 @@ const HelpSearch = () => {
                         <h3 className="font-semibold text-gray-900 mb-1">
                           {article.title}
                         </h3>
-                        <span className="text-sm text-primary-600">
+                        <span className="text-sm text-primary-500">
                           {article.category}
                         </span>
                       </div>
@@ -173,7 +173,7 @@ const HelpSearch = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
             <button
               onClick={() => navigate("/contact")}
-              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
+              className="bg-white text-primary-500 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
             >
               <FiMessageCircle className="text-xl" />
               Contact Support

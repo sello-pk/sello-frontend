@@ -219,7 +219,7 @@ const Promotions = () => {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="font-mono font-semibold text-primary-600 dark:text-primary-400">
+                                            <span className="font-mono font-semibold text-primary-500 dark:text-primary-400">
                                                 {promo.promoCode}
                                             </span>
                                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -246,7 +246,7 @@ const Promotions = () => {
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     onClick={() => handleEdit(promo)}
-                                                    className="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 flex items-center gap-1"
+                                                    className="text-primary-500 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 flex items-center gap-1"
                                                 >
                                                     <FiEdit size={16} />
                                                     Edit

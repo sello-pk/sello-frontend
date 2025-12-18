@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { FiPlus, FiX, FiTrash2, FiCheck, FiAlertCircle, FiInfo, FiCheckCircle } from "react-icons/fi";
 import { MdNotifications, MdNotificationsActive } from "react-icons/md";
 import { io } from "socket.io-client";
+import { SOCKET_BASE_URL } from "../../redux/config";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Notifications = () => {
@@ -37,10 +38,7 @@ const Notifications = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-        const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
-
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_BASE_URL, {
             auth: { token },
             query: { token },
             transports: ['websocket', 'polling'],
@@ -199,7 +197,7 @@ const Notifications = () => {
                         <div>
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                                 <div className="h-12 w-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                                    <MdNotificationsActive className="text-2xl text-primary-600 dark:text-primary-400" />
+                                    <MdNotificationsActive className="text-2xl text-primary-500 dark:text-primary-400" />
                                 </div>
                                 Notifications Management
                             </h2>
@@ -356,11 +354,11 @@ const Notifications = () => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="text-sm text-gray-500 dark:text-gray-400">
                                                     {notification.recipient ? (
-                                                        <span className="text-primary-600 dark:text-primary-400 font-medium">
+                                                        <span className="text-primary-500 dark:text-primary-400 font-medium">
                                                             {notification.recipient?.name || "Specific User"}
                                                         </span>
                                                     ) : notification.targetRole ? (
-                                                        <span className="text-primary-600 dark:text-primary-400 font-medium capitalize">
+                                                        <span className="text-primary-500 dark:text-primary-400 font-medium capitalize">
                                                             {notification.targetRole}s Only
                                                         </span>
                                                     ) : (

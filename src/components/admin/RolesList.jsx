@@ -136,7 +136,7 @@ const RolesList = ({ onCreateRole }) => {
                                     <div className="flex items-center gap-2 ml-4">
                                         <button
                                             onClick={() => handleViewDetails(role)}
-                                            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                            className="p-2 text-gray-600 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
                                             title="View Details"
                                         >
                                             <FiEye size={18} />

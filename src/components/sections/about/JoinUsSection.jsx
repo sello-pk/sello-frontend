@@ -91,7 +91,7 @@ const JoinUsSection = () => {
                 </p>
 
                 {/* Checkmark */}
-                <div className="mt-4 flex items-center text-primary-600 font-semibold">
+                <div className="mt-4 flex items-center text-primary-500 font-semibold">
                   <FiCheckCircle className="w-5 h-5 mr-2" />
                   <span className="text-sm">Verified</span>
                 </div>

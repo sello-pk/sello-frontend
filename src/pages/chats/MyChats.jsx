@@ -12,6 +12,7 @@ import {
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { SOCKET_BASE_URL } from "../../redux/config";
 
 const MyChats = () => {
     const navigate = useNavigate();
@@ -22,6 +23,8 @@ const MyChats = () => {
     const [socket, setSocket] = useState(null);
     const [socketConnected, setSocketConnected] = useState(false);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
 
     const { data: currentUser } = useGetMeQuery();
     const { data: chats = [], isLoading: chatsLoading, refetch: refetchChats, error: chatsError } = useGetCarChatsQuery(
@@ -42,10 +45,6 @@ const MyChats = () => {
     const [deleteMessage] = useDeleteCarChatMessageMutation();
 
     const token = localStorage.getItem("token");
-    // Get BASE_URL from environment or use default
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-    // SOCKET_URL should not have /api
-    const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
     // Initialize Socket.io
     useEffect(() => {
@@ -56,7 +55,7 @@ const MyChats = () => {
 
         let newSocket;
         try {
-            newSocket = io(SOCKET_URL, {
+            newSocket = io(SOCKET_BASE_URL, {
                 auth: { token },
                 query: { token },
                 transports: ['websocket', 'polling'],
@@ -112,9 +111,31 @@ const MyChats = () => {
         };
     }, [token, selectedChat, SOCKET_URL]);
 
-    // Auto scroll to bottom
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChat]);
+
+    // Auto scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     // Auto select first chat
@@ -389,7 +410,7 @@ const MyChats = () => {
                                     </div>
 
                                     {/* Messages */}
-                                    <div className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-3">
+                                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-3">
                                         {messagesLoading ? (
                                             <div className="flex justify-center py-8">
                                                 <Spinner fullScreen={false} />

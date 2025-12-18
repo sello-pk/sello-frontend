@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Spinner from "../../components/Spinner";
+import toast from "react-hot-toast";
 import { FiUpload, FiTrash2, FiX, FiImage } from "react-icons/fi";
 
 const BlogMediaLibrary = () => {

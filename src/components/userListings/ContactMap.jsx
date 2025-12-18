@@ -9,7 +9,7 @@ const ContactCard = ({ contact }) => (
     {/* Phone */}
     <a
       href={`tel:${contact.phone}`}
-      className="flex items-center gap-3 bg-primary-50 text-primary-700 px-4 py-3 rounded-lg hover:bg-primary-100 mb-4 transition-colors group"
+      className="flex items-center gap-3 bg-primary-50 text-primary-500 px-4 py-3 rounded-lg hover:bg-primary-100 mb-4 transition-colors group"
     >
       <FiPhone className="text-lg group-hover:scale-110 transition-transform" />
       <span className="font-medium">{contact.phone}</span>

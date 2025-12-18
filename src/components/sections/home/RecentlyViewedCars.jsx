@@ -8,16 +8,32 @@ import { FaCar } from "react-icons/fa6";
 const RecentlyViewedCars = () => {
   const navigate = useNavigate();
   const { recentCars } = useRecentlyViewedCars();
-  const [displayedCars, setDisplayedCars] = useState([]);
 
-  // Use the stored data directly for display (it already has the essential info)
+  const VISIBLE_COUNT = 3; // show 3 cards at a time in the carousel
+  const [startIndex, setStartIndex] = useState(0);
+
+  const total = recentCars.length;
+
+  // Auto-slider: advance every 4 seconds if more than VISIBLE_COUNT
   useEffect(() => {
-    if (recentCars.length > 0) {
-      setDisplayedCars(recentCars.slice(0, 6));
-    } else {
-      setDisplayedCars([]);
+    if (total <= VISIBLE_COUNT) return;
+
+    const interval = setInterval(() => {
+      setStartIndex((prev) => (prev + VISIBLE_COUNT) % total);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [total]);
+
+  // Compute currently visible cars (wrap around the list)
+  let visibleCars = recentCars;
+  if (total > VISIBLE_COUNT) {
+    visibleCars = [];
+    for (let i = 0; i < VISIBLE_COUNT; i += 1) {
+      const idx = (startIndex + i) % total;
+      visibleCars.push(recentCars[idx]);
     }
-  }, [recentCars]);
+  }
 
   if (recentCars.length === 0) {
     return null; // Don't show section if no recently viewed cars
@@ -29,23 +45,15 @@ const RecentlyViewedCars = () => {
         <h3 className="text-xl md:text-2xl font-semibold text-gray-800">
           Recently Looked Cars
         </h3>
-        {displayedCars.length > 0 && (
-          <button
-            onClick={() => navigate("/my-listings")}
-            className="text-sm text-primary-500 hover:text-primary-600 font-medium"
-          >
-            View All
-          </button>
-        )}
       </div>
 
-      {displayedCars.length === 0 ? (
+      {visibleCars.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
           No recently viewed cars
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-[60vw]  gap-4">
-          {displayedCars.map((car) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-[60vw] gap-4 transition-all duration-300">
+          {visibleCars.map((car) => {
             const carId = car._id;
             const carImage =
               (Array.isArray(car.images) && car.images[0]) ||

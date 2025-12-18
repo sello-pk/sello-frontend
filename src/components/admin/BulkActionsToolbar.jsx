@@ -21,12 +21,12 @@ const BulkActionsToolbar = ({
         <div className={`bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4 ${className}`}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-primary-900 dark:text-primary-300">
+                    <span className="text-sm font-medium text-primary-500 dark:text-primary-300">
                         {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
                     </span>
                     <button
                         onClick={onDeselectAll}
-                        className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 underline"
+                        className="text-sm text-primary-500 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 underline"
                     >
                         Clear selection
                     </button>

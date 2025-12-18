@@ -143,7 +143,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
                     onClick={() => setSelectedDuration(days)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       isSelected
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
+                        ? "border-primary-500 bg-primary-50 text-primary-500"
                         : "border-gray-200 hover:border-primary-300 text-gray-700"
                     }`}
                   >
@@ -169,7 +169,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
             <div className="border-t border-blue-200 pt-2 mt-2">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-gray-900">Total Cost</span>
-                <span className="text-2xl font-bold text-primary-600">AED {totalCost}</span>
+                <span className="text-2xl font-bold text-primary-500">AED {totalCost}</span>
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
                     You have {user?.boostCredits || 0} credits available
                   </div>
                 </div>
-                <div className="font-bold text-primary-600">
+                <div className="font-bold text-primary-500">
                   -{totalCost} credits
                 </div>
               </label>

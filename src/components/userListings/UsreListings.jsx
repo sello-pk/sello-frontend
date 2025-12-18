@@ -195,7 +195,7 @@ const UserListings = () => {
                           className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
                             car?.isBoosted && new Date(car?.boostExpiry) > new Date()
                               ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300"
-                              : "bg-primary-100 text-primary-700 hover:bg-primary-200 border border-primary-300"
+                              : "bg-primary-100 text-primary-500 hover:bg-primary-200 border border-primary-300"
                           }`}
                         >
                           <FiZap size={16} />

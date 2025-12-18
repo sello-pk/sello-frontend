@@ -95,7 +95,10 @@ const BlogCreateEnhanced = () => {
 
             const result = await createBlog(formDataToSend).unwrap();
             toast.success(status === "published" ? "Blog published successfully! It will appear on the public site immediately." : "Blog saved as draft");
-            navigate("/admin/blogs");
+            // Small delay to ensure cache invalidation completes
+            setTimeout(() => {
+                navigate("/admin/blogs");
+            }, 100);
         } catch (error) {
             toast.error(error?.data?.message || "Failed to create blog");
         }

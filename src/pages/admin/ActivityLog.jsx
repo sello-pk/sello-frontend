@@ -126,7 +126,7 @@ const ActivityLog = () => {
                 <div className="mb-6">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
-                            <FiActivity className="text-2xl text-primary-600" />
+                            <FiActivity className="text-2xl text-primary-500" />
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Activity Log</h2>
@@ -234,7 +234,7 @@ const ActivityLog = () => {
                                             <td className="px-6 py-4">
                                                 {log.details && Object.keys(log.details).length > 0 ? (
                                                     <details className="cursor-pointer">
-                                                        <summary className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
+                                                        <summary className="text-sm text-primary-500 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
                                                             View Details
                                                         </summary>
                                                         <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs font-mono text-gray-700 dark:text-gray-300 max-w-md">

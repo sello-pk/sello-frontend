@@ -26,6 +26,8 @@ const Chatbot = () => {
     const [newQuickReplyTitle, setNewQuickReplyTitle] = useState("");
     const [newQuickReplyMessage, setNewQuickReplyMessage] = useState("");
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [quickReplyToDelete, setQuickReplyToDelete] = useState(null);
 
@@ -76,9 +78,31 @@ const Chatbot = () => {
 
     const selectedChatData = chats.find(c => c._id === selectedChat);
 
-    // Auto scroll to bottom when new messages arrive
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChat]);
+
+    // Auto scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     const handleSendMessage = async () => {
@@ -360,7 +384,7 @@ const Chatbot = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
                                         {messagesLoading ? (
                                             <div className="flex justify-center items-center h-32">
                                                 <Spinner fullScreen={false} />

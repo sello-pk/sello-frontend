@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Spinner from "../../components/Spinner";
+import toast from "react-hot-toast";
 import { FiTrash2, FiCheck, FiX } from "react-icons/fi";
 
 const BlogComments = () => {

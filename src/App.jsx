@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { useEffect, useRef, lazy, Suspense } from "react";
 import { Route, Routes, useLocation, Navigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Spinner from "./components/Spinner";
@@ -9,62 +9,72 @@ import BottomHeader from "./components/BottomHeader.jsx";
 import Footer from "./components/Footer.jsx";
 import WhatsAppChatWidget from "./components/support/WhatsAppChatWidget.jsx";
 
-// Pages
+// Critical pages - keep as regular imports for faster initial load
 import Home from "./pages/Home.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Signup from "./pages/auth/SignUp.jsx";
-import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
-import ResetPassword from "./pages/auth/ResetPassword.jsx";
-import VerifyOtp from "./pages/auth/VerifyOtp.jsx";
-import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
-import AcceptInvite from "./pages/auth/AcceptInvite.jsx";
-import OurPrivacyPolicy from "./pages/ourPages/OurPrivacyPolicy.jsx";
-import TermsCondition from "./pages/ourPages/TermsCondition.jsx";
-import CarListings from "./pages/listings/CarListings.jsx";
-import CarDetails from "./pages/listings/CarDetails.jsx";
-import About from "./pages/about/About.jsx";
-import Contact from "./pages/contact/Contact.jsx";
-import CreatePost from "./pages/posts/CreatePost.jsx";
-import EditCar from "./pages/posts/EditCar.jsx";
-import AllBrands from "./pages/AllBrands.jsx";
-import FilterPage from "./pages/filter/FilterPage.jsx";
-import FilteredResults from "./pages/listings/FilteredResults.jsx";
-import UserListingPage from "./pages/userListings/UserListingPage.jsx";
-import LoanPlansPage from "./pages/loanPlans/LoanPlansPage.jsx";
-import ProfilePage from "./pages/profile/ProfilePage.jsx";
-import SavedCars from "./pages/SavedCars.jsx";
-import Blog from "./pages/blog/Blog.jsx";
-import AllBlog from "./pages/blog/AllBlog.jsx";
-import BlogDetails from "./pages/blog/BlogDetails.jsx";
-import CategoryPage from "./pages/categories/CategoryPage.jsx";
-import MyChats from "./pages/chats/MyChats.jsx";
-import SellerChats from "./pages/seller/SellerChats.jsx";
-import DealerDashboard from "./pages/dashboards/DealerDashboard.jsx";
-import SellerDashboard from "./pages/dashboards/SellerDashboard.jsx";
-import HelpCenter from "./pages/help/HelpCenter.jsx";
-import AccountLogin from "./pages/help/AccountLogin.jsx";
-import BuyingSelling from "./pages/help/BuyingSelling.jsx";
-import Payments from "./pages/help/Payments.jsx";
-import Shipping from "./pages/help/Shipping.jsx";
-import Safety from "./pages/help/Safety.jsx";
-import BuyingCars from "./pages/help/BuyingCars.jsx";
-import SellingCars from "./pages/help/SellingCars.jsx";
-import PaymentMethods from "./pages/help/PaymentMethods.jsx";
-import AccountSettings from "./pages/help/AccountSettings.jsx";
-import FAQs from "./pages/help/FAQs.jsx";
-import Policies from "./pages/help/Policies.jsx";
-import Billing from "./pages/help/Billing.jsx";
-import Managing from "./pages/help/Managing.jsx";
-import Uploading from "./pages/help/Uploading.jsx";
-import Enterprise from "./pages/help/Enterprise.jsx";
-import Creators from "./pages/help/Creators.jsx";
-import Features from "./pages/help/Features.jsx";
-import Sales from "./pages/help/Sales.jsx";
-import Sharing from "./pages/help/Sharing.jsx";
-import Developers from "./pages/help/Developers.jsx";
-import HelpSearch from "./pages/help/HelpSearch.jsx";
-import SubscriptionSuccess from "./pages/payments/SubscriptionSuccess.jsx";
-import BoostSuccess from "./pages/payments/BoostSuccess.jsx";
+
+// Lazy load auth pages
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword.jsx"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword.jsx"));
+const VerifyOtp = lazy(() => import("./pages/auth/VerifyOtp.jsx"));
+const ResetSuccess = lazy(() => import("./pages/auth/ResetSuccess.jsx"));
+const AcceptInvite = lazy(() => import("./pages/auth/AcceptInvite.jsx"));
+
+// Lazy load public pages
+const OurPrivacyPolicy = lazy(() => import("./pages/ourPages/OurPrivacyPolicy.jsx"));
+const TermsCondition = lazy(() => import("./pages/ourPages/TermsCondition.jsx"));
+const CarListings = lazy(() => import("./pages/listings/CarListings.jsx"));
+const CarDetails = lazy(() => import("./pages/listings/CarDetails.jsx"));
+const About = lazy(() => import("./pages/about/About.jsx"));
+const Contact = lazy(() => import("./pages/contact/Contact.jsx"));
+const AllBrands = lazy(() => import("./pages/AllBrands.jsx"));
+const FilterPage = lazy(() => import("./pages/filter/FilterPage.jsx"));
+const FilteredResults = lazy(() => import("./pages/listings/FilteredResults.jsx"));
+const LoanPlansPage = lazy(() => import("./pages/loanPlans/LoanPlansPage.jsx"));
+const Blog = lazy(() => import("./pages/blog/Blog.jsx"));
+const AllBlog = lazy(() => import("./pages/blog/AllBlog.jsx"));
+const BlogDetails = lazy(() => import("./pages/blog/BlogDetails.jsx"));
+const CategoryPage = lazy(() => import("./pages/categories/CategoryPage.jsx"));
+
+// Lazy load protected pages
+const CreatePost = lazy(() => import("./pages/posts/CreatePost.jsx"));
+const EditCar = lazy(() => import("./pages/posts/EditCar.jsx"));
+const UserListingPage = lazy(() => import("./pages/userListings/UserListingPage.jsx"));
+const ProfilePage = lazy(() => import("./pages/profile/ProfilePage.jsx"));
+const SavedCars = lazy(() => import("./pages/SavedCars.jsx"));
+const MyChats = lazy(() => import("./pages/chats/MyChats.jsx"));
+const SellerChats = lazy(() => import("./pages/seller/SellerChats.jsx"));
+const DealerDashboard = lazy(() => import("./pages/dashboards/DealerDashboard.jsx"));
+const SellerDashboard = lazy(() => import("./pages/dashboards/SellerDashboard.jsx"));
+
+// Lazy load help pages
+const HelpCenter = lazy(() => import("./pages/help/HelpCenter.jsx"));
+const AccountLogin = lazy(() => import("./pages/help/AccountLogin.jsx"));
+const BuyingSelling = lazy(() => import("./pages/help/BuyingSelling.jsx"));
+const Payments = lazy(() => import("./pages/help/Payments.jsx"));
+const Shipping = lazy(() => import("./pages/help/Shipping.jsx"));
+const Safety = lazy(() => import("./pages/help/Safety.jsx"));
+const BuyingCars = lazy(() => import("./pages/help/BuyingCars.jsx"));
+const SellingCars = lazy(() => import("./pages/help/SellingCars.jsx"));
+const PaymentMethods = lazy(() => import("./pages/help/PaymentMethods.jsx"));
+const AccountSettings = lazy(() => import("./pages/help/AccountSettings.jsx"));
+const FAQs = lazy(() => import("./pages/help/FAQs.jsx"));
+const Policies = lazy(() => import("./pages/help/Policies.jsx"));
+const Billing = lazy(() => import("./pages/help/Billing.jsx"));
+const Managing = lazy(() => import("./pages/help/Managing.jsx"));
+const Uploading = lazy(() => import("./pages/help/Uploading.jsx"));
+const Enterprise = lazy(() => import("./pages/help/Enterprise.jsx"));
+const Creators = lazy(() => import("./pages/help/Creators.jsx"));
+const Features = lazy(() => import("./pages/help/Features.jsx"));
+const Sales = lazy(() => import("./pages/help/Sales.jsx"));
+const Sharing = lazy(() => import("./pages/help/Sharing.jsx"));
+const Developers = lazy(() => import("./pages/help/Developers.jsx"));
+const HelpSearch = lazy(() => import("./pages/help/HelpSearch.jsx"));
+
+// Lazy load payment pages
+const SubscriptionSuccess = lazy(() => import("./pages/payments/SubscriptionSuccess.jsx"));
+const BoostSuccess = lazy(() => import("./pages/payments/BoostSuccess.jsx"));
 
 // Admin Pages
 // Lazy load admin pages for code splitting
@@ -104,19 +114,43 @@ import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 // ScrollToTop component to scroll to top on route change
 const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => {
+    // Prevent browser's default scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    // Only scroll if pathname actually changed (not on initial mount/refresh)
+    const pathnameChanged = prevPathnameRef.current !== pathname;
+    prevPathnameRef.current = pathname;
+
     // Don't scroll to top for admin routes - AdminLayout handles its own scrolling
     if (pathname.startsWith("/admin")) {
       return;
     }
     
-    // Scroll to top immediately on route change
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant", // Use instant for immediate scroll, can change to "smooth" if preferred
-    });
+    // Only scroll on route change, not on refresh
+    if (pathnameChanged) {
+      // Small delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant",
+        });
+      });
+    } else {
+      // On initial load/refresh, ensure we're at top
+      if (window.scrollY > 0) {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant",
+        });
+      }
+    }
   }, [pathname]);
 
   return null;
@@ -197,69 +231,73 @@ const App = () => {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/reset-success" element={<ResetSuccess />} />
-        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
+        <Route path="/forgot-password" element={<Suspense fallback={<Spinner fullScreen={true} />}><ForgotPassword /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<Spinner fullScreen={true} />}><ResetPassword /></Suspense>} />
+        <Route path="/verify-otp" element={<Suspense fallback={<Spinner fullScreen={true} />}><VerifyOtp /></Suspense>} />
+        <Route path="/reset-success" element={<Suspense fallback={<Spinner fullScreen={true} />}><ResetSuccess /></Suspense>} />
+        <Route path="/accept-invite/:token" element={<Suspense fallback={<Spinner fullScreen={true} />}><AcceptInvite /></Suspense>} />
 
         {/* Public pages */}
-        <Route path="/privacy-policy" element={<OurPrivacyPolicy />} />
-        <Route path="/terms-conditon" element={<TermsCondition />} />
-        <Route path="/cars" element={<CarListings />} />
+        <Route path="/privacy-policy" element={<Suspense fallback={<Spinner fullScreen={true} />}><OurPrivacyPolicy /></Suspense>} />
+        <Route path="/terms-conditon" element={<Suspense fallback={<Spinner fullScreen={true} />}><TermsCondition /></Suspense>} />
+        <Route path="/cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><CarListings /></Suspense>} />
         {/* Car Details - Only match if path starts with /cars/ and has an ID */}
         {/* Use a function to validate before rendering */}
         <Route 
           path="/cars/:id" 
           element={
             <CarDetailsRouteGuard>
-              <CarDetails />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <CarDetails />
+              </Suspense>
             </CarDetailsRouteGuard>
           } 
         />
-        <Route path="/category/:slug" element={<CategoryPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/view-all-brands" element={<AllBrands />} />
-        <Route path="/filter" element={<FilterPage />} />
-        <Route path="/search-results" element={<FilteredResults />} />
-        <Route path="/loan-plans" element={<LoanPlansPage />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/all" element={<AllBlog />} />
-        <Route path="/blog/:id" element={<BlogDetails />} />
-        <Route path="/help-center" element={<HelpCenter />} />
-        <Route path="/help/search" element={<HelpSearch />} />
-        <Route path="/help/account-login" element={<AccountLogin />} />
-        <Route path="/help/buying-selling" element={<BuyingSelling />} />
-        <Route path="/help/payments" element={<Payments />} />
-        <Route path="/help/shipping" element={<Shipping />} />
-        <Route path="/help/safety" element={<Safety />} />
-        <Route path="/help/buying-cars" element={<BuyingCars />} />
-        <Route path="/help/selling-cars" element={<SellingCars />} />
-        <Route path="/help/payment-methods" element={<PaymentMethods />} />
-        <Route path="/help/account-settings" element={<AccountSettings />} />
-        <Route path="/help/faqs" element={<FAQs />} />
-        <Route path="/help/policies" element={<Policies />} />
-        <Route path="/help/billing" element={<Billing />} />
-        <Route path="/help/managing" element={<Managing />} />
-        <Route path="/help/uploading" element={<Uploading />} />
-        <Route path="/help/enterprise" element={<Enterprise />} />
-        <Route path="/help/creators" element={<Creators />} />
-        <Route path="/help/features" element={<Features />} />
-        <Route path="/help/sales" element={<Sales />} />
-        <Route path="/help/sharing" element={<Sharing />} />
-        <Route path="/help/developers" element={<Developers />} />
+        <Route path="/category/:slug" element={<Suspense fallback={<Spinner fullScreen={true} />}><CategoryPage /></Suspense>} />
+        <Route path="/about" element={<Suspense fallback={<Spinner fullScreen={true} />}><About /></Suspense>} />
+        <Route path="/contact" element={<Suspense fallback={<Spinner fullScreen={true} />}><Contact /></Suspense>} />
+        <Route path="/view-all-brands" element={<Suspense fallback={<Spinner fullScreen={true} />}><AllBrands /></Suspense>} />
+        <Route path="/filter" element={<Suspense fallback={<Spinner fullScreen={true} />}><FilterPage /></Suspense>} />
+        <Route path="/search-results" element={<Suspense fallback={<Spinner fullScreen={true} />}><FilteredResults /></Suspense>} />
+        <Route path="/loan-plans" element={<Suspense fallback={<Spinner fullScreen={true} />}><LoanPlansPage /></Suspense>} />
+        <Route path="/blog" element={<Suspense fallback={<Spinner fullScreen={true} />}><Blog /></Suspense>} />
+        <Route path="/blog/all" element={<Suspense fallback={<Spinner fullScreen={true} />}><AllBlog /></Suspense>} />
+        <Route path="/blog/:id" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogDetails /></Suspense>} />
+        <Route path="/help-center" element={<Suspense fallback={<Spinner fullScreen={true} />}><HelpCenter /></Suspense>} />
+        <Route path="/help/search" element={<Suspense fallback={<Spinner fullScreen={true} />}><HelpSearch /></Suspense>} />
+        <Route path="/help/account-login" element={<Suspense fallback={<Spinner fullScreen={true} />}><AccountLogin /></Suspense>} />
+        <Route path="/help/buying-selling" element={<Suspense fallback={<Spinner fullScreen={true} />}><BuyingSelling /></Suspense>} />
+        <Route path="/help/payments" element={<Suspense fallback={<Spinner fullScreen={true} />}><Payments /></Suspense>} />
+        <Route path="/help/shipping" element={<Suspense fallback={<Spinner fullScreen={true} />}><Shipping /></Suspense>} />
+        <Route path="/help/safety" element={<Suspense fallback={<Spinner fullScreen={true} />}><Safety /></Suspense>} />
+        <Route path="/help/buying-cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><BuyingCars /></Suspense>} />
+        <Route path="/help/selling-cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><SellingCars /></Suspense>} />
+        <Route path="/help/payment-methods" element={<Suspense fallback={<Spinner fullScreen={true} />}><PaymentMethods /></Suspense>} />
+        <Route path="/help/account-settings" element={<Suspense fallback={<Spinner fullScreen={true} />}><AccountSettings /></Suspense>} />
+        <Route path="/help/faqs" element={<Suspense fallback={<Spinner fullScreen={true} />}><FAQs /></Suspense>} />
+        <Route path="/help/policies" element={<Suspense fallback={<Spinner fullScreen={true} />}><Policies /></Suspense>} />
+        <Route path="/help/billing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Billing /></Suspense>} />
+        <Route path="/help/managing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Managing /></Suspense>} />
+        <Route path="/help/uploading" element={<Suspense fallback={<Spinner fullScreen={true} />}><Uploading /></Suspense>} />
+        <Route path="/help/enterprise" element={<Suspense fallback={<Spinner fullScreen={true} />}><Enterprise /></Suspense>} />
+        <Route path="/help/creators" element={<Suspense fallback={<Spinner fullScreen={true} />}><Creators /></Suspense>} />
+        <Route path="/help/features" element={<Suspense fallback={<Spinner fullScreen={true} />}><Features /></Suspense>} />
+        <Route path="/help/sales" element={<Suspense fallback={<Spinner fullScreen={true} />}><Sales /></Suspense>} />
+        <Route path="/help/sharing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Sharing /></Suspense>} />
+        <Route path="/help/developers" element={<Suspense fallback={<Spinner fullScreen={true} />}><Developers /></Suspense>} />
 
         {/* Payment Success Pages */}
-        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-        <Route path="/boost/success" element={<BoostSuccess />} />
+        <Route path="/subscription/success" element={<Suspense fallback={<Spinner fullScreen={true} />}><SubscriptionSuccess /></Suspense>} />
+        <Route path="/boost/success" element={<Suspense fallback={<Spinner fullScreen={true} />}><BoostSuccess /></Suspense>} />
 
         {/* Protected User Routes */}
         <Route
           path="/create-post"
           element={
             <ProtectedRoute>
-              <CreatePost />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <CreatePost />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -267,7 +305,9 @@ const App = () => {
           path="/edit-car/:id"
           element={
             <ProtectedRoute>
-              <EditCar />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <EditCar />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -275,7 +315,9 @@ const App = () => {
           path="/my-listings"
           element={
             <ProtectedRoute>
-              <UserListingPage />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <UserListingPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -283,7 +325,9 @@ const App = () => {
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <ProfilePage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -291,7 +335,9 @@ const App = () => {
           path="/saved-cars"
           element={
             <ProtectedRoute>
-              <SavedCars />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <SavedCars />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -299,7 +345,9 @@ const App = () => {
           path="/my-chats"
           element={
             <ProtectedRoute>
-              <MyChats />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <MyChats />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -307,7 +355,9 @@ const App = () => {
           path="/seller/chats"
           element={
             <ProtectedRoute>
-              <SellerChats />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <SellerChats />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -317,7 +367,9 @@ const App = () => {
           path="/dealer/dashboard"
           element={
             <ProtectedRoute>
-              <DealerDashboard />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <DealerDashboard />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -325,7 +377,9 @@ const App = () => {
           path="/seller/dashboard"
           element={
             <ProtectedRoute>
-              <SellerDashboard />
+              <Suspense fallback={<Spinner fullScreen={true} />}>
+                <SellerDashboard />
+              </Suspense>
             </ProtectedRoute>
           }
         />

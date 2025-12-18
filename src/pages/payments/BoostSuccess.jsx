@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiCheckCircle, FiLoader, FiXCircle, FiZap } from "react-icons/fi";
-import { useGetMyCarsQuery } from "../../redux/services/api";
+import { useGetMyCarsQuery, useVerifyPaymentSessionQuery } from "../../redux/services/api";
 import toast from "react-hot-toast";
 
 const BoostSuccess = () => {
@@ -10,32 +10,55 @@ const BoostSuccess = () => {
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState("verifying"); // verifying, success, error
   const { refetch: refetchCars } = useGetMyCarsQuery();
+  
+  // Verify payment session
+  const { data: paymentData, isLoading: isVerifying, error: verifyError, refetch: refetchVerification } = useVerifyPaymentSessionQuery(
+    sessionId || "",
+    { skip: !sessionId }
+  );
 
   useEffect(() => {
-    const verifyPayment = async () => {
-      if (!sessionId) {
+    if (!sessionId) {
+      setStatus("error");
+      toast.error("No session ID provided");
+      return;
+    }
+
+    // Give webhook a moment to process
+    const verifyTimer = setTimeout(() => {
+      if (verifyError) {
         setStatus("error");
-        toast.error("No session ID provided");
+        toast.error("Failed to verify payment. Please contact support if you were charged.");
         return;
       }
 
-      try {
-        // The webhook should have already processed the payment
-        // But we can verify the session status here if needed
-        // For now, just wait a moment and refetch cars
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        await refetchCars();
-        setStatus("success");
-        toast.success("Post boosted successfully!");
-      } catch (error) {
-        console.error("Verification error:", error);
-        setStatus("error");
-        toast.error("Failed to verify payment. Please contact support.");
+      if (!isVerifying && paymentData) {
+        if (paymentData.isPaid) {
+          // Check if boost is active
+          if (paymentData.boostStatus?.isActive) {
+            setStatus("success");
+            refetchCars();
+            toast.success("Post boosted successfully!");
+          } else if (paymentData.boostStatus?.isBoosted === false) {
+            // Payment succeeded but boost not applied yet - wait a bit more
+            setTimeout(() => {
+              refetchVerification();
+            }, 2000);
+          } else {
+            // Payment succeeded
+            setStatus("success");
+            refetchCars();
+            toast.success("Payment verified! Your listing will be boosted shortly.");
+          }
+        } else {
+          setStatus("error");
+          toast.error("Payment was not successful. Please try again.");
+        }
       }
-    };
+    }, 1500); // Wait 1.5s for webhook to process
 
-    verifyPayment();
-  }, [sessionId, refetchCars]);
+    return () => clearTimeout(verifyTimer);
+  }, [sessionId, paymentData, isVerifying, verifyError, refetchCars, refetchVerification]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">

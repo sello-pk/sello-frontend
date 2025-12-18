@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useRequestDealerMutation, useGetMeQuery } from "../../redux/services/api";
 import toast from "react-hot-toast";
-import { FiX, FiCheckCircle, FiAlertCircle, FiBriefcase, FiFileText, FiMapPin, FiPhone } from "react-icons/fi";
+import { FiX, FiCheckCircle, FiAlertCircle, FiBriefcase, FiFileText, FiMapPin, FiPhone, FiUpload } from "react-icons/fi";
 import Spinner from "../Spinner";
 
 const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
@@ -11,6 +11,7 @@ const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
     businessAddress: "",
     businessPhone: "",
   });
+  const [businessLicenseFile, setBusinessLicenseFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [requestDealer, { isLoading }] = useRequestDealerMutation();
   const { data: user, refetch } = useGetMeQuery();
@@ -28,8 +29,8 @@ const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
       newErrors.businessName = "Business name must be at least 3 characters";
     }
 
-    if (!formData.businessLicense.trim()) {
-      newErrors.businessLicense = "Business license number is required";
+    if (!formData.businessLicense.trim() && !businessLicenseFile) {
+      newErrors.businessLicense = "Business license number or file is required";
     }
 
     if (!formData.businessAddress.trim()) {
@@ -40,12 +41,39 @@ const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
 
     if (!formData.businessPhone.trim()) {
       newErrors.businessPhone = "Business phone number is required";
-    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.businessPhone.trim())) {
+    } else if (!/^[\d\s\-+()]+$/.test(formData.businessPhone.trim())) {
       newErrors.businessPhone = "Please enter a valid phone number";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          businessLicenseFile: "Please upload a PDF, JPG, or PNG file"
+        }));
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors((prev) => ({
+          ...prev,
+          businessLicenseFile: "File size must be less than 5MB"
+        }));
+        return;
+      }
+      setBusinessLicenseFile(file);
+      if (errors.businessLicenseFile) {
+        setErrors((prev) => ({ ...prev, businessLicenseFile: "" }));
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -57,20 +85,35 @@ const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
     }
 
     try {
-      const result = await requestDealer({
-        businessName: formData.businessName.trim(),
-        businessLicense: formData.businessLicense.trim(),
-        businessAddress: formData.businessAddress.trim(),
-        businessPhone: formData.businessPhone.trim(),
-      }).unwrap();
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("businessName", formData.businessName.trim());
+      if (formData.businessLicense.trim()) {
+        formDataToSend.append("businessLicense", formData.businessLicense.trim());
+      }
+      formDataToSend.append("businessAddress", formData.businessAddress.trim());
+      formDataToSend.append("businessPhone", formData.businessPhone.trim());
 
-      toast.success("Dealer request submitted successfully! Pending admin verification.");
+      // Append file if provided
+      if (businessLicenseFile) {
+        formDataToSend.append("businessLicense", businessLicenseFile);
+      }
+
+      // Use the API mutation - it should handle FormData
+      const result = await requestDealer(formDataToSend).unwrap();
+
+      const message = result?.dealerInfo?.verified 
+        ? "Dealer account created and verified successfully!"
+        : "Dealer request submitted successfully! Pending admin verification.";
+      
+      toast.success(message);
       setFormData({
         businessName: "",
         businessLicense: "",
         businessAddress: "",
         businessPhone: "",
       });
+      setBusinessLicenseFile(null);
       setErrors({});
       refetch();
       if (onSuccess) onSuccess();
@@ -199,23 +242,62 @@ const DealerRequestForm = ({ isOpen, onClose, onSuccess }) => {
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               <FiFileText className="inline mr-2" size={16} />
-              Business License Number *
+              Business License *
             </label>
-            <input
-              type="text"
-              name="businessLicense"
-              value={formData.businessLicense}
-              onChange={handleChange}
-              placeholder="Enter your business license number"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all ${
-                errors.businessLicense ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.businessLicense && (
-              <p className="text-red-500 text-xs mt-1">{errors.businessLicense}</p>
-            )}
-            <p className="text-gray-500 text-xs mt-1">
-              This will be verified by our admin team
+            <div className="space-y-3">
+              <input
+                type="text"
+                name="businessLicense"
+                value={formData.businessLicense}
+                onChange={handleChange}
+                placeholder="Enter your business license number"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all ${
+                  errors.businessLicense ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.businessLicense && (
+                <p className="text-red-500 text-xs mt-1">{errors.businessLicense}</p>
+              )}
+              <div className="text-center text-gray-500 text-sm">OR</div>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary-500 transition-colors">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="license-upload"
+                />
+                <label
+                  htmlFor="license-upload"
+                  className="flex flex-col items-center justify-center cursor-pointer"
+                >
+                  <FiUpload className="text-gray-400 mb-2" size={24} />
+                  <span className="text-sm text-gray-600">
+                    {businessLicenseFile ? businessLicenseFile.name : "Click to upload license file"}
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1">
+                    PDF, JPG, PNG (Max 5MB)
+                  </span>
+                </label>
+              </div>
+              {businessLicenseFile && (
+                <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-2">
+                  <span className="text-sm text-green-800">{businessLicenseFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setBusinessLicenseFile(null)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <FiX size={18} />
+                  </button>
+                </div>
+              )}
+              {errors.businessLicenseFile && (
+                <p className="text-red-500 text-xs mt-1">{errors.businessLicenseFile}</p>
+              )}
+            </div>
+            <p className="text-gray-500 text-xs mt-2">
+              Provide either license number or upload license document (will be verified by admin team)
             </p>
           </div>
 

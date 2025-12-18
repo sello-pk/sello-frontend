@@ -187,7 +187,7 @@ const MultiSelectFilter = ({ value = [], onChange, options = [] }) => {
                                     type="checkbox"
                                     checked={value.includes(option.value)}
                                     onChange={() => toggleOption(option.value)}
-                                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                    className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                                 />
                                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
                             </label>

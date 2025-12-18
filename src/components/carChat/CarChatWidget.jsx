@@ -17,6 +17,8 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
     const [editMessageText, setEditMessageText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true);
 
     const { data: currentUser } = useGetMeQuery();
     const token = localStorage.getItem("token");
@@ -143,9 +145,15 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                         
                         return [...filtered, data.message];
                     });
-                    setTimeout(() => {
-                        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                    }, 100);
+                    // Only auto-scroll if user is near bottom
+                    if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+                        setTimeout(() => {
+                            const container = messagesContainerRef.current;
+                            if (container) {
+                                container.scrollTop = container.scrollHeight;
+                            }
+                        }, 100);
+                    }
                 }
             });
 
@@ -176,9 +184,31 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
         };
     }, [token, chatId, SOCKET_URL]);
 
-    // Auto scroll to bottom
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [chatId]);
+
+    // Auto scroll to bottom only if user is near bottom
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        if (shouldAutoScrollRef.current) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     const loadMessages = async (chatIdToLoad) => {
@@ -355,7 +385,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ECE5DD]">
+                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ECE5DD]">
                         {isLoading ? (
                             <div className="flex justify-center py-8">
                                 <Spinner fullScreen={false} />

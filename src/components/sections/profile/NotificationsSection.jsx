@@ -8,6 +8,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
 } from "../../../redux/services/api";
+import { SOCKET_BASE_URL } from "../../../redux/config";
 import toast from "react-hot-toast";
 
 const NotificationsSection = () => {
@@ -16,8 +17,6 @@ const NotificationsSection = () => {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-  const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
   const { data: notificationsData, refetch } = useGetUserNotificationsQuery(
     { page: 1, limit: 50 },
@@ -41,7 +40,7 @@ const NotificationsSection = () => {
   useEffect(() => {
     if (!token) return;
 
-    const newSocket = io(SOCKET_URL, {
+    const newSocket = io(SOCKET_BASE_URL, {
       auth: { token },
       query: { token },
       transports: ['websocket', 'polling'],
@@ -60,7 +59,8 @@ const NotificationsSection = () => {
     newSocket.on('new-notification', (data) => {
       toast.success(data.message || data.title || "New notification", {
         icon: '🔔',
-        duration: 5000,
+        duration: 7000,
+        position: 'bottom-right',
       });
       refetch();
     });
@@ -72,7 +72,7 @@ const NotificationsSection = () => {
         newSocket.close();
       }
     };
-  }, [token, SOCKET_URL, refetch]);
+  }, [token, refetch]);
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
@@ -147,9 +147,9 @@ const NotificationsSection = () => {
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
             {unreadCount > 0 ? (
-              <MdNotificationsActive className="text-2xl text-primary-600" />
+              <MdNotificationsActive className="text-2xl text-primary-500" />
             ) : (
-              <MdNotifications className="text-2xl text-primary-600" />
+              <MdNotifications className="text-2xl text-primary-500" />
             )}
           </div>
           <div>
@@ -176,7 +176,7 @@ const NotificationsSection = () => {
           onClick={() => setFilter("all")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             filter === "all"
-              ? "text-primary-600 border-b-2 border-primary-600"
+              ? "text-primary-500 border-b-2 border-primary-500"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -186,7 +186,7 @@ const NotificationsSection = () => {
           onClick={() => setFilter("unread")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             filter === "unread"
-              ? "text-primary-600 border-b-2 border-primary-600"
+              ? "text-primary-500 border-b-2 border-primary-500"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -196,7 +196,7 @@ const NotificationsSection = () => {
           onClick={() => setFilter("read")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             filter === "read"
-              ? "text-primary-600 border-b-2 border-primary-600"
+              ? "text-primary-500 border-b-2 border-primary-500"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >

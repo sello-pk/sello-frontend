@@ -97,12 +97,17 @@ const DealerDashboard = () => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      localStorage.removeItem("token");
+      // clearTokens is called by transformResponse, but ensure cleanup
       localStorage.removeItem("user");
       toast.success("Logged out successfully");
       navigate("/login");
     } catch (error) {
+      // Clear tokens even if logout request fails
+      const { clearTokens } = await import("../../utils/tokenRefresh");
+      clearTokens();
+      localStorage.removeItem("user");
       toast.error("Logout failed");
+      navigate("/login");
     }
   };
 
@@ -434,7 +439,7 @@ const DealerDashboard = () => {
                   {(!stats.subscriptionActive || !stats.canPostMore) && (
                     <button
                       onClick={() => navigate("/profile")}
-                      className="w-full md:w-auto px-6 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
+                      className="w-full md:w-auto px-6 py-2 bg-white text-primary-500 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
                     >
                       {!stats.subscriptionActive ? "Upgrade Subscription" : "Manage Subscription"}
                     </button>
@@ -448,7 +453,7 @@ const DealerDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Business Overview</h3>
                   <button
                     onClick={() => navigate("/profile")}
-                    className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+                    className="text-sm text-primary-500 hover:text-primary-500 font-medium"
                   >
                     Manage Profile →
                   </button>
@@ -497,7 +502,7 @@ const DealerDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Recent Listings</h3>
                   <button
                     onClick={() => navigate("/create-post")}
-                    className="text-primary-500 hover:text-primary-600 font-medium"
+                    className="text-primary-500 hover:text-primary-500 font-medium"
                   >
                     View All
                   </button>
@@ -540,7 +545,7 @@ const DealerDashboard = () => {
                           <h4 className="font-semibold text-gray-900 truncate">
                             {car.make} {car.model} {car.year}
                           </h4>
-                          <p className="text-primary-600 font-bold mt-1">
+                          <p className="text-primary-500 font-bold mt-1">
                             AED {car.price?.toLocaleString()}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
@@ -648,7 +653,7 @@ const DealerDashboard = () => {
                       <h4 className="font-semibold text-gray-900">
                         {car.make} {car.model} {car.year}
                       </h4>
-                      <p className="text-primary-600 font-bold mt-1">
+                      <p className="text-primary-500 font-bold mt-1">
                         AED {car.price?.toLocaleString()}
                       </p>
                       <div className="flex items-center gap-2 mt-3">

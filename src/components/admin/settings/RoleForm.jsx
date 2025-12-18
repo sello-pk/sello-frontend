@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { FaSave, FaTimes, FaSpinner, FaInfoCircle } from "react-icons/fa";
+import { API_BASE_URL } from "../../../redux/config";
+import { getAccessToken } from "../../../utils/tokenRefresh";
 
 // Mapping of Modules to Backend Permission Keys
 const PERMISSION_MODULES = [
@@ -259,8 +261,13 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const url = `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles${role ? `/${role._id}` : ""}`;
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setLoading(false);
+        return;
+      }
+      const url = `${API_BASE_URL}/roles${role ? `/${role._id}` : ""}`;
       const method = role ? "put" : "post";
 
       const response = await axios[method](url, submitData, { 

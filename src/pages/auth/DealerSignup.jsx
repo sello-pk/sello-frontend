@@ -717,13 +717,13 @@ const DealerSignup = ({ onBack }) => {
                       {formData.specialties.map((specialty) => (
                         <span
                           key={specialty}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-500 rounded-full text-sm"
                         >
                           {specialty}
                           <button
                             type="button"
                             onClick={() => removeFromArray("specialties", specialty)}
-                            className="hover:text-primary-600"
+                            className="hover:text-primary-500"
                           >
                             <FaTimes size={12} />
                           </button>

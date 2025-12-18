@@ -47,7 +47,7 @@ const LatestBlogsSection = () => {
         </div>
         <Link 
           to="/blog/all" 
-          className="text-primary-500 hover:text-primary-600 font-medium flex items-center gap-2 transition-colors"
+          className="text-primary-500 hover:text-primary-500 font-medium flex items-center gap-2 transition-colors"
         >
           View All
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

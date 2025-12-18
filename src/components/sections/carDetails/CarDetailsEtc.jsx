@@ -131,7 +131,7 @@ const CarDetailsEtc = () => {
                     <div key={idx} className="text-center">
                       <div className="flex flex-col items-center gap-2">
                         <div className="bg-primary-50 rounded-full p-3">
-                          <Icon className="text-primary-600 text-xl" />
+                          <Icon className="text-primary-500 text-xl" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium">
@@ -182,7 +182,7 @@ const CarDetailsEtc = () => {
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => setShowMore(!showMore)}
-                  className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
+                  className="text-primary-500 hover:text-primary-500 font-medium text-sm flex items-center gap-1"
                 >
                   {showMore ? "Show Less" : "Show More Details"}
                   <span className="text-lg">{showMore ? "↑" : "↓"}</span>
@@ -348,7 +348,7 @@ const CarDetailsEtc = () => {
                     {car.contactNumber && (
                       <a
                         href={`tel:${car.contactNumber}`}
-                        className="w-full bg-white border-2 border-primary-500 text-primary-600 px-4 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-white border-2 border-primary-500 text-primary-500 px-4 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
                       >
                         <FaPhone />
                         Call Now

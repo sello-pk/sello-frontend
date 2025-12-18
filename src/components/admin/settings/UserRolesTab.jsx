@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../routes";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "../../../redux/config";
+import { getAccessToken } from "../../../utils/tokenRefresh";
 import {
   FaPlus,
   FaUserPlus,
@@ -47,11 +50,14 @@ const UserRolesTab = () => {
     setLoading(true);
     try {
       // Fetch all admin users (including team members) - fetch with high limit to get all
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setLoading(false);
+        return;
+      }
       const usersRes = await axios.get(
-        `${
-          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-        }/admin/users?role=admin&limit=1000`,
+        `${API_BASE_URL}/admin/users?role=admin&limit=1000`,
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` },
@@ -60,18 +66,14 @@ const UserRolesTab = () => {
 
       const [rolesRes, invitesRes] = await Promise.all([
         axios.get(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-          }/roles`,
+          `${API_BASE_URL}/roles`,
           {
             withCredentials: true,
             headers: { Authorization: `Bearer ${token}` },
           }
         ),
         axios.get(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-          }/roles/invites/all`,
+          `${API_BASE_URL}/roles/invites/all`,
           {
             withCredentials: true,
             headers: { Authorization: `Bearer ${token}` },
@@ -172,11 +174,13 @@ const UserRolesTab = () => {
   const handleDeleteConfirm = async () => {
     if (!roleToDelete) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        return;
+      }
       const response = await axios.delete(
-        `${
-          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-        }/roles/${roleToDelete}`,
+        `${API_BASE_URL}/roles/${roleToDelete}`,
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` },
@@ -204,7 +208,7 @@ const UserRolesTab = () => {
   const handleViewUser = (user) => {
     setOpenDropdown(null);
     // Navigate to admin users page with user ID to view details
-    navigate(`/admin/users/${user._id}`);
+    navigate(ROUTES.admin.userDetail(user._id));
   };
 
   const handleEditUserRole = async (user) => {
@@ -264,7 +268,12 @@ const UserRolesTab = () => {
 
     setAssigningRole(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setAssigningRole(false);
+        return;
+      }
       const selectedRole = roles.find(
         (r) => r._id.toString() === selectedRoleId
       );
@@ -276,9 +285,7 @@ const UserRolesTab = () => {
 
       // Update user's role via admin API
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-        }/admin/users/${userToAssignRole._id}`,
+        `${API_BASE_URL}/admin/users/${userToAssignRole._id}`,
         {
           adminRole: selectedRole.displayName || selectedRole.name,
           roleId: selectedRoleId,
@@ -457,7 +464,7 @@ const UserRolesTab = () => {
                             >
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-sm">
+                                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-500 font-bold text-sm">
                                     {user.name?.charAt(0)?.toUpperCase() || "U"}
                                   </div>
                                   <span className="font-medium text-gray-800">
@@ -684,7 +691,7 @@ const UserRolesTab = () => {
                                 <span
                                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     invite.status === "pending"
-                                      ? "bg-primary-100 text-primary-800"
+                                      ? "bg-primary-100 text-primary-500"
                                       : invite.status === "accepted"
                                       ? "bg-green-100 text-green-800"
                                       : "bg-gray-100 text-gray-800"
@@ -699,7 +706,7 @@ const UserRolesTab = () => {
                                   <div className="flex items-center justify-end gap-2">
                                     <button
                                       onClick={handleCopyInviteUrl}
-                                      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary-500 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
                                       title="Copy invite URL to share with user"
                                     >
                                       <FaCopy size={12} /> Copy URL

@@ -90,7 +90,10 @@ const BlogEdit = () => {
 
             await updateBlog({ blogId: id, formData: formDataToSend }).unwrap();
             toast.success("Blog updated successfully! Changes will reflect on the public site immediately.");
-            navigate("/admin/blogs");
+            // Small delay to ensure cache invalidation completes
+            setTimeout(() => {
+                navigate("/admin/blogs");
+            }, 100);
         } catch (error) {
             toast.error(error?.data?.message || "Failed to update blog");
         }

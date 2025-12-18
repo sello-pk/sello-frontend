@@ -15,6 +15,7 @@ import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { formatDistanceToNow } from "date-fns";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 import { useSearchParams } from "react-router-dom";
+import { API_BASE_URL, SOCKET_BASE_URL } from "../../redux/config";
 
 const SupportChat = () => {
     const [searchParams] = useSearchParams();
@@ -41,12 +42,12 @@ const SupportChat = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState(null);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true); // Track if we should auto-scroll
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-    const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
 
     // If chatId is in URL, fetch all chats (no status filter) to ensure we find it
     const shouldFetchAll = !!chatIdFromUrl;
@@ -108,7 +109,7 @@ const SupportChat = () => {
     useEffect(() => {
         if (!token) return;
 
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_BASE_URL, {
             auth: { token },
             query: { token },
             transports: ['websocket', 'polling'],
@@ -181,6 +182,8 @@ const SupportChat = () => {
                 : (messagesData?.data || []);
             // Load messages
             setMessages(messagesArray);
+            // Reset auto-scroll flag when switching chats
+            shouldAutoScrollRef.current = true;
         } else {
             setMessages([]);
         }
@@ -211,9 +214,33 @@ const SupportChat = () => {
         setSelectedChat(chatIdString);
     }, [chatIdFromUrl, chats, chatsLoading, selectedChat, refetchChats]);
 
-    // Auto scroll to bottom
+    // Track user scroll to determine if we should auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100; // 100px threshold
+            shouldAutoScrollRef.current = isNearBottom;
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [selectedChat]);
+
+    // Auto scroll to bottom only if user is near bottom (not on initial load or manual scroll up)
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container || messages.length === 0) return;
+        
+        // Only auto-scroll if user hasn't manually scrolled up
+        if (shouldAutoScrollRef.current) {
+            // Use scrollTop on container to avoid window scrolling
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
     }, [messages]);
 
     // Mark messages as seen
@@ -346,8 +373,7 @@ const SupportChat = () => {
         
         try {
             const token = localStorage.getItem("token");
-            const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-            const result = await fetch(`${BASE_URL}/api/support-chat/messages/${messageToDelete}`, {
+            const result = await fetch(`${API_BASE_URL}/support-chat/messages/${messageToDelete}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -355,8 +381,9 @@ const SupportChat = () => {
             });
             const data = await result.json();
             if (data.success) {
+                // Notify other listeners via socket (if connected)
                 if (socket && socket.connected) {
-                    socket.emit('delete-message', { messageId, chatId: selectedChat });
+                    socket.emit('delete-message', { messageId: messageToDelete, chatId: selectedChat });
                 }
                 refetchMessages();
                 toast.success("Message deleted");
@@ -592,7 +619,7 @@ const SupportChat = () => {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-2">
                                 {messagesLoading ? (
                                     <div className="flex justify-center py-8">
                                         <Spinner fullScreen={false} />
@@ -701,7 +728,7 @@ const SupportChat = () => {
                                                                     <button
                                                                         onClick={async () => {
                                                                             try {
-                                                                                const result = await fetch(`${BASE_URL}/api/support-chat/messages/${msg._id}`, {
+                                                                                const result = await fetch(`${API_BASE_URL}/support-chat/messages/${msg._id}`, {
                                                                                     method: "PUT",
                                                                                     headers: {
                                                                                         "Content-Type": "application/json",
@@ -771,7 +798,7 @@ const SupportChat = () => {
                                                                         setEditingMessageId(msg._id);
                                                                         setEditMessageText(msg.message);
                                                                     }}
-                                                                    className="opacity-0 group-hover:opacity-100 ml-1 text-primary-500 hover:text-primary-700"
+                                                                    className="opacity-0 group-hover:opacity-100 ml-1 text-primary-500 hover:text-primary-500"
                                                                     title="Edit message"
                                                                 >
                                                                     <FiEdit2 size={12} />

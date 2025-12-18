@@ -277,11 +277,26 @@ const GetAllCarsSection = () => {
   }
 
   if (error) {
+    // Extract error message from RTK Query error structure
+    const errorMessage = error?.data?.message || 
+                        error?.message || 
+                        error?.error || 
+                        'Unknown error occurred';
+    
     return (
       <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
-        <h2 className="text-center text-xl text-red-500">
-          Error loading cars: {error.message}
-        </h2>
+        <div className="text-center">
+          <h2 className="text-xl text-red-500 mb-4">
+            Error loading cars
+          </h2>
+          <p className="text-gray-600 mb-4">{errorMessage}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </section>
     );
   }

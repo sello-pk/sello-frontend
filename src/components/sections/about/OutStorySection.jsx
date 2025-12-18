@@ -88,7 +88,7 @@ const OutStorySection = () => {
                   <div className="text-primary-500 mb-2">
                     <stat.icon className="w-8 h-8 md:w-10 md:h-10" />
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-primary-600 mb-1">
+                  <div className="text-2xl md:text-3xl font-extrabold text-primary-500 mb-1">
                     {stat.value}
                   </div>
                   <div className="text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">
@@ -151,7 +151,7 @@ const OutStorySection = () => {
                   <div className="text-primary-500 mb-2">
                     <stat.icon className="w-8 h-8 md:w-10 md:h-10" />
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-primary-600 mb-1">
+                  <div className="text-2xl md:text-3xl font-extrabold text-primary-500 mb-1">
                     {stat.value}
                   </div>
                   <div className="text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">

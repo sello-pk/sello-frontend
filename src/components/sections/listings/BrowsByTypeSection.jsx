@@ -96,12 +96,12 @@ const BrowsByTypeSection = () => {
                       className="w-14 h-14 md:w-16 md:h-16 object-contain"
                     />
                   ) : (
-                    <Icon className="text-5xl md:text-6xl text-primary-500 group-hover:text-primary-600 transition-colors duration-300" />
+                    <Icon className="text-5xl md:text-6xl text-primary-500 group-hover:text-primary-500 transition-colors duration-300" />
                   )}
                 </div>
 
                 {/* Category Name */}
-                <h3 className="text-base md:text-lg font-bold text-gray-800 text-center group-hover:text-primary-600 transition-colors duration-300">
+                <h3 className="text-base md:text-lg font-bold text-gray-800 text-center group-hover:text-primary-500 transition-colors duration-300">
                   {category.name}
                 </h3>
 

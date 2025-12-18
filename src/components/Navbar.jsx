@@ -273,7 +273,7 @@ const Navbar = () => {
       {open && (
         <div
           ref={drawerRef}
-          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl md:hidden"
+          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-500 px-6 py-6 bg-primary-300 shadow-xl md:hidden"
         >
           {/* Close Button */}
           <div className="flex justify-end text-3xl mb-6">
@@ -309,7 +309,7 @@ const Navbar = () => {
                 closeDrawer();
                 navigate("/create-post");
               }}
-              className="mt-4 flex items-center gap-2 text-primary-700"
+              className="mt-4 flex items-center gap-2 text-primary-500"
             >
               <FaCirclePlus />
               Create Post
@@ -320,7 +320,7 @@ const Navbar = () => {
               <Link
                 to="/admin/dashboard"
                 onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
               >
                 <span>Admin Panel</span>
               </Link>
@@ -329,7 +329,7 @@ const Navbar = () => {
               <Link
                 to="/dealer/dashboard"
                 onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
               >
                 <span>Dealer Dashboard</span>
               </Link>
@@ -338,7 +338,7 @@ const Navbar = () => {
               <Link
                 to="/seller/dashboard"
                 onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
               >
                 <span>My Dashboard</span>
               </Link>

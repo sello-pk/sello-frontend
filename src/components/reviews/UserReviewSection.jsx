@@ -110,7 +110,7 @@ const UserReviewSection = ({ userId, carId, sellerName }) => {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <FiUser className="text-primary-600" size={20} />
+                      <FiUser className="text-primary-500" size={20} />
                     )}
                   </div>
                   <div>
@@ -150,7 +150,7 @@ const UserReviewSection = ({ userId, carId, sellerName }) => {
             </div>
           ))}
           {reviews.length > 5 && (
-            <button className="w-full py-2 text-primary-600 hover:text-primary-700 font-medium">
+            <button className="w-full py-2 text-primary-500 hover:text-primary-500 font-medium">
               View All {reviews.length} Reviews
             </button>
           )}

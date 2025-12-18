@@ -553,13 +553,13 @@ const DealerProfileEditSection = ({
                   {dealerFormData.specialties.map((specialty) => (
                     <span
                       key={specialty}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-500 rounded-full text-sm"
                     >
                       {specialty}
                       <button
                         type="button"
                         onClick={() => removeFromArray("specialties", specialty)}
-                        className="hover:text-primary-600"
+                        className="hover:text-primary-500"
                       >
                         <FaTimes size={12} />
                       </button>
@@ -860,7 +860,7 @@ const DealerProfileEditSection = ({
                       {user.dealerInfo.specialties.map((specialty, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
+                          className="px-3 py-1 bg-primary-100 text-primary-500 rounded-full text-sm"
                         >
                           {specialty}
                         </span>
@@ -897,7 +897,7 @@ const DealerProfileEditSection = ({
                       href={user.dealerInfo.businessLicense}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+                      className="inline-flex items-center gap-2 text-primary-500 hover:text-primary-500 font-medium"
                     >
                       <span>View License Document</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -51,7 +51,7 @@ const RoleDetails = ({ role, isOpen, onClose }) => {
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <FiShield className="text-primary-600" size={24} />
+                        <FiShield className="text-primary-500" size={24} />
                         <div>
                             <h2 className="text-xl font-bold text-gray-900">{role.displayName}</h2>
                             <p className="text-sm text-gray-500">{role.name}</p>

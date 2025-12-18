@@ -15,6 +15,7 @@ import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiSearch, FiEdit2, FiTrash2, FiMessageSquare, FiClock, FiCheckCircle, FiEye, FiUser, FiX, FiMail } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import { ROUTES } from "../../routes";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const CustomerRequests = () => {
@@ -824,15 +825,19 @@ const CustomerRequests = () => {
                                         <p className="text-sm text-gray-900 whitespace-pre-wrap">{item.displayMessage || item.description}</p>
                                     </div>
                                     {item.itemType === "contact_form" && item.chatId && (
-                                        <div className="bg-gray-50 p-4 rounded-xl">
-                                            <p className="text-sm font-semibold text-gray-700 mb-2">Chat</p>
-                                            <a
-                                                href={`/admin/support-chat?chatId=${typeof item.chatId === 'string' ? item.chatId : (item.chatId?._id || item.chatId?.toString() || '')}`}
-                                                className="text-primary-500 hover:underline"
-                                            >
-                                                View Chat Conversation
-                                            </a>
-                                        </div>
+                                      <div className="bg-gray-50 p-4 rounded-xl">
+                                        <p className="text-sm font-semibold text-gray-700 mb-2">Chat</p>
+                                        <a
+                                          href={ROUTES.admin.supportChatWithId(
+                                            typeof item.chatId === "string"
+                                              ? item.chatId
+                                              : item.chatId?._id || item.chatId?.toString() || ""
+                                          )}
+                                          className="text-primary-500 hover:underline"
+                                        >
+                                          View Chat Conversation
+                                        </a>
+                                      </div>
                                     )}
                                     {item.itemType === "customer_request" && item.responses && item.responses.length > 0 && (
                                         <div>

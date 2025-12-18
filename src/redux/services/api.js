@@ -1,9 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens, refreshAccessToken, shouldRefreshToken } from "../../utils/tokenRefresh.js";
 
 // Use environment variable or default to port 4000 (matching server)
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL =
-  import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// const BASE_URL =
+//   import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+
+// Track if we're currently refreshing to avoid multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshPromise = null;
 
 export const api = createApi({
   reducerPath: "api",
@@ -18,7 +23,7 @@ export const api = createApi({
         baseUrl: BASE_URL,
         credentials: "include",
         prepareHeaders: (headers, { extra, endpoint }) => {
-          const token = localStorage.getItem("token");
+          const token = getAccessToken();
           if (token) {
             headers.set("Authorization", `Bearer ${token}`);
           }
@@ -31,14 +36,55 @@ export const api = createApi({
         },
       })(args, api, extraOptions);
 
-      // Handle 401 errors - token expired or invalid
-      // Only clear token for certain endpoints, not for all 401s
+      // Handle 401 errors - try to refresh token
       if (baseResult.error && baseResult.error.status === 401) {
         const url = args?.url || "";
-        // Only clear token for auth-related endpoints, not for save/unsave operations
-        // Let the component handle the error for save operations
+        const refreshToken = getRefreshToken();
+
+        // Try to refresh token if we have a refresh token and this isn't an auth endpoint
+        if (refreshToken && shouldRefreshToken(401, url)) {
+          try {
+            // If already refreshing, wait for that promise
+            if (isRefreshing && refreshPromise) {
+              await refreshPromise;
+            } else if (!isRefreshing) {
+              // Start refresh process
+              isRefreshing = true;
+              refreshPromise = refreshAccessToken(refreshToken);
+              
+              try {
+                await refreshPromise;
+              } finally {
+                isRefreshing = false;
+                refreshPromise = null;
+              }
+            }
+
+            // Retry original request with new token
+            const newToken = getAccessToken();
+            if (newToken) {
+              return fetchBaseQuery({
+                baseUrl: BASE_URL,
+                credentials: "include",
+                prepareHeaders: (headers) => {
+                  headers.set("Authorization", `Bearer ${newToken}`);
+                  if (!(args?.body instanceof FormData)) {
+                    headers.set("Content-Type", "application/json");
+                  }
+                  return headers;
+                },
+              })(args, api, extraOptions);
+            }
+          } catch (refreshError) {
+            // Refresh failed, clear tokens and let it fall through to 401 handling
+            clearTokens();
+            localStorage.removeItem("user");
+          }
+        }
+
+        // If refresh failed or no refresh token, clear tokens
         if (url.includes("/users/me") || url.includes("/auth/")) {
-          localStorage.removeItem("token");
+          clearTokens();
           localStorage.removeItem("user");
         }
         // Don't redirect automatically - let components handle it
@@ -100,12 +146,18 @@ export const api = createApi({
       }),
       invalidatesTags: ["User"],
       transformResponse: (response) => {
-        // Backend format: { success, message, data: { user, token } }
+        // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
         if (response?.data) {
+          // Store refresh token if provided
+          if (response.data.refreshToken) {
+            setRefreshToken(response.data.refreshToken);
+          }
           return {
             message: response.message,
             user: response.data.user,
-            token: response.data.token,
+            token: response.data.token || response.data.accessToken,
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
           };
         }
         return response;
@@ -119,10 +171,16 @@ export const api = createApi({
       }),
       invalidatesTags: ["User"],
       transformResponse: (response) => {
-        // Backend format: { success, message, data: { user, token } }
-        if (response?.data?.user && response?.data?.token) {
+        // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
+        if (response?.data?.user) {
+          // Store refresh token if provided
+          if (response.data.refreshToken) {
+            setRefreshToken(response.data.refreshToken);
+          }
           return {
-            token: response.data.token,
+            token: response.data.token || response.data.accessToken,
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
             user: response.data.user,
           };
         }
@@ -149,10 +207,16 @@ export const api = createApi({
       },
       invalidatesTags: ["User"],
       transformResponse: (response) => {
-        // Backend format: { success, message, data: { user, token } }
-        if (response?.data?.user && response?.data?.token) {
+        // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
+        if (response?.data?.user) {
+          // Store refresh token if provided
+          if (response.data.refreshToken) {
+            setRefreshToken(response.data.refreshToken);
+          }
           return {
-            token: response.data.token,
+            token: response.data.token || response.data.accessToken,
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
             user: response.data.user,
             message: response.message,
           };
@@ -319,11 +383,20 @@ export const api = createApi({
       transformResponse: (response) => response?.data || response,
     }),
     logout: builder.mutation({
-      query: () => ({
-        url: "/auth/logout",
-        method: "POST",
-      }),
+      query: () => {
+        const refreshToken = getRefreshToken();
+        return {
+          url: "/auth/logout",
+          method: "POST",
+          body: refreshToken ? { refreshToken } : {},
+        };
+      },
       invalidatesTags: ["User"],
+      transformResponse: () => {
+        // Clear tokens on successful logout
+        clearTokens();
+        return { success: true };
+      },
     }),
 
     // ✅ Car GET Endpoint with Pagination
@@ -364,6 +437,22 @@ export const api = createApi({
       transformResponse: (response) => {
         const data = response?.data || response;
         return data;
+      },
+    }),
+
+    // ✅ Get Car Counts by Make
+    getCarCountsByMake: builder.query({
+      query: () => ({
+        url: "/cars/stats/counts-by-make",
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data || response;
+        // Ensure we return an object with brand names as keys
+        if (typeof data === "object" && data !== null) {
+          return data;
+        }
+        return {};
       },
     }),
 
@@ -621,11 +710,15 @@ export const api = createApi({
       },
       providesTags: ["Blog"],
       transformResponse: (response) => response?.data || response,
+      // Refetch when component mounts or args change to ensure fresh data after admin updates
+      refetchOnMountOrArgChange: true,
     }),
     getBlogById: builder.query({
       query: (blogId) => `/blogs/${blogId}`,
       providesTags: ["Blog"],
       transformResponse: (response) => response?.data || response,
+      // Refetch when component mounts or args change to ensure fresh data after admin updates
+      refetchOnMountOrArgChange: true,
     }),
 
     // Banners (Public)
@@ -843,6 +936,13 @@ export const api = createApi({
       }),
       transformResponse: (response) => response?.data || response,
     }),
+    verifyPaymentSession: builder.query({
+      query: (sessionId) => ({
+        url: `/subscriptions/verify-payment/${sessionId}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response?.data || response,
+    }),
 
     // User Reviews (for sellers/users)
     addUserReview: builder.mutation({
@@ -893,6 +993,7 @@ export const {
   useLogoutMutation,
   useGetCarsQuery,
   useGetSingleCarQuery,
+  useGetCarCountsByMakeQuery,
   useCreateCarMutation,
   useGetFilteredCarsQuery,
   useGetMyCarsQuery,
@@ -938,6 +1039,7 @@ export const {
   usePurchaseSubscriptionMutation,
   useCancelSubscriptionMutation,
   useGetPaymentHistoryQuery,
+  useVerifyPaymentSessionQuery,
   useAddUserReviewMutation,
   useGetUserReviewsQuery,
   useCreateReportMutation,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { ROUTES } from "../../routes";
 import {
     useGetAllDealersQuery,
     useVerifyDealerMutation,
@@ -51,7 +52,7 @@ const Dealers = () => {
     };
 
     const handleEdit = (dealerId) => {
-        navigate(`/admin/users/${dealerId}`);
+        navigate(ROUTES.admin.userDetail(dealerId));
     };
 
     const handleCloseModal = () => {
@@ -64,7 +65,7 @@ const Dealers = () => {
             free: "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300",
             basic: "bg-blue-100 text-blue-800",
             premium: "bg-purple-100 text-purple-800",
-            dealer: "bg-primary-100 text-primary-800"
+            dealer: "bg-primary-100 text-primary-500"
         };
         return planColors[plan] || planColors.free;
     };
@@ -382,7 +383,7 @@ const Dealers = () => {
                                                             <p className="text-sm text-gray-600">Specialties</p>
                                                             <div className="flex flex-wrap gap-2 mt-1">
                                                                 {dealerDetails.dealerInfo.specialties.map((specialty, idx) => (
-                                                                    <span key={idx} className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm">
+                                                                    <span key={idx} className="px-3 py-1 bg-primary-100 text-primary-500 rounded-full text-sm">
                                                                         {specialty}
                                                                     </span>
                                                                 ))}

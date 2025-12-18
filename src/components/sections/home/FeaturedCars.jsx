@@ -77,7 +77,7 @@ const FeaturedCars = () => {
         {featuredCars.length > 0 && (
           <button
             onClick={() => navigate("/cars")}
-            className="text-primary-500 hover:text-primary-600 text-sm md:text-base font-medium flex items-center gap-1"
+            className="text-primary-500 hover:text-primary-500 text-sm md:text-base font-medium flex items-center gap-1"
           >
             View All Featured
             <IoIosArrowRoundUp className="text-xl rotate-[40deg]" />
@@ -183,7 +183,7 @@ const FeaturedCars = () => {
                   </h6>
                   <button
                     onClick={() => car._id && navigate(`/cars/${car._id}`)}
-                    className="flex items-center gap-2 text-primary-500 hover:text-primary-600 hover:underline text-sm md:text-base font-medium transition-colors"
+                    className="flex items-center gap-2 text-primary-500 hover:text-primary-500 hover:underline text-sm md:text-base font-medium transition-colors"
                   >
                     View Details
                     <IoIosArrowRoundUp className="text-xl rotate-[40deg]" />

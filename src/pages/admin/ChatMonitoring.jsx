@@ -11,6 +11,7 @@ import { HiChatBubbleLeftRight } from "react-icons/hi2";
 import { MdFlag } from "react-icons/md";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes";
 
 const ChatMonitoring = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -47,11 +48,11 @@ const ChatMonitoring = () => {
     const handleOpenChat = (chatId, chatType) => {
         // Navigate to Support Chatbot with selected chat
         if (chatType === 'support') {
-            navigate(`/admin/support-chatbot?chatId=${chatId}`);
+            navigate(ROUTES.admin.supportChatbotWithId(chatId));
         } else {
             // For car chats, you might want to implement a different view
             // For now, we'll also redirect to support chatbot
-            navigate(`/admin/support-chatbot?chatId=${chatId}`);
+            navigate(ROUTES.admin.supportChatbotWithId(chatId));
         }
     };
 

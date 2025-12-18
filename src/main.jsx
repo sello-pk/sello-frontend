@@ -11,11 +11,28 @@ import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import AppLoader from "./components/common/AppLoader.jsx";
 import "leaflet/dist/leaflet.css";
 
-// Check if Google OAuth is configured
-const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const fallbackClientId = "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com";
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || fallbackClientId;
-const isUsingFallback = !hasGoogleClientId;
+// Google OAuth client ID – must be set explicitly for production
+// For local development you can optionally fall back to a hard-coded ID,
+// but in production we require VITE_GOOGLE_CLIENT_ID to be defined.
+const envGoogleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const isDev = import.meta.env.DEV;
+
+// Optional: dev-only fallback to ease local setup (must match your Google console config)
+const DEV_FALLBACK_CLIENT_ID =
+  "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com";
+
+const googleClientId =
+  envGoogleClientId || (isDev ? DEV_FALLBACK_CLIENT_ID : undefined);
+
+if (!googleClientId) {
+  // Fail fast in production if not configured correctly
+  // This avoids confusing "origin not allowed" errors from Google
+  // and makes the misconfiguration obvious during deployment.
+  // eslint-disable-next-line no-console
+  console.error(
+    "VITE_GOOGLE_CLIENT_ID is not set. Google Login will not work until this is configured."
+  );
+}
 
 
 // App Root Component with Initial Loader

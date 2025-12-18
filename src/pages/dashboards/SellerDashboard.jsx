@@ -52,12 +52,17 @@ const SellerDashboard = () => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      localStorage.removeItem("token");
+      // clearTokens is called by transformResponse, but ensure cleanup
       localStorage.removeItem("user");
       toast.success("Logged out successfully");
       navigate("/login");
     } catch (error) {
+      // Clear tokens even if logout request fails
+      const { clearTokens } = await import("../../utils/tokenRefresh");
+      clearTokens();
+      localStorage.removeItem("user");
       toast.error("Logout failed");
+      navigate("/login");
     }
   };
 
@@ -318,7 +323,7 @@ const SellerDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Recent Listings</h3>
                   <button
                     onClick={() => navigate("/my-listings")}
-                    className="text-primary-500 hover:text-primary-600 font-medium"
+                    className="text-primary-500 hover:text-primary-500 font-medium"
                   >
                     View All
                   </button>
@@ -361,7 +366,7 @@ const SellerDashboard = () => {
                           <h4 className="font-semibold text-gray-900 truncate">
                             {car.make} {car.model} {car.year}
                           </h4>
-                          <p className="text-primary-600 font-bold mt-1">
+                          <p className="text-primary-500 font-bold mt-1">
                             AED {car.price?.toLocaleString()}
                           </p>
                         </div>
@@ -407,7 +412,7 @@ const SellerDashboard = () => {
                       <h4 className="font-semibold text-gray-900">
                         {car.make} {car.model} {car.year}
                       </h4>
-                      <p className="text-primary-600 font-bold mt-1">
+                      <p className="text-primary-500 font-bold mt-1">
                         AED {car.price?.toLocaleString()}
                       </p>
                       <div className="flex items-center gap-2 mt-3">

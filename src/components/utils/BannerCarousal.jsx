@@ -123,7 +123,7 @@ const BannerCarousal = () => {
                                             href={slide.linkUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 mt-3 text-base md:text-lg text-primary-600 hover:text-primary-700 font-semibold transition-colors group"
+                                            className="inline-flex items-center gap-2 mt-3 text-base md:text-lg text-primary-500 hover:text-primary-500 font-semibold transition-colors group"
                                         >
                                             Learn More 
                                             <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -144,7 +144,7 @@ const BannerCarousal = () => {
                             className="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 md:p-4 shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl group"
                             aria-label="Previous slide"
                         >
-                            <FaChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:text-primary-600 transition-colors" />
+                            <FaChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:text-primary-500 transition-colors" />
                         </button>
                         <button
                             onClick={goToNext}
@@ -152,7 +152,7 @@ const BannerCarousal = () => {
                             className="absolute right-4 md:right-6 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 md:p-4 shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl group"
                             aria-label="Next slide"
                         >
-                            <FaChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:text-primary-600 transition-colors" />
+                            <FaChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:text-primary-500 transition-colors" />
                         </button>
                     </>
                 )}

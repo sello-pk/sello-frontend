@@ -33,7 +33,7 @@ const OurTeam = () => {
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <div className="inline-block mb-4">
-            <span className="text-primary-600 font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-2 bg-primary-100 rounded-full">
+            <span className="text-primary-500 font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-2 bg-primary-100 rounded-full">
               Meet The Team
             </span>
           </div>
@@ -81,11 +81,11 @@ const OurTeam = () => {
                 {/* Text Content */}
                 <div className="text-center px-4">
                   <div className="mb-4">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors duration-300">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 group-hover:text-primary-500 transition-colors duration-300">
                       {member.name}
                     </h3>
                     <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full">
-                      <p className="font-bold text-primary-700 text-sm md:text-base uppercase tracking-wide">
+                      <p className="font-bold text-primary-500 text-sm md:text-base uppercase tracking-wide">
                         {member.position}
                       </p>
                     </div>

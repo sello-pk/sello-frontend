@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { FaTimes, FaSpinner, FaPaperPlane } from "react-icons/fa";
+import { API_BASE_URL } from "../../../redux/config";
+import { getAccessToken } from "../../../utils/tokenRefresh";
 
 const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
   const [formData, setFormData] = useState({
@@ -70,7 +72,12 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+        setLoading(false);
+        return;
+      }
       
       // Prepare data to send - use roleId if available, otherwise use role name
       const inviteData = {
@@ -82,7 +89,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
       };
       
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/invite`,
+        `${API_BASE_URL}/roles/invite`,
         inviteData,
         { 
           withCredentials: true,

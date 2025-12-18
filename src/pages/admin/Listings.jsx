@@ -349,7 +349,7 @@ const Listings = () => {
         if (car.isApproved === true) {
             return <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Approved</span>;
         }
-        return <span className="px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-800">Pending</span>;
+        return <span className="px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-500">Pending</span>;
     };
 
     const formatDate = (date) => {
@@ -519,7 +519,7 @@ const Listings = () => {
                                                 type="checkbox"
                                                 checked={selectedCars.size === cars.length && cars.length > 0}
                                                 onChange={handleSelectAll}
-                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                                             />
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Image</th>
@@ -540,7 +540,7 @@ const Listings = () => {
                                                     type="checkbox"
                                                     checked={selectedCars.has(car._id)}
                                                     onChange={() => handleSelectCar(car._id)}
-                                                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                    className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                                                 />
                                             </td>
                                             <td className="px-6 py-4">
@@ -601,7 +601,7 @@ const Listings = () => {
                                                         <Tooltip content="Unapprove this listing">
                                                             <button
                                                                 onClick={() => handleApprove(car._id, false)}
-                                                                className="text-primary-600 hover:text-primary-700 transition-colors"
+                                                                className="text-primary-500 hover:text-primary-500 transition-colors"
                                                                 aria-label="Unapprove listing"
                                                             >
                                                                 <FiX size={18} />

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { ROUTES } from "../../routes";
 import { useGetAllContactFormsQuery, useConvertToChatMutation, useUpdateContactFormStatusMutation, useDeleteContactFormMutation } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
@@ -68,11 +69,11 @@ const ContactFormManagement = () => {
             refetch();
             if (result?.data?.chat?._id) {
                 // Ensure chatId is a string
-                const chatId = typeof result.data.chat._id === 'string' 
-                    ? result.data.chat._id 
+                const chatId = typeof result.data.chat._id === 'string'
+                    ? result.data.chat._id
                     : result.data.chat._id.toString();
                 // Redirect to support chat with the new chat ID
-                window.location.href = `/admin/support-chat?chatId=${chatId}`;
+                window.location.href = ROUTES.admin.supportChatWithId(chatId);
             }
         } catch (error) {
             toast.error(error?.data?.message || "Failed to convert to chat");
@@ -144,7 +145,7 @@ const ContactFormManagement = () => {
                         <p className="text-gray-600">
                             Manage and respond to contact form submissions
                             {contactForms.length > 0 && (
-                                <span className="ml-2 text-primary-600 font-semibold">
+                                <span className="ml-2 text-primary-500 font-semibold">
                                     ({contactForms.length} {contactForms.length === 1 ? 'form' : 'forms'})
                                 </span>
                             )}
@@ -302,7 +303,7 @@ const ContactFormManagement = () => {
                                                                 e.stopPropagation();
                                                                 handleConvertToChat(form._id);
                                                             }}
-                                                            className="text-primary-500 hover:text-primary-600 flex items-center gap-1"
+                                                            className="text-primary-500 hover:text-primary-500 flex items-center gap-1"
                                                             title="Convert to Chat"
                                                         >
                                                             <FiMessageSquare size={16} />
@@ -310,14 +311,20 @@ const ContactFormManagement = () => {
                                                         </button>
                                                     )}
                                                     {form.chatId && (
-                                                        <a
-                                                            href={`/admin/support-chat?chatId=${typeof form.chatId === 'string' ? form.chatId : (form.chatId?._id || form.chatId?.toString() || '')}`}
-                                                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                                            title="View Chat"
-                                                        >
-                                                            <FiMessageSquare size={16} />
-                                                            <span className="hidden md:inline">View Chat</span>
-                                                        </a>
+                                                      <a
+                                                        href={ROUTES.admin.supportChatWithId(
+                                                          typeof form.chatId === "string"
+                                                            ? form.chatId
+                                                            : form.chatId?._id ||
+                                                              form.chatId?.toString() ||
+                                                              ""
+                                                        )}
+                                                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                                        title="View Chat"
+                                                      >
+                                                        <FiMessageSquare size={16} />
+                                                        <span className="hidden md:inline">View Chat</span>
+                                                      </a>
                                                     )}
                                                     <select
                                                         value={form.status}
@@ -401,15 +408,21 @@ const ContactFormManagement = () => {
                                             </p>
                                         </div>
                                         {form.chatId && (
-                                            <div className="col-span-2">
-                                                <label className="text-sm font-medium text-gray-500">Chat</label>
-                                                <a
-                                                    href={`/admin/support-chat?chatId=${typeof form.chatId === 'string' ? form.chatId : (form.chatId?._id || form.chatId?.toString() || '')}`}
-                                                    className="text-primary-500 hover:underline"
-                                                >
-                                                    View Chat Conversation
-                                                </a>
-                                            </div>
+                                          <div className="col-span-2">
+                                            <label className="text-sm font-medium text-gray-500">Chat</label>
+                                            <a
+                                              href={ROUTES.admin.supportChatWithId(
+                                                typeof form.chatId === "string"
+                                                  ? form.chatId
+                                                  : form.chatId?._id ||
+                                                    form.chatId?.toString() ||
+                                                    ""
+                                              )}
+                                              className="text-primary-500 hover:underline"
+                                            >
+                                              View Chat Conversation
+                                            </a>
+                                          </div>
                                         )}
                                     </div>
                                     {!form.chatId && (

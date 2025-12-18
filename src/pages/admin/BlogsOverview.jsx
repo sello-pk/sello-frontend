@@ -31,7 +31,7 @@ const BlogsOverview = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState(null);
-  const { data: blogsData, isLoading: blogsLoading } = useGetAllBlogsQuery({
+  const { data: blogsData, isLoading: blogsLoading, refetch: refetchBlogs } = useGetAllBlogsQuery({
     page,
     limit: 10,
   });
@@ -70,6 +70,8 @@ const BlogsOverview = () => {
     try {
       await deleteBlog(blogToDelete).unwrap();
       toast.success("Blog deleted successfully");
+      // Refetch blogs list to show updated data
+      refetchBlogs();
     } catch (error) {
       toast.error(error?.data?.message || "Failed to delete blog");
     } finally {

@@ -97,14 +97,16 @@ const AdminLayout = ({ children }) => {
     const handleLogout = async () => {
         try {
             await logout().unwrap();
-            localStorage.removeItem("token");
+            // clearTokens is called by transformResponse, but ensure cleanup
             localStorage.removeItem("user");
             navigate("/login");
         } catch (error) {
             if (process.env.NODE_ENV === 'development') {
                 console.error("Logout error:", error);
             }
-            localStorage.removeItem("token");
+            // Clear tokens even if logout request fails
+            const { clearTokens } = await import("../../utils/tokenRefresh");
+            clearTokens();
             localStorage.removeItem("user");
             navigate("/login");
         }

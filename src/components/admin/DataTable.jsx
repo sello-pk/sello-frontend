@@ -104,7 +104,7 @@ const DataTable = memo(({
                                             if (input) input.indeterminate = someSelected;
                                         }}
                                         onChange={(e) => handleSelectAll(e.target.checked)}
-                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                        className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                                     />
                                 </th>
                             )}
@@ -150,7 +150,7 @@ const DataTable = memo(({
                                                 type="checkbox"
                                                 checked={isSelected}
                                                 onChange={(e) => handleSelectRow(row.id || row._id || rowIndex, e.target.checked)}
-                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                                             />
                                         </td>
                                     )}
