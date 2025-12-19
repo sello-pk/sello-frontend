@@ -10,11 +10,13 @@ import Spinner from "../../components/Spinner";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (!email) {
       return toast.error("Email is required");
@@ -27,7 +29,8 @@ const ForgotPassword = () => {
       navigate("/verify-otp");
     } catch (err) {
       const errorMessage = err?.data?.message || err?.message || "Failed to send OTP. Please try again later.";
-      toast.error(errorMessage);
+      setError(errorMessage);
+      toast.error(errorMessage, { duration: 5000 });
       console.error("Forgot password error:", err);
     }
   };
@@ -67,12 +70,23 @@ const ForgotPassword = () => {
                 </label>
                 <input
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(""); // Clear error on type
+                  }}
                   className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg"
                   type="email"
                   placeholder="example@gmail.com"
                 />
               </div>
+
+              {/* Error Message Display */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
+                  <p className="font-semibold">Error:</p>
+                  <p>{error}</p>
+                </div>
+              )}
 
               {/* Send OTP Button */}
               <button

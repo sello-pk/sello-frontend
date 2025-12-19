@@ -123,14 +123,15 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
             
             // Also show the URL in a more visible way
             setTimeout(() => {
-              toast.info(
+              toast(
                 <div>
                   <p className="font-semibold mb-2">Invite URL (copied to clipboard):</p>
                   <p className="text-xs break-all bg-gray-100 p-2 rounded">{response.data.inviteUrl}</p>
                 </div>,
                 {
                   duration: 15000,
-                  style: { maxWidth: '500px' }
+                  style: { maxWidth: '500px' },
+                  icon: 'ℹ️'
                 }
               );
             }, 1000);
