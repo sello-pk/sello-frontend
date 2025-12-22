@@ -21,24 +21,15 @@ import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
 import { images } from "../../../assets/assets";
 import { useCarCategories } from "../../../hooks/useCarCategories";
+import { isFieldVisible, getRequiredFields } from "../../../utils/vehicleFieldConfig";
 
 const EditCarForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { makes, models, getModelsByMake, years, isLoading: categoriesLoading } = useCarCategories();
-  const [selectedMake, setSelectedMake] = useState("");
-  const [availableModels, setAvailableModels] = useState([]);
-  const [availableYears, setAvailableYears] = useState([]);
-  
-  // Load car data
-  const { data: car, isLoading: isLoadingCar, error: carError } = useGetSingleCarQuery(id, {
-    skip: !id,
-  });
-  const { data: currentUser } = useGetMeQuery();
-  
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    vehicleType: "Car", // Default vehicle type
     make: "",
     model: "",
     variant: "",
@@ -67,6 +58,18 @@ const EditCarForm = () => {
     images: [],
     existingImages: [], // URLs of existing images
   });
+  
+  // Load car data
+  const { data: car, isLoading: isLoadingCar, error: carError } = useGetSingleCarQuery(id, {
+    skip: !id,
+  });
+  const { data: currentUser } = useGetMeQuery();
+  
+  // Filter categories by vehicle type from formData
+  const { makes, models, getModelsByMake, years, isLoading: categoriesLoading } = useCarCategories(formData.vehicleType);
+  const [selectedMake, setSelectedMake] = useState("");
+  const [availableModels, setAvailableModels] = useState([]);
+  const [availableYears, setAvailableYears] = useState([]);
 
   const [editCar, { isLoading }] = useEditCarMutation();
 
@@ -88,6 +91,7 @@ const EditCarForm = () => {
       setFormData({
         title: car.title || "",
         description: car.description || "",
+        vehicleType: car.vehicleType || "Car", // Include vehicle type
         make: car.make || "",
         model: car.model || "",
         variant: car.variant || "",
@@ -197,26 +201,15 @@ const EditCarForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const requiredFields = [
-      "title",
-      "make",
-      "model",
-      "year",
-      "condition",
-      "price",
-      "fuelType",
-      "engineCapacity",
-      "transmission",
-      "regionalSpec",
-      "bodyType",
-      "city",
-      "contactNumber",
-      "sellerType",
-      "warranty",
-      "ownerType",
-      "geoLocation",
-    ];
-    const missing = requiredFields.filter((key) => !formData[key]);
+    
+    // Validate required fields dynamically based on vehicle type
+    const requiredFields = getRequiredFields(formData.vehicleType);
+    
+    const missing = requiredFields.filter((key) => {
+      const value = formData[key];
+      return !value || (typeof value === 'string' && value.trim() === '');
+    });
+    
     if (missing.length) {
       toast.error(`Missing required fields: ${missing.join(", ")}`);
       return;
@@ -488,57 +481,70 @@ const EditCarForm = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block mb-1">Body Type</label>
-          <BodyTypes
-            onBodyTypeChange={(val) => handleChange("bodyType", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "bodyType") && (
+          <div>
+            <label className="block mb-1">Body Type</label>
+            <BodyTypes
+              vehicleType={formData.vehicleType}
+              onBodyTypeChange={(val) => handleChange("bodyType", val)}
+            />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "regionalSpec") && (
+          <div>
+            <label className="block mb-1">Regional Spec</label>
+            <RegionalSpecs
+              onChange={(val) => handleChange("regionalSpec", val)}
+            />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "fuelType") && (
+          <div>
+            <label className="block mb-1">Fuel Type</label>
+            <FuelSpecs onChange={(val) => handleChange("fuelType", val)} />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "transmission") && (
+          <div>
+            <label className="block mb-1">Transmission</label>
+            <TransmissionSpecs
+              onChange={(val) => handleChange("transmission", val)}
+            />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "cylinders") && (
+          <div>
+            <label className="block mb-1">Number of Cylinders</label>
+            <CylindersSpecs
+              onChange={(val) => handleChange("numberOfCylinders", val)}
+            />
+          </div>
+        )}
 
         <div>
-          <label className="block mb-1">Regional Spec</label>
-          <RegionalSpecs
-            onChange={(val) => handleChange("regionalSpec", val)}
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Fuel Type</label>
-          <FuelSpecs onChange={(val) => handleChange("fuelType", val)} />
-        </div>
-
-        <div>
-          <label className="block mb-1">Transmission</label>
-          <TransmissionSpecs
-            onChange={(val) => handleChange("transmission", val)}
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Number of Cylinders</label>
-          <CylindersSpecs
-            onChange={(val) => handleChange("numberOfCylinders", val)}
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Exterior Color</label>
           <ExteriorColor
+            value={formData.colorExterior}
             onChange={(val) => handleChange("colorExterior", val)}
           />
         </div>
 
         <div>
-          <label className="block mb-1">Interior Color</label>
           <InteriorColor
+            value={formData.colorInterior}
             onChange={(val) => handleChange("colorInterior", val)}
           />
         </div>
 
-        <div>
-          <label className="block mb-1">Car Doors</label>
-          <DoorsSpecs onChange={(val) => handleChange("carDoors", val)} />
-        </div>
+        {isFieldVisible(formData.vehicleType, "doors") && (
+          <div>
+            <label className="block mb-1">Car Doors</label>
+            <DoorsSpecs onChange={(val) => handleChange("carDoors", val)} />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Owner Type</label>
@@ -564,19 +570,23 @@ const EditCarForm = () => {
           </select>
         </div>
 
-        <div>
-          <label className="block mb-1">Horsepower</label>
-          <HorsePowerSpecs
-            onChange={(val) => handleChange("horsepower", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "horsepower") && (
+          <div>
+            <label className="block mb-1">Horsepower</label>
+            <HorsePowerSpecs
+              onChange={(val) => handleChange("horsepower", val)}
+            />
+          </div>
+        )}
 
-        <div>
-          <label className="block mb-1">Engine Capacity</label>
-          <EngineCapacitySpecs
-            onChange={(val) => handleChange("engineCapacity", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "engineCapacity") && (
+          <div>
+            <label className="block mb-1">Engine Capacity</label>
+            <EngineCapacitySpecs
+              onChange={(val) => handleChange("engineCapacity", val)}
+            />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Features</label>

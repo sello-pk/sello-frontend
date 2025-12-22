@@ -19,7 +19,12 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
-    cors: true
+    cors: true,
+    headers: {
+      // Required for Google OAuth to work properly
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none'
+    }
   },
   build: {
     // Production build optimizations
@@ -123,6 +128,14 @@ export default defineConfig({
       '@tiptap/extension-link',
       '@tiptap/extension-text-align',
       '@tiptap/extension-underline'
+    ],
+    exclude: [
+      '@sentry/react' // Exclude Sentry - it's optional and loaded dynamically
     ]
+  },
+  resolve: {
+    alias: {
+      // Make Sentry import optional - only resolve if package exists
+    }
   }
 });

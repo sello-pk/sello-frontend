@@ -331,11 +331,11 @@ const HelpCenter = () => {
                 <span className="text-lg font-medium">+971 50 123 4567</span>
               </a>
               <a
-                href="mailto:support@sello.ae"
+                href={`mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"}`}
                 className="flex items-center gap-2 text-white hover:text-primary-100 transition-colors"
               >
                 <FiMail className="text-xl" />
-                <span className="text-lg font-medium">support@sello.ae</span>
+                <span className="text-lg font-medium">{import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"}</span>
               </a>
             </div>
             <div className="pt-6 border-t border-primary-400">

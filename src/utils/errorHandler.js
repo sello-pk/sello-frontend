@@ -70,7 +70,9 @@ export const handleApiError = (error, options = {}) => {
     const {
         onError,
         showNotification = true,
-        defaultMessage = 'An error occurred. Please try again.'
+        defaultMessage = 'An error occurred. Please try again.',
+        endpoint,
+        ...metadata
     } = options;
     
     const errorMessage = getErrorMessage(error) || defaultMessage;
@@ -85,10 +87,8 @@ export const handleApiError = (error, options = {}) => {
         notifyError(errorMessage);
     }
     
-    // Log error in development
-    if (process.env.NODE_ENV === 'development') {
-        console.error('API Error:', error);
-    }
+    // Log error to console
+    console.error(`API Error: ${endpoint || 'Unknown'}`, error, { endpoint, ...metadata });
     
     return errorMessage;
 };

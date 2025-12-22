@@ -61,7 +61,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                             }
                         });
                     } catch (fetchError) {
-                        console.error("Network error creating chat:", fetchError);
+                        console.error("Network error creating chat", fetchError);
                         toast.error("Cannot connect to server. Please check your connection.");
                         return;
                     }
@@ -82,7 +82,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                     toast.error(data.message || "Failed to initialize chat");
                 }
             } catch (error) {
-                console.error("Initialize chat error:", error);
+                console.error("Initialize chat error", error);
                 if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_REFUSED')) {
                     toast.error("Cannot connect to server. Please make sure the server is running.");
                 } else {
@@ -125,7 +125,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
             });
 
             newSocket.on('connect_error', (error) => {
-                console.error('Car chat socket connection error:', error);
+                console.error('Car chat socket connection error', error);
                 setSocketConnected(false);
                 // Don't show error toast - fallback to REST API
             });
@@ -173,7 +173,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
 
             setSocket(newSocket);
         } catch (error) {
-            console.error('Error initializing socket:', error);
+            console.error('Error initializing socket', error);
             setSocketConnected(false);
         }
 
@@ -223,7 +223,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                 setMessages(data.data);
             }
         } catch (error) {
-            console.error("Load messages error:", error);
+            console.error("Load messages error", error);
         }
     };
 
@@ -283,7 +283,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                 }
             }
         } catch (error) {
-            console.error("Send message error:", error);
+            console.error("Send message error", error);
             toast.error("Failed to send message");
         }
     };

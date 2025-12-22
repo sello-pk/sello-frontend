@@ -42,7 +42,8 @@ import hybirdType from '../types/hybirdType.svg';
 import reviewBoyImg from '../types/reviewBoyImg.png';
 import reviewGirlImg from '../types/reviewGirlImg.png';
 
-export const bodyTypes = [
+// Car body types
+export const carBodyTypes = [
   { titleValue: "Roadster", image: roadster, isChecked: false },
   { titleValue: "Cabriolet", image: cabriolet, isChecked: false },
   { titleValue: "Super", image: superType, isChecked: false },
@@ -60,6 +61,58 @@ export const bodyTypes = [
   { titleValue: "Pickup", image: truck, isChecked: false },
   { titleValue: "Van", image: van, isChecked: false },
 ];
+
+// Bus body types (using van/truck images as placeholders - can be updated later)
+export const busBodyTypes = [
+  { titleValue: "School Bus", image: van, isChecked: false },
+  { titleValue: "Coach", image: van, isChecked: false },
+  { titleValue: "Mini Bus", image: van, isChecked: false },
+  { titleValue: "Double Decker", image: van, isChecked: false },
+  { titleValue: "Shuttle Bus", image: van, isChecked: false },
+  { titleValue: "Transit Bus", image: van, isChecked: false },
+];
+
+// Truck body types
+export const truckBodyTypes = [
+  { titleValue: "Pickup", image: truck, isChecked: false },
+  { titleValue: "Flatbed", image: truck, isChecked: false },
+  { titleValue: "Box Truck", image: truck, isChecked: false },
+  { titleValue: "Dump Truck", image: truck, isChecked: false },
+  { titleValue: "Tow Truck", image: truck, isChecked: false },
+  { titleValue: "Cement Truck", image: truck, isChecked: false },
+  { titleValue: "Refrigerated Truck", image: truck, isChecked: false },
+  { titleValue: "Tanker Truck", image: truck, isChecked: false },
+];
+
+// Van body types (can reuse car body types or have specific ones)
+export const vanBodyTypes = [
+  { titleValue: "Van", image: van, isChecked: false },
+  { titleValue: "Minivan", image: van, isChecked: false },
+  { titleValue: "Cargo Van", image: van, isChecked: false },
+  { titleValue: "Passenger Van", image: van, isChecked: false },
+];
+
+// Default export for backward compatibility (Car body types)
+export const bodyTypes = carBodyTypes;
+
+// Get body types by vehicle type
+export const getBodyTypesByVehicleType = (vehicleType) => {
+  switch (vehicleType) {
+    case "Car":
+      return carBodyTypes;
+    case "Bus":
+      return busBodyTypes;
+    case "Truck":
+      return truckBodyTypes;
+    case "Van":
+      return vanBodyTypes;
+    case "Bike":
+    case "E-bike":
+      return []; // Bikes don't have body types
+    default:
+      return carBodyTypes;
+  }
+};
 
 export const regionalSpecs = [
   { titleValue: "GCC", isChecked: false },
@@ -100,28 +153,65 @@ export const numberOfCylinders = [
   { titleValue: 12, isChecked: false },
 ];
 
+// Color definitions with hex values for proper display
+const colorDefinitions = {
+  "Black": "#000000",
+  "White": "#FFFFFF",
+  "Silver": "#C0C0C0",
+  "Gray": "#808080",
+  "Red": "#FF0000",
+  "Blue": "#0000FF",
+  "Green": "#008000",
+  "Brown": "#8B4513",
+  "Beige": "#F5F5DC",
+  "Tan": "#D2B48C",
+  "Gold": "#FFD700",
+  "Orange": "#FFA500",
+  "Yellow": "#FFFF00",
+  "Purple": "#800080",
+  "Pink": "#FFC0CB",
+  "Maroon": "#800000",
+  "Navy": "#000080",
+  "Teal": "#008080",
+  "Burgundy": "#800020",
+  "Champagne": "#F7E7CE",
+  "Pearl": "#F8F6F0",
+};
+
+// Exterior colors - common car colors
 export const exteriorColors = [
-  { titleValue: "Black", isChecked: false, category: "color" },
-  { titleValue: "Blue", isChecked: false, category: "color" },
-  { titleValue: "Brown", isChecked: false, category: "color" },
-  { titleValue: "Purple", isChecked: false, category: "color" },
-  { titleValue: "Silver", isChecked: false, category: "color" },
-  { titleValue: "White", isChecked: false, category: "color" },
-  { titleValue: "Orange", isChecked: false, category: "color" },
-  { titleValue: "Yellow", isChecked: false, category: "color" },
-  { titleValue: "Gold", isChecked: false, category: "color" },
+  { titleValue: "Black", hexColor: colorDefinitions["Black"], isChecked: false, category: "color" },
+  { titleValue: "White", hexColor: colorDefinitions["White"], isChecked: false, category: "color" },
+  { titleValue: "Silver", hexColor: colorDefinitions["Silver"], isChecked: false, category: "color" },
+  { titleValue: "Gray", hexColor: colorDefinitions["Gray"], isChecked: false, category: "color" },
+  { titleValue: "Red", hexColor: colorDefinitions["Red"], isChecked: false, category: "color" },
+  { titleValue: "Blue", hexColor: colorDefinitions["Blue"], isChecked: false, category: "color" },
+  { titleValue: "Green", hexColor: colorDefinitions["Green"], isChecked: false, category: "color" },
+  { titleValue: "Brown", hexColor: colorDefinitions["Brown"], isChecked: false, category: "color" },
+  { titleValue: "Beige", hexColor: colorDefinitions["Beige"], isChecked: false, category: "color" },
+  { titleValue: "Gold", hexColor: colorDefinitions["Gold"], isChecked: false, category: "color" },
+  { titleValue: "Orange", hexColor: colorDefinitions["Orange"], isChecked: false, category: "color" },
+  { titleValue: "Yellow", hexColor: colorDefinitions["Yellow"], isChecked: false, category: "color" },
+  { titleValue: "Purple", hexColor: colorDefinitions["Purple"], isChecked: false, category: "color" },
+  { titleValue: "Maroon", hexColor: colorDefinitions["Maroon"], isChecked: false, category: "color" },
+  { titleValue: "Navy", hexColor: colorDefinitions["Navy"], isChecked: false, category: "color" },
+  { titleValue: "Burgundy", hexColor: colorDefinitions["Burgundy"], isChecked: false, category: "color" },
+  { titleValue: "Champagne", hexColor: colorDefinitions["Champagne"], isChecked: false, category: "color" },
+  { titleValue: "Pearl", hexColor: colorDefinitions["Pearl"], isChecked: false, category: "color" },
 ];
 
+// Interior colors - common interior colors
 export const interiorColor = [
-  { titleValue: "Black", isChecked: false, category: "color" },
-  { titleValue: "Blue", isChecked: false, category: "color" },
-  { titleValue: "Brown", isChecked: false, category: "color" },
-  { titleValue: "Purple", isChecked: false, category: "color" },
-  { titleValue: "Silver", isChecked: false, category: "color" },
-  { titleValue: "White", isChecked: false, category: "color" },
-  { titleValue: "Orange", isChecked: false, category: "color" },
-  { titleValue: "Yellow", isChecked: false, category: "color" },
-  { titleValue: "Gold", isChecked: false, category: "color" },
+  { titleValue: "Black", hexColor: colorDefinitions["Black"], isChecked: false, category: "color" },
+  { titleValue: "Beige", hexColor: colorDefinitions["Beige"], isChecked: false, category: "color" },
+  { titleValue: "Brown", hexColor: colorDefinitions["Brown"], isChecked: false, category: "color" },
+  { titleValue: "Tan", hexColor: colorDefinitions["Tan"], isChecked: false, category: "color" },
+  { titleValue: "Gray", hexColor: colorDefinitions["Gray"], isChecked: false, category: "color" },
+  { titleValue: "White", hexColor: colorDefinitions["White"], isChecked: false, category: "color" },
+  { titleValue: "Red", hexColor: colorDefinitions["Red"], isChecked: false, category: "color" },
+  { titleValue: "Blue", hexColor: colorDefinitions["Blue"], isChecked: false, category: "color" },
+  { titleValue: "Cream", hexColor: "#FFFDD0", isChecked: false, category: "color" },
+  { titleValue: "Burgundy", hexColor: colorDefinitions["Burgundy"], isChecked: false, category: "color" },
 ];
 
 export const doors = [

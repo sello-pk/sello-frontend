@@ -3,13 +3,20 @@ import { useGetAllCategoriesQuery } from "../redux/services/adminApi";
 
 /**
  * Custom hook to fetch and organize car categories (makes, models, years, countries, cities)
+ * @param {string} vehicleType - Optional vehicle type filter (Car, Bus, Truck, Van, Bike, E-bike)
  */
-export const useCarCategories = () => {
-    // Use skip to prevent duplicate queries - RTK Query will cache based on query params
-    const { data: allCarCategories, isLoading: carLoading, error: carError } = useGetAllCategoriesQuery({
+export const useCarCategories = (vehicleType = null) => {
+    // Build query params
+    const queryParams = {
         type: "car",
         isActive: "true",
-    }, {
+    };
+    if (vehicleType) {
+        queryParams.vehicleType = vehicleType;
+    }
+
+    // Use skip to prevent duplicate queries - RTK Query will cache based on query params
+    const { data: allCarCategories, isLoading: carLoading, error: carError } = useGetAllCategoriesQuery(queryParams, {
         // Refetch on mount to ensure fresh data
         refetchOnMountOrArgChange: true,
     });

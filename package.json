@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.7",
@@ -55,6 +58,12 @@
     "tailwindcss": "^3.4.17",
     "terser": "^5.44.1",
     "vite": "^6.3.5",
-    "vite-plugin-static-copy": "^3.1.1"
+    "vite-plugin-static-copy": "^3.1.1",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitest/ui": "^2.1.8",
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.8"
   }
 }

@@ -94,7 +94,7 @@ const Footer = () => {
                     href="mailto:info@sello.ae"
                     className="hover:text-white transition-colors duration-200"
                   >
-                    support@sello.pk
+                    {import.meta.env.VITE_SUPPORT_EMAIL || 'support@example.com'}
                   </a>
                 </p>
               </div>
@@ -217,7 +217,7 @@ const Footer = () => {
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()}{" "}
             <a
-              href="https://sello.pk"
+              href={import.meta.env.VITE_SITE_URL || 'https://example.com'}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-500 hover:text-primary-400 transition-colors duration-200 font-medium"

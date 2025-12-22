@@ -15,6 +15,7 @@ import {
   useGetInviteByTokenQuery,
   useAcceptInviteMutation,
 } from "../../redux/services/adminApi";
+import { setAccessToken, setRefreshToken } from "../../utils/tokenRefresh.js";
 
 // DetailItem component for invitation details
 const DetailItem = ({ icon, label, value, badge = false }) => {
@@ -96,11 +97,11 @@ const AcceptInvite = () => {
       localStorage.removeItem("otp");
 
 
-      // STEP 2: Store tokens and user data
-      localStorage.setItem("token", tokenData);
+      // STEP 2: Store tokens and user data using utility functions
+      setAccessToken(tokenData);
       // Store refresh token if provided (new system)
       if (res.refreshToken) {
-        localStorage.setItem("refreshToken", res.refreshToken);
+        setRefreshToken(res.refreshToken);
       }
 
       const completeUserData = {
@@ -135,7 +136,7 @@ const AcceptInvite = () => {
       // Using React Router navigate with replace to avoid history issues
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      console.error("Accept invite error:", err);
+      console.error("Accept invite error", err);
       toast.error(
         err?.data?.message || err?.message || "Failed to accept invitation"
       );

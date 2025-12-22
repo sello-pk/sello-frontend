@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, lazy, Suspense } from "react";
 import { Route, Routes, useLocation, Navigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import Spinner from "./components/Spinner";
+import AppLoader from "./components/common/AppLoader";
 
 // Components
 import Navbar from "./components/Navbar.jsx";
@@ -231,71 +231,71 @@ const App = () => {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<Signup />} />
-        <Route path="/forgot-password" element={<Suspense fallback={<Spinner fullScreen={true} />}><ForgotPassword /></Suspense>} />
-        <Route path="/reset-password" element={<Suspense fallback={<Spinner fullScreen={true} />}><ResetPassword /></Suspense>} />
-        <Route path="/verify-otp" element={<Suspense fallback={<Spinner fullScreen={true} />}><VerifyOtp /></Suspense>} />
-        <Route path="/reset-success" element={<Suspense fallback={<Spinner fullScreen={true} />}><ResetSuccess /></Suspense>} />
-        <Route path="/accept-invite/:token" element={<Suspense fallback={<Spinner fullScreen={true} />}><AcceptInvite /></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<AppLoader />}><ForgotPassword /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<AppLoader />}><ResetPassword /></Suspense>} />
+        <Route path="/verify-otp" element={<Suspense fallback={<AppLoader />}><VerifyOtp /></Suspense>} />
+        <Route path="/reset-success" element={<Suspense fallback={<AppLoader />}><ResetSuccess /></Suspense>} />
+        <Route path="/accept-invite/:token" element={<Suspense fallback={<AppLoader />}><AcceptInvite /></Suspense>} />
 
         {/* Public pages */}
-        <Route path="/privacy-policy" element={<Suspense fallback={<Spinner fullScreen={true} />}><OurPrivacyPolicy /></Suspense>} />
-        <Route path="/terms-conditon" element={<Suspense fallback={<Spinner fullScreen={true} />}><TermsCondition /></Suspense>} />
-        <Route path="/cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><CarListings /></Suspense>} />
+        <Route path="/privacy-policy" element={<Suspense fallback={<AppLoader />}><OurPrivacyPolicy /></Suspense>} />
+        <Route path="/terms-conditon" element={<Suspense fallback={<AppLoader />}><TermsCondition /></Suspense>} />
+        <Route path="/cars" element={<Suspense fallback={<AppLoader />}><CarListings /></Suspense>} />
         {/* Car Details - Only match if path starts with /cars/ and has an ID */}
         {/* Use a function to validate before rendering */}
         <Route 
           path="/cars/:id" 
           element={
             <CarDetailsRouteGuard>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <CarDetails />
               </Suspense>
             </CarDetailsRouteGuard>
           } 
         />
-        <Route path="/category/:slug" element={<Suspense fallback={<Spinner fullScreen={true} />}><CategoryPage /></Suspense>} />
-        <Route path="/about" element={<Suspense fallback={<Spinner fullScreen={true} />}><About /></Suspense>} />
-        <Route path="/contact" element={<Suspense fallback={<Spinner fullScreen={true} />}><Contact /></Suspense>} />
-        <Route path="/view-all-brands" element={<Suspense fallback={<Spinner fullScreen={true} />}><AllBrands /></Suspense>} />
-        <Route path="/filter" element={<Suspense fallback={<Spinner fullScreen={true} />}><FilterPage /></Suspense>} />
-        <Route path="/search-results" element={<Suspense fallback={<Spinner fullScreen={true} />}><FilteredResults /></Suspense>} />
-        <Route path="/loan-plans" element={<Suspense fallback={<Spinner fullScreen={true} />}><LoanPlansPage /></Suspense>} />
-        <Route path="/blog" element={<Suspense fallback={<Spinner fullScreen={true} />}><Blog /></Suspense>} />
-        <Route path="/blog/all" element={<Suspense fallback={<Spinner fullScreen={true} />}><AllBlog /></Suspense>} />
-        <Route path="/blog/:id" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogDetails /></Suspense>} />
-        <Route path="/help-center" element={<Suspense fallback={<Spinner fullScreen={true} />}><HelpCenter /></Suspense>} />
-        <Route path="/help/search" element={<Suspense fallback={<Spinner fullScreen={true} />}><HelpSearch /></Suspense>} />
-        <Route path="/help/account-login" element={<Suspense fallback={<Spinner fullScreen={true} />}><AccountLogin /></Suspense>} />
-        <Route path="/help/buying-selling" element={<Suspense fallback={<Spinner fullScreen={true} />}><BuyingSelling /></Suspense>} />
-        <Route path="/help/payments" element={<Suspense fallback={<Spinner fullScreen={true} />}><Payments /></Suspense>} />
-        <Route path="/help/shipping" element={<Suspense fallback={<Spinner fullScreen={true} />}><Shipping /></Suspense>} />
-        <Route path="/help/safety" element={<Suspense fallback={<Spinner fullScreen={true} />}><Safety /></Suspense>} />
-        <Route path="/help/buying-cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><BuyingCars /></Suspense>} />
-        <Route path="/help/selling-cars" element={<Suspense fallback={<Spinner fullScreen={true} />}><SellingCars /></Suspense>} />
-        <Route path="/help/payment-methods" element={<Suspense fallback={<Spinner fullScreen={true} />}><PaymentMethods /></Suspense>} />
-        <Route path="/help/account-settings" element={<Suspense fallback={<Spinner fullScreen={true} />}><AccountSettings /></Suspense>} />
-        <Route path="/help/faqs" element={<Suspense fallback={<Spinner fullScreen={true} />}><FAQs /></Suspense>} />
-        <Route path="/help/policies" element={<Suspense fallback={<Spinner fullScreen={true} />}><Policies /></Suspense>} />
-        <Route path="/help/billing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Billing /></Suspense>} />
-        <Route path="/help/managing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Managing /></Suspense>} />
-        <Route path="/help/uploading" element={<Suspense fallback={<Spinner fullScreen={true} />}><Uploading /></Suspense>} />
-        <Route path="/help/enterprise" element={<Suspense fallback={<Spinner fullScreen={true} />}><Enterprise /></Suspense>} />
-        <Route path="/help/creators" element={<Suspense fallback={<Spinner fullScreen={true} />}><Creators /></Suspense>} />
-        <Route path="/help/features" element={<Suspense fallback={<Spinner fullScreen={true} />}><Features /></Suspense>} />
-        <Route path="/help/sales" element={<Suspense fallback={<Spinner fullScreen={true} />}><Sales /></Suspense>} />
-        <Route path="/help/sharing" element={<Suspense fallback={<Spinner fullScreen={true} />}><Sharing /></Suspense>} />
-        <Route path="/help/developers" element={<Suspense fallback={<Spinner fullScreen={true} />}><Developers /></Suspense>} />
+        <Route path="/category/:slug" element={<Suspense fallback={<AppLoader />}><CategoryPage /></Suspense>} />
+        <Route path="/about" element={<Suspense fallback={<AppLoader />}><About /></Suspense>} />
+        <Route path="/contact" element={<Suspense fallback={<AppLoader />}><Contact /></Suspense>} />
+        <Route path="/view-all-brands" element={<Suspense fallback={<AppLoader />}><AllBrands /></Suspense>} />
+        <Route path="/filter" element={<Suspense fallback={<AppLoader />}><FilterPage /></Suspense>} />
+        <Route path="/search-results" element={<Suspense fallback={<AppLoader />}><FilteredResults /></Suspense>} />
+        <Route path="/loan-plans" element={<Suspense fallback={<AppLoader />}><LoanPlansPage /></Suspense>} />
+        <Route path="/blog" element={<Suspense fallback={<AppLoader />}><Blog /></Suspense>} />
+        <Route path="/blog/all" element={<Suspense fallback={<AppLoader />}><AllBlog /></Suspense>} />
+        <Route path="/blog/:id" element={<Suspense fallback={<AppLoader />}><BlogDetails /></Suspense>} />
+        <Route path="/help-center" element={<Suspense fallback={<AppLoader />}><HelpCenter /></Suspense>} />
+        <Route path="/help/search" element={<Suspense fallback={<AppLoader />}><HelpSearch /></Suspense>} />
+        <Route path="/help/account-login" element={<Suspense fallback={<AppLoader />}><AccountLogin /></Suspense>} />
+        <Route path="/help/buying-selling" element={<Suspense fallback={<AppLoader />}><BuyingSelling /></Suspense>} />
+        <Route path="/help/payments" element={<Suspense fallback={<AppLoader />}><Payments /></Suspense>} />
+        <Route path="/help/shipping" element={<Suspense fallback={<AppLoader />}><Shipping /></Suspense>} />
+        <Route path="/help/safety" element={<Suspense fallback={<AppLoader />}><Safety /></Suspense>} />
+        <Route path="/help/buying-cars" element={<Suspense fallback={<AppLoader />}><BuyingCars /></Suspense>} />
+        <Route path="/help/selling-cars" element={<Suspense fallback={<AppLoader />}><SellingCars /></Suspense>} />
+        <Route path="/help/payment-methods" element={<Suspense fallback={<AppLoader />}><PaymentMethods /></Suspense>} />
+        <Route path="/help/account-settings" element={<Suspense fallback={<AppLoader />}><AccountSettings /></Suspense>} />
+        <Route path="/help/faqs" element={<Suspense fallback={<AppLoader />}><FAQs /></Suspense>} />
+        <Route path="/help/policies" element={<Suspense fallback={<AppLoader />}><Policies /></Suspense>} />
+        <Route path="/help/billing" element={<Suspense fallback={<AppLoader />}><Billing /></Suspense>} />
+        <Route path="/help/managing" element={<Suspense fallback={<AppLoader />}><Managing /></Suspense>} />
+        <Route path="/help/uploading" element={<Suspense fallback={<AppLoader />}><Uploading /></Suspense>} />
+        <Route path="/help/enterprise" element={<Suspense fallback={<AppLoader />}><Enterprise /></Suspense>} />
+        <Route path="/help/creators" element={<Suspense fallback={<AppLoader />}><Creators /></Suspense>} />
+        <Route path="/help/features" element={<Suspense fallback={<AppLoader />}><Features /></Suspense>} />
+        <Route path="/help/sales" element={<Suspense fallback={<AppLoader />}><Sales /></Suspense>} />
+        <Route path="/help/sharing" element={<Suspense fallback={<AppLoader />}><Sharing /></Suspense>} />
+        <Route path="/help/developers" element={<Suspense fallback={<AppLoader />}><Developers /></Suspense>} />
 
         {/* Payment Success Pages */}
-        <Route path="/subscription/success" element={<Suspense fallback={<Spinner fullScreen={true} />}><SubscriptionSuccess /></Suspense>} />
-        <Route path="/boost/success" element={<Suspense fallback={<Spinner fullScreen={true} />}><BoostSuccess /></Suspense>} />
+        <Route path="/subscription/success" element={<Suspense fallback={<AppLoader />}><SubscriptionSuccess /></Suspense>} />
+        <Route path="/boost/success" element={<Suspense fallback={<AppLoader />}><BoostSuccess /></Suspense>} />
 
         {/* Protected User Routes */}
         <Route
           path="/create-post"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <CreatePost />
               </Suspense>
             </ProtectedRoute>
@@ -305,7 +305,7 @@ const App = () => {
           path="/edit-car/:id"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <EditCar />
               </Suspense>
             </ProtectedRoute>
@@ -315,7 +315,7 @@ const App = () => {
           path="/my-listings"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <UserListingPage />
               </Suspense>
             </ProtectedRoute>
@@ -325,7 +325,7 @@ const App = () => {
           path="/profile"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <ProfilePage />
               </Suspense>
             </ProtectedRoute>
@@ -335,7 +335,7 @@ const App = () => {
           path="/saved-cars"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <SavedCars />
               </Suspense>
             </ProtectedRoute>
@@ -345,7 +345,7 @@ const App = () => {
           path="/my-chats"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <MyChats />
               </Suspense>
             </ProtectedRoute>
@@ -355,7 +355,7 @@ const App = () => {
           path="/seller/chats"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <SellerChats />
               </Suspense>
             </ProtectedRoute>
@@ -367,7 +367,7 @@ const App = () => {
           path="/dealer/dashboard"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <DealerDashboard />
               </Suspense>
             </ProtectedRoute>
@@ -377,7 +377,7 @@ const App = () => {
           path="/seller/dashboard"
           element={
             <ProtectedRoute>
-              <Suspense fallback={<Spinner fullScreen={true} />}>
+              <Suspense fallback={<AppLoader />}>
                 <SellerDashboard />
               </Suspense>
             </ProtectedRoute>
@@ -386,33 +386,33 @@ const App = () => {
 
         {/* Admin Routes */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/dashboard" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminDashboard /></Suspense>} />
-          <Route path="/admin/users" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminUsers /></Suspense>} />
-          <Route path="/admin/users/:userId" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminUsers /></Suspense>} />
-          <Route path="/admin/listings" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminListings /></Suspense>} />
-          <Route path="/admin/dealers" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminDealers /></Suspense>} />
-          <Route path="/admin/categories" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminCategories /></Suspense>} />
+          <Route path="/admin/dashboard" element={<Suspense fallback={<AppLoader />}><AdminDashboard /></Suspense>} />
+          <Route path="/admin/users" element={<Suspense fallback={<AppLoader />}><AdminUsers /></Suspense>} />
+          <Route path="/admin/users/:userId" element={<Suspense fallback={<AppLoader />}><AdminUsers /></Suspense>} />
+          <Route path="/admin/listings" element={<Suspense fallback={<AppLoader />}><AdminListings /></Suspense>} />
+          <Route path="/admin/dealers" element={<Suspense fallback={<AppLoader />}><AdminDealers /></Suspense>} />
+          <Route path="/admin/categories" element={<Suspense fallback={<AppLoader />}><AdminCategories /></Suspense>} />
           {/* Blog Management Routes */}
-          <Route path="/admin/blogs" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogsOverview /></Suspense>} />
-          <Route path="/admin/blog-categories" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogCategories /></Suspense>} />
-          <Route path="/admin/blogs/create" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogCreateEnhanced /></Suspense>} />
-          <Route path="/admin/blogs/:id/edit" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogEdit /></Suspense>} />
-          <Route path="/admin/blog-comments" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogComments /></Suspense>} />
-          <Route path="/admin/blog-media" element={<Suspense fallback={<Spinner fullScreen={true} />}><BlogMediaLibrary /></Suspense>} />
-          <Route path="/admin/analytics" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminReports /></Suspense>} />
-          <Route path="/admin/activity-log" element={<Suspense fallback={<Spinner fullScreen={true} />}><ActivityLog /></Suspense>} />
-          <Route path="/admin/chat" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminChatMonitoring /></Suspense>} />
-          <Route path="/admin/chatbot" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminChatbot /></Suspense>} />
-          <Route path="/admin/promotions" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminPromotions /></Suspense>} />
-          <Route path="/admin/payments" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminPayments /></Suspense>} />
-          <Route path="/admin/notifications" element={<Suspense fallback={<Spinner fullScreen={true} />}><AdminNotifications /></Suspense>} />
-          <Route path="/admin/support-chat" element={<Suspense fallback={<Spinner fullScreen={true} />}><SupportChat /></Suspense>} />
-          <Route path="/admin/support-chatbot" element={<Suspense fallback={<Spinner fullScreen={true} />}><SupportChatbot /></Suspense>} />
-          <Route path="/admin/customer-requests" element={<Suspense fallback={<Spinner fullScreen={true} />}><CustomerRequests /></Suspense>} />
+          <Route path="/admin/blogs" element={<Suspense fallback={<AppLoader />}><BlogsOverview /></Suspense>} />
+          <Route path="/admin/blog-categories" element={<Suspense fallback={<AppLoader />}><BlogCategories /></Suspense>} />
+          <Route path="/admin/blogs/create" element={<Suspense fallback={<AppLoader />}><BlogCreateEnhanced /></Suspense>} />
+          <Route path="/admin/blogs/:id/edit" element={<Suspense fallback={<AppLoader />}><BlogEdit /></Suspense>} />
+          <Route path="/admin/blog-comments" element={<Suspense fallback={<AppLoader />}><BlogComments /></Suspense>} />
+          <Route path="/admin/blog-media" element={<Suspense fallback={<AppLoader />}><BlogMediaLibrary /></Suspense>} />
+          <Route path="/admin/analytics" element={<Suspense fallback={<AppLoader />}><AdminReports /></Suspense>} />
+          <Route path="/admin/activity-log" element={<Suspense fallback={<AppLoader />}><ActivityLog /></Suspense>} />
+          <Route path="/admin/chat" element={<Suspense fallback={<AppLoader />}><AdminChatMonitoring /></Suspense>} />
+          <Route path="/admin/chatbot" element={<Suspense fallback={<AppLoader />}><AdminChatbot /></Suspense>} />
+          <Route path="/admin/promotions" element={<Suspense fallback={<AppLoader />}><AdminPromotions /></Suspense>} />
+          <Route path="/admin/payments" element={<Suspense fallback={<AppLoader />}><AdminPayments /></Suspense>} />
+          <Route path="/admin/notifications" element={<Suspense fallback={<AppLoader />}><AdminNotifications /></Suspense>} />
+          <Route path="/admin/support-chat" element={<Suspense fallback={<AppLoader />}><SupportChat /></Suspense>} />
+          <Route path="/admin/support-chatbot" element={<Suspense fallback={<AppLoader />}><SupportChatbot /></Suspense>} />
+          <Route path="/admin/customer-requests" element={<Suspense fallback={<AppLoader />}><CustomerRequests /></Suspense>} />
           <Route path="/admin/customers" element={<Navigate to="/admin/customer-requests" replace />} />
-          <Route path="/admin/banners" element={<Suspense fallback={<Spinner fullScreen={true} />}><Banners /></Suspense>} />
-          <Route path="/admin/testimonials" element={<Suspense fallback={<Spinner fullScreen={true} />}><Testimonials /></Suspense>} />
-          <Route path="/admin/settings" element={<Suspense fallback={<Spinner fullScreen={true} />}><Settings /></Suspense>} />
+          <Route path="/admin/banners" element={<Suspense fallback={<AppLoader />}><Banners /></Suspense>} />
+          <Route path="/admin/testimonials" element={<Suspense fallback={<AppLoader />}><Testimonials /></Suspense>} />
+          <Route path="/admin/settings" element={<Suspense fallback={<AppLoader />}><Settings /></Suspense>} />
         </Route>
       </Routes>
 

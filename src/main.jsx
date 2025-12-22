@@ -11,27 +11,32 @@ import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import AppLoader from "./components/common/AppLoader.jsx";
 import "leaflet/dist/leaflet.css";
 
-// Google OAuth client ID – must be set explicitly for production
-// For local development you can optionally fall back to a hard-coded ID,
-// but in production we require VITE_GOOGLE_CLIENT_ID to be defined.
+// Google OAuth client ID – must be set explicitly
+// In production, VITE_GOOGLE_CLIENT_ID is required
 const envGoogleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const isDev = import.meta.env.DEV;
 
-// Optional: dev-only fallback to ease local setup (must match your Google console config)
-const DEV_FALLBACK_CLIENT_ID =
-  "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com";
-
-const googleClientId =
-  envGoogleClientId || (isDev ? DEV_FALLBACK_CLIENT_ID : undefined);
+// Require Google Client ID in production, warn in development
+const googleClientId = envGoogleClientId;
 
 if (!googleClientId) {
-  // Fail fast in production if not configured correctly
-  // This avoids confusing "origin not allowed" errors from Google
-  // and makes the misconfiguration obvious during deployment.
-  // eslint-disable-next-line no-console
-  console.error(
-    "VITE_GOOGLE_CLIENT_ID is not set. Google Login will not work until this is configured."
-  );
+  if (isDev) {
+    // Warn in development but allow app to continue
+    console.warn(
+      "VITE_GOOGLE_CLIENT_ID is not set. Google Login will not work until this is configured."
+    );
+  } else {
+    // Fail fast in production if not configured correctly
+    // This avoids confusing "origin not allowed" errors from Google
+    // and makes the misconfiguration obvious during deployment.
+    console.error(
+      "VITE_GOOGLE_CLIENT_ID is required in production. Google Login will not work."
+    );
+    // In production, throw error to prevent deployment with misconfiguration
+    throw new Error(
+      "Google OAuth not configured. Please set VITE_GOOGLE_CLIENT_ID environment variable."
+    );
+  }
 }
 
 

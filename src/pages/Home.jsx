@@ -11,6 +11,7 @@ import BuySellCards from "../components/utils/BuySellCards";
 import GetAllCarsSection from "../components/sections/listings/GetAllCarsSection";
 import BannerCarousal from "../components/utils/BannerCarousal";
 import SEO from "../components/common/SEO";
+import StructuredData from "../components/common/StructuredData";
 import Video from "../components/sections/home/Video";
 
 const Home = () => {
@@ -28,6 +29,9 @@ const Home = () => {
         description="Find your perfect car on Sello. Browse thousands of new and used cars from trusted sellers in Pakistan. Buy or sell your car today with confidence!"
         keywords="buy cars Pakistan, sell cars Pakistan , used cars, new cars, car marketplace Pakistan, car dealers Pakistan"
       />
+      {/* Structured Data for SEO */}
+      <StructuredData.OrganizationSchema />
+      <StructuredData.WebSiteSchema />
       <div className="">
         <Hero />
         <BrandsSection />

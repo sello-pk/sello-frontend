@@ -20,14 +20,11 @@ import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
 import { useCarCategories } from "../../../hooks/useCarCategories";
-import LocationPicker from "../../utils/LocationPicker";
+import LocationButton from "../../utils/filter/LocationButton";
 import { isFieldVisible, getRequiredFields } from "../../../utils/vehicleFieldConfig";
 
 const CreatePostForm = () => {
   const navigate = useNavigate();
-  const { makes, models, getModelsByMake, years, countries, cities, getCitiesByCountry, isLoading: categoriesLoading } = useCarCategories();
-  const [selectedMake, setSelectedMake] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
   const [availableCities, setAvailableCities] = useState([]);
@@ -67,6 +64,9 @@ const CreatePostForm = () => {
     motorPower: "",
     images: [],
   });
+
+  // Filter categories by selected vehicle type (must be after formData declaration)
+  const { makes, models, getModelsByMake, years, countries, cities, getCitiesByCountry, isLoading: categoriesLoading } = useCarCategories(formData.vehicleType);
 
   const [createCar, { isLoading }] = useCreateCarMutation();
 
@@ -142,7 +142,6 @@ const CreatePostForm = () => {
       
       // When make changes, update available models
       if (field === "make") {
-        setSelectedMake(value);
         if (value) {
           const selectedMakeObj = makes.find(m => m.name === value);
           if (selectedMakeObj) {
@@ -183,7 +182,6 @@ const CreatePostForm = () => {
       
       // When country changes, update available cities
       if (field === "country") {
-        setSelectedCountry(value);
         if (value) {
           const selectedCountryObj = countries.find(c => c.name === value);
           if (selectedCountryObj) {
@@ -281,18 +279,28 @@ const CreatePostForm = () => {
     }
 
     const data = new FormData();
+    
+    // Only set defaults for fields that are visible for this vehicle type
     const defaults = {
       variant: formData.variant || "N/A",
       colorExterior: formData.colorExterior || "N/A",
       colorInterior: formData.colorInterior || "N/A",
-      horsepower: formData.horsepower || "N/A",
       mileage: formData.mileage || "0",
-      carDoors: formData.carDoors || "4",
-      numberOfCylinders: formData.numberOfCylinders || "4",
       location: formData.location || "",
       description: formData.description || "",
       features: formData.features.length ? formData.features : [],
     };
+    
+    // Add conditional defaults only if fields are visible
+    if (isFieldVisible(formData.vehicleType, "horsepower")) {
+      defaults.horsepower = formData.horsepower || "N/A";
+    }
+    if (isFieldVisible(formData.vehicleType, "doors")) {
+      defaults.carDoors = formData.carDoors || "4";
+    }
+    if (isFieldVisible(formData.vehicleType, "cylinders")) {
+      defaults.numberOfCylinders = formData.numberOfCylinders || "4";
+    }
 
     // Optimize FormData construction - build in single pass
     // Add images first
@@ -336,9 +344,37 @@ const CreatePostForm = () => {
         // Always append geoLocation (parsedGeoLocation is guaranteed to have a value - either from form or default)
         data.append(key, JSON.stringify(parsedGeoLocation));
       } else {
-        const value = defaults[key] !== undefined ? defaults[key] : formData[key];
-        if (value !== null && value !== undefined && value !== '') {
-          data.append(key, String(value));
+        // Check if field should be sent based on visibility
+        let shouldSend = true;
+        
+        // Don't send fields that aren't visible for this vehicle type
+        if (key === 'fuelType' && !isFieldVisible(formData.vehicleType, 'fuelType')) {
+          shouldSend = false;
+        } else if (key === 'transmission' && !isFieldVisible(formData.vehicleType, 'transmission')) {
+          shouldSend = false;
+        } else if (key === 'regionalSpec' && !isFieldVisible(formData.vehicleType, 'regionalSpec')) {
+          shouldSend = false;
+        } else if (key === 'bodyType' && !isFieldVisible(formData.vehicleType, 'bodyType')) {
+          shouldSend = false;
+        } else if (key === 'engineCapacity' && !isFieldVisible(formData.vehicleType, 'engineCapacity')) {
+          shouldSend = false;
+        } else if (key === 'horsepower' && !isFieldVisible(formData.vehicleType, 'horsepower')) {
+          shouldSend = false;
+        } else if (key === 'carDoors' && !isFieldVisible(formData.vehicleType, 'doors')) {
+          shouldSend = false;
+        } else if (key === 'numberOfCylinders' && !isFieldVisible(formData.vehicleType, 'cylinders')) {
+          shouldSend = false;
+        } else if (key === 'batteryRange' && !isFieldVisible(formData.vehicleType, 'batteryRange')) {
+          shouldSend = false;
+        } else if (key === 'motorPower' && !isFieldVisible(formData.vehicleType, 'motorPower')) {
+          shouldSend = false;
+        }
+        
+        if (shouldSend) {
+          const value = defaults[key] !== undefined ? defaults[key] : formData[key];
+          if (value !== null && value !== undefined && value !== '') {
+            data.append(key, String(value));
+          }
         }
       }
     });
@@ -397,8 +433,6 @@ const CreatePostForm = () => {
         motorPower: "",
         images: [],
       });
-      setSelectedMake("");
-      setSelectedCountry("");
       setAvailableModels([]);
       setAvailableYears([]);
       setAvailableCities([]);
@@ -435,7 +469,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Vehicle Type *</label>
           <select
             value={formData.vehicleType}
@@ -467,6 +501,15 @@ const CreatePostForm = () => {
               if (!isFieldVisible(newVehicleType, "motorPower")) {
                 handleChange("motorPower", "");
               }
+              if (!isFieldVisible(newVehicleType, "fuelType")) {
+                handleChange("fuelType", "");
+              }
+              if (!isFieldVisible(newVehicleType, "transmission")) {
+                handleChange("transmission", "");
+              }
+              if (!isFieldVisible(newVehicleType, "regionalSpec")) {
+                handleChange("regionalSpec", "");
+              }
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             required
@@ -480,7 +523,7 @@ const CreatePostForm = () => {
           </select>
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Title</label>
           <Input
             inputType="text"
@@ -491,7 +534,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Description</label>
           <textarea
             value={formData.description}
@@ -501,7 +544,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="price mt-5 mb-2">
+        <div className="price mt-5 mb-2 pl-2">
           <label className="block mb-1">Price</label>
           <Input
             inputType="number"
@@ -512,7 +555,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="flex gap-6 my-2 w-full items-center">
+        <div className="flex gap-6 my-2 w-full items-center pl-2">
           <div className="w-1/2">
             <label className="block mb-1">Country</label>
             <select
@@ -557,7 +600,7 @@ const CreatePostForm = () => {
           </div>
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Contact Number</label>
           <Input
             inputType="tel"
@@ -568,7 +611,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="flex gap-6 my-2 w-full items-center">
+        <div className="flex gap-6 my-2 w-full items-center pl-2">
           <div className="w-1/2">
             <label className="block mb-1">Car Make *</label>
             <select
@@ -613,7 +656,7 @@ const CreatePostForm = () => {
           </div>
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Variant</label>
           <Input
             inputType="text"
@@ -623,7 +666,7 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="flex gap-6 my-2 w-full items-center">
+        <div className="flex gap-6 my-2 w-full items-center pl-2">
           <div className="w-1/2">
             <label className="block mb-1">Year *</label>
             <select
@@ -633,24 +676,18 @@ const CreatePostForm = () => {
               required
               disabled={categoriesLoading}
             >
-              <option value="">Select Year</option>
-              {availableYears.length > 0 ? (
-                availableYears.map((year) => (
-                  <option key={year._id} value={year.name}>
-                    {year.name}
-                  </option>
-                ))
-              ) : (
-                // Fallback: show years from 1990 to current year if no categories
-                Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => {
-                  const year = new Date().getFullYear() - i;
-                  return (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  );
-                })
-              )}
+              <option value="">
+                {categoriesLoading 
+                  ? "Loading..." 
+                  : availableYears.length === 0 
+                    ? "No years available (add in admin)" 
+                    : "Select Year"}
+              </option>
+              {availableYears.map((year) => (
+                <option key={year._id} value={year.name}>
+                  {year.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="w-1/2">
@@ -666,35 +703,42 @@ const CreatePostForm = () => {
 
         {isFieldVisible(formData.vehicleType, "bodyType") && (
           <div>
-            <label className="block mb-1">Body Type</label>
+            <label className="block mb-1 pl-2">Body Type</label>
             <BodyTypes
+              vehicleType={formData.vehicleType}
               onBodyTypeChange={(val) => handleChange("bodyType", val)}
             />
           </div>
         )}
 
-        <div>
-          <label className="block mb-1">Regional Spec</label>
-          <RegionalSpecs
-            onChange={(val) => handleChange("regionalSpec", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "regionalSpec") && (
+          <div>
+            <label className="block mb-1 pl-2">Regional Spec</label>
+            <RegionalSpecs
+              onChange={(val) => handleChange("regionalSpec", val)}
+            />
+          </div>
+        )}
 
-        <div>
-          <label className="block mb-1">Fuel Type</label>
-          <FuelSpecs onChange={(val) => handleChange("fuelType", val)} />
-        </div>
+        {isFieldVisible(formData.vehicleType, "fuelType") && (
+          <div>
+            <label className="block mb-1 pl-2">Fuel Type</label>
+            <FuelSpecs onChange={(val) => handleChange("fuelType", val)} />
+          </div>
+        )}
 
-        <div>
-          <label className="block mb-1">Transmission</label>
-          <TransmissionSpecs
-            onChange={(val) => handleChange("transmission", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "transmission") && (
+          <div>
+            <label className="block mb-1 pl-2">Transmission</label>
+            <TransmissionSpecs
+              onChange={(val) => handleChange("transmission", val)}
+            />
+          </div>
+        )}
 
         {isFieldVisible(formData.vehicleType, "cylinders") && (
           <div>
-            <label className="block mb-1">Number of Cylinders</label>
+            <label className="block mb-1 pl-2">Number of Cylinders</label>
             <CylindersSpecs
               onChange={(val) => handleChange("numberOfCylinders", val)}
             />
@@ -702,37 +746,37 @@ const CreatePostForm = () => {
         )}
 
         <div>
-          <label className="block mb-1">Exterior Color</label>
           <ExteriorColor
+            value={formData.colorExterior}
             onChange={(val) => handleChange("colorExterior", val)}
           />
         </div>
 
         <div>
-          <label className="block mb-1">Interior Color</label>
           <InteriorColor
+            value={formData.colorInterior}
             onChange={(val) => handleChange("colorInterior", val)}
           />
         </div>
 
         {isFieldVisible(formData.vehicleType, "doors") && (
           <div>
-            <label className="block mb-1">Car Doors</label>
+            <label className="block mb-1 pl-2">Car Doors</label>
             <DoorsSpecs onChange={(val) => handleChange("carDoors", val)} />
           </div>
         )}
 
         <div>
-          <label className="block mb-1">Owner Type</label>
+          <label className="block mb-1 pl-2">Owner Type</label>
           <OwnerTypeSpecs onChange={(val) => handleChange("ownerType", val)} />
         </div>
 
         <div>
-          <label className="block mb-1">Warranty</label>
+          <label className="block mb-1 pl-2">Warranty</label>
           <WarrantyType onChange={(val) => handleChange("warranty", val)} />
         </div>
 
-        <div>
+        <div className="pl-2">
           <label className="block mb-1">Seller Type</label>
           <select
             value={formData.sellerType}
@@ -748,7 +792,7 @@ const CreatePostForm = () => {
 
         {isFieldVisible(formData.vehicleType, "horsepower") && (
           <div>
-            <label className="block mb-1">Horsepower</label>
+            <label className="block mb-1 pl-2">Horsepower</label>
             <HorsePowerSpecs
               onChange={(val) => handleChange("horsepower", val)}
             />
@@ -757,7 +801,7 @@ const CreatePostForm = () => {
 
         {isFieldVisible(formData.vehicleType, "engineCapacity") && (
           <div>
-            <label className="block mb-1">Engine Capacity</label>
+            <label className="block mb-1 pl-2">Engine Capacity</label>
             <EngineCapacitySpecs
               onChange={(val) => handleChange("engineCapacity", val)}
             />
@@ -765,7 +809,7 @@ const CreatePostForm = () => {
         )}
 
         {isFieldVisible(formData.vehicleType, "batteryRange") && (
-          <div>
+          <div className="pl-2">
             <label className="block mb-1">Battery Range (km)</label>
             <Input
               inputType="number"
@@ -777,7 +821,7 @@ const CreatePostForm = () => {
         )}
 
         {isFieldVisible(formData.vehicleType, "motorPower") && (
-          <div>
+          <div className="pl-2">
             <label className="block mb-1">Motor Power (W)</label>
             <Input
               inputType="number"
@@ -789,18 +833,18 @@ const CreatePostForm = () => {
         )}
 
         <div>
-          <label className="block mb-1">Features</label>
+          <label className="block mb-1 pl-2">Features</label>
           <TechnicalFeaturesSpecs
             onChange={(val) => handleChange("features", val)}
           />
         </div>
 
         <div>
-          <label className="block mb-1">Condition</label>
+          <label className="block mb-1 pl-2">Condition</label>
           <CarCondition onChange={(val) => handleChange("condition", val)} />
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 pl-2">
           <label className="block mb-1">Address</label>
           <Input
             inputType="text"
@@ -810,11 +854,21 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="my-4">
+        <div className="my-4 pl-2">
           <label className="block mb-2 font-medium">Car Location *</label>
-          <LocationPicker
-            onLocationChange={(coords) => handleChange("geoLocation", coords)}
-            initialLocation={formData.geoLocation}
+          <LocationButton
+            onChange={(locationData) => {
+              // LocationButton returns { coordinates: {lat, lng}, address, formatted }
+              // Convert to [longitude, latitude] format for backend
+              if (locationData?.coordinates) {
+                const coords = [locationData.coordinates.lng, locationData.coordinates.lat];
+                handleChange("geoLocation", JSON.stringify(coords));
+                // Also update location address if provided
+                if (locationData.address) {
+                  handleChange("location", locationData.address);
+                }
+              }
+            }}
           />
           {!formData.geoLocation && (
             <p className="text-xs text-gray-500 mt-2">

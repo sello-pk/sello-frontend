@@ -31,7 +31,7 @@ const ForgotPassword = () => {
       const errorMessage = err?.data?.message || err?.message || "Failed to send OTP. Please try again later.";
       setError(errorMessage);
       toast.error(errorMessage, { duration: 5000 });
-      console.error("Forgot password error:", err);
+      console.error("Forgot password error", err);
     }
   };
 

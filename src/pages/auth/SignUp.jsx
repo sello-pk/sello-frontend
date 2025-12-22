@@ -12,6 +12,7 @@ import {
 } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
 import DealerSignup from "./DealerSignup";
+import { setAccessToken, setRefreshToken } from "../../utils/tokenRefresh.js";
 
 // Check if Google OAuth is configured
 const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -109,16 +110,16 @@ const SignUp = () => {
       const responseRefreshToken = res?.refreshToken || res?.data?.refreshToken;
 
       if (!responseToken || !responseUser) {
-        console.error("Invalid response structure:", res);
+        console.error("Invalid Google signup response structure", { response: res });
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      localStorage.setItem("token", responseToken);
-      localStorage.setItem("user", JSON.stringify(responseUser));
-      // Store refresh token if provided (new system)
+      // Use utility functions for token storage
+      setAccessToken(responseToken);
       if (responseRefreshToken) {
-        localStorage.setItem("refreshToken", responseRefreshToken);
+        setRefreshToken(responseRefreshToken);
       }
+      localStorage.setItem("user", JSON.stringify(responseUser));
 
       toast.success("Google sign-up successful!");
       
@@ -137,8 +138,7 @@ const SignUp = () => {
         navigate("/");
       }
     } catch (err) {
-      console.error("Google sign-up error:", err);
-      console.error("Error details:", {
+      console.error("Google sign-up error", err, {
         status: err?.status,
         data: err?.data,
         message: err?.message,
@@ -357,7 +357,7 @@ const SignUp = () => {
                       }
                       
                       // Log other errors for debugging (only if configured)
-                      console.error("Google OAuth error:", error);
+                      console.error("Google OAuth error", error);
                       
                       let errorMsg = "Google sign-up failed. ";
                       

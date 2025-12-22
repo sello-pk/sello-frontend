@@ -17,7 +17,7 @@ const AdminRoute = () => {
                 return JSON.parse(storedUser);
             }
         } catch (e) {
-            console.error("Error parsing cached user:", e);
+            console.error("Error parsing cached user", e);
         }
         return null;
     };
@@ -43,7 +43,7 @@ const AdminRoute = () => {
 
     // Handle errors - check if it's a network error or auth error
     if (isError && !cachedUser) {
-        console.error("AdminRoute - Error fetching user:", error);
+        console.error("AdminRoute - Error fetching user", error);
         
         // If it's a network error, try to use cached user
         if (error?.status === 'FETCH_ERROR' || error?.data?.message?.includes('Failed to fetch') || error?.data?.error?.includes('Failed to fetch')) {

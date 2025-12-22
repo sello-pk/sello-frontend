@@ -75,14 +75,24 @@ export const refreshAccessToken = async (refreshToken) => {
     }
 
     const newAccessToken = data.data?.accessToken || data.data?.token;
+    const newRefreshToken = data.data?.refreshToken;
+    
     if (!newAccessToken) {
       throw new Error('No access token in refresh response');
     }
 
     // Store new access token
     setAccessToken(newAccessToken);
+    
+    // TOKEN ROTATION: Store new refresh token if provided (old one is now invalid)
+    if (newRefreshToken) {
+      setRefreshToken(newRefreshToken);
+    }
 
-    return { accessToken: newAccessToken };
+    return { 
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken 
+    };
   } catch (error) {
     // If refresh fails, clear all tokens
     clearTokens();

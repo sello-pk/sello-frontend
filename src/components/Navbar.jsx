@@ -26,7 +26,7 @@ const Navbar = () => {
         return JSON.parse(storedUser);
       }
     } catch (e) {
-      console.error("Error parsing cached user:", e);
+      // Error parsing cached user - silent fail
     }
     return null;
   };

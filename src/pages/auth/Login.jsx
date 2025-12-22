@@ -50,7 +50,7 @@ const Login = () => {
         throw new Error("Invalid response from server. Missing user data.");
       }
 
-      // Store tokens in the Local Storage
+      // Store tokens using utility functions for consistency
       const token = res.token || res.accessToken || res.data?.token;
       const user = res.user || res.data?.user;
       const refreshToken = res.refreshToken || res.data?.refreshToken;
@@ -59,12 +59,14 @@ const Login = () => {
         throw new Error("Failed to extract login credentials from response.");
       }
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      // Store refresh token if provided (new system)
+      // Use utility functions for token storage
+      setAccessToken(token);
       if (refreshToken) {
-        localStorage.setItem("refreshToken", refreshToken);
+        setRefreshToken(refreshToken);
       }
+      
+      // Store user data
+      localStorage.setItem("user", JSON.stringify(user));
 
       // Invalidate and refetch user queries (mutation already does this, but ensure it happens)
       try {
@@ -107,7 +109,7 @@ const Login = () => {
         }
       }, 100);
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Login error", err);
       const errorMessage = err?.data?.message || err?.message || "Login failed. Please try again.";
       toast.error(errorMessage);
     }
@@ -129,11 +131,16 @@ const Login = () => {
       const responseUser = res?.user || res?.data?.user;
 
       if (!responseToken || !responseUser) {
-        console.error("Invalid response structure:", res);
+        console.error("Invalid Google login response structure", { response: res });
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      localStorage.setItem("token", responseToken);
+      // Use utility functions for token storage
+      const responseRefreshToken = res?.refreshToken || res?.data?.refreshToken;
+      setAccessToken(responseToken);
+      if (responseRefreshToken) {
+        setRefreshToken(responseRefreshToken);
+      }
       localStorage.setItem("user", JSON.stringify(responseUser));
 
       // Invalidate and refetch user queries
@@ -177,12 +184,13 @@ const Login = () => {
         }
       }, 100);
     } catch (err) {
-      console.error("Google login error:", err);
-      console.error("Error details:", {
+      console.error("Google login error", err, {
         status: err?.status,
         data: err?.data,
         message: err?.message,
-        originalStatus: err?.originalStatus
+        originalStatus: err?.originalStatus,
+        error: err?.error,
+        serverMessage: err?.data?.message || err?.data?.error || err?.message
       });
       
       let errorMessage = "Google login failed. Please try again.";
@@ -190,10 +198,13 @@ const Login = () => {
       // Handle RTK Query errors - check nested data structure
       const errorData = err?.data || err;
       
+      // Prioritize server error message
       if (errorData?.message) {
         errorMessage = errorData.message;
       } else if (errorData?.error) {
-        errorMessage = errorData.error;
+        errorMessage = typeof errorData.error === 'string' 
+          ? errorData.error 
+          : errorData.error?.message || "Server error occurred";
       } else if (err?.message) {
         errorMessage = err.message;
       } else if (err?.status === 401 || err?.originalStatus === 401) {
@@ -201,7 +212,9 @@ const Login = () => {
       } else if (err?.status === 403 || err?.originalStatus === 403) {
         errorMessage = "Access denied. Please contact support.";
       } else if (err?.status === 500 || err?.originalStatus === 500) {
-        errorMessage = "Server error. Please try again later or contact support.";
+        // Show server error message if available, otherwise generic message
+        errorMessage = errorData?.message || errorData?.error || "Server error. Please check server logs for details.";
+        console.error("Server error details", { errorData });
       } else if (err?.status === 'FETCH_ERROR' || err?.status === 'PARSING_ERROR' || err?.message?.includes('Failed to fetch')) {
         errorMessage = "Unable to connect to server. Please ensure the backend server is running and try again.";
       } else if (err?.error === 'TypeError: Failed to fetch' || err?.data?.error === 'TypeError: Failed to fetch') {
@@ -340,7 +353,7 @@ const Login = () => {
                       }
                       
                       // Log other errors for debugging (only if configured)
-                      console.error("Google OAuth error:", error);
+                      console.error("Google OAuth error", error);
                       
                       let errorMsg = "Google login failed. ";
                       

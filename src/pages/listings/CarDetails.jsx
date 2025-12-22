@@ -16,6 +16,7 @@ import SimilarListings from "../../components/sections/carDetails/SimilarListing
 import RecentlyViewed from "../../components/sections/carDetails/RecentlyViewed";
 import UserReviewSection from "../../components/reviews/UserReviewSection";
 import SEO from "../../components/common/SEO";
+import StructuredData from "../../components/common/StructuredData";
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -159,6 +160,13 @@ const CarDetails = () => {
         type="product"
         keywords={`${car?.make || ''} ${car?.model || ''}, ${car?.year || ''}, ${car?.condition || ''} car, ${car?.city || ''}, car for sale`}
       />
+      {/* Structured Data for SEO */}
+      {car && (
+        <>
+          <StructuredData.ProductSchema car={car} />
+          <StructuredData.BreadcrumbSchema items={breadcrumbItems.map(item => ({ name: item.label, url: item.path }))} />
+        </>
+      )}
       <Breadcrumb items={breadcrumbItems} />
       
       {/* Hero Section */}

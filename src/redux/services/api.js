@@ -2,9 +2,14 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens, refreshAccessToken, shouldRefreshToken } from "../../utils/tokenRefresh.js";
 
 // Use environment variable or default to port 4000 (matching server)
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-// const BASE_URL =
-//   import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+// VITE_API_URL is REQUIRED in production
+const BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV 
+    ? "http://localhost:4000/api" 
+    : (() => {
+        console.error("VITE_API_URL is required in production!");
+        return ""; // Fail fast if not configured
+      })());
 
 // Track if we're currently refreshing to avoid multiple simultaneous refresh attempts
 let isRefreshing = false;
@@ -63,6 +68,7 @@ export const api = createApi({
             // Retry original request with new token
             const newToken = getAccessToken();
             if (newToken) {
+              // Retry the original request with the new access token
               return fetchBaseQuery({
                 baseUrl: BASE_URL,
                 credentials: "include",
@@ -74,6 +80,10 @@ export const api = createApi({
                   return headers;
                 },
               })(args, api, extraOptions);
+            } else {
+              // Token refresh succeeded but no new token received - clear and fail
+              clearTokens();
+              localStorage.removeItem("user");
             }
           } catch (refreshError) {
             // Refresh failed, clear tokens and let it fall through to 401 handling
@@ -112,7 +122,7 @@ export const api = createApi({
       return baseResult;
     } catch (error) {
       // Catch any unexpected errors
-      console.error("API request error:", error);
+      console.error("API request error", error);
       return {
         error: {
           status: "FETCH_ERROR",
@@ -230,7 +240,7 @@ export const api = createApi({
           };
         }
         // If response structure is unexpected, return as is
-        console.warn("Unexpected Google login response structure:", response);
+        console.warn("Unexpected Google login response structure", { response });
         return response;
       },
       transformErrorResponse: (response, meta, arg) => {
@@ -470,17 +480,14 @@ export const api = createApi({
           credentials: "include",
           // Handle file upload progress if needed
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload progress: ${percentCompleted}%`);
+            // Upload progress tracking (silent)
           },
         };
       },
       invalidatesTags: ["Cars"],
       // Add error handling
       transformErrorResponse: (response) => {
-        console.error("Car creation failed:", response);
+        console.error("Car creation failed", response);
         return response.data;
       },
     }),

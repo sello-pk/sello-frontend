@@ -9,8 +9,8 @@ const ContactInformation = () => {
       icon: FiMail,
       title: "Email Address",
       items: [
-        { label: "General Inquiries", value: "info@sello.ae", link: "mailto:info@sello.ae" },
-        { label: "Support", value: "support@sello.ae", link: "mailto:support@sello.ae" },
+        { label: "General Inquiries", value: import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com"}` },
+        { label: "Support", value: import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"}` },
       ],
       color: "bg-blue-50 text-blue-600",
     },

@@ -8,14 +8,20 @@ const HeroFilter = () => {
   const [activeTab, setActiveTab] = useState("all");
   const navigate = useNavigate();
 
-  // Dynamic categories from admin panel
+  // Vehicle type options - same as CreatePostForm
+  const vehicleTypeOptions = ["Car", "Bus", "Truck", "Van", "Bike", "E-bike"];
+
+  // Vehicle type state
+  const [vehicleType, setVehicleType] = useState("");
+
+  // Dynamic categories from admin panel - filtered by vehicle type
   const {
     makes,
     models,
     years,
     getModelsByMake,
     isLoading: categoriesLoading,
-  } = useCarCategories();
+  } = useCarCategories(vehicleType || null);
 
   const [filters, setFilters] = useState({
     year: "",
@@ -38,6 +44,12 @@ const HeroFilter = () => {
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    
+    // Reset make and model when vehicle type changes
+    if (field === "vehicleType") {
+      setVehicleType(value);
+      setFilters((prev) => ({ ...prev, make: "", model: "" }));
+    }
   };
 
   // Parse mileage range to min/max values
@@ -81,6 +93,11 @@ const HeroFilter = () => {
     
     // Build backend query parameters
     const backendFilters = {};
+
+    // Vehicle type filter
+    if (vehicleType) {
+      backendFilters.vehicleType = vehicleType;
+    }
 
     // Condition from activeTab
     if (activeTab === "new") {
@@ -276,7 +293,15 @@ const HeroFilter = () => {
           <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row">
             {/* Left Section - Orange Background with Filters */}
             <div className="bg-primary-500 p-4 flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+                {/* Vehicle Type Filter */}
+                <FilterSelect
+                  label="Vehicle Type"
+                  value={vehicleType}
+                  onChange={(v) => handleChange("vehicleType", v)}
+                  options={["", ...vehicleTypeOptions]}
+                />
+
                 {/* Year Filter */}
                 <FilterSelect
                   label="Year"

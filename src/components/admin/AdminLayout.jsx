@@ -25,7 +25,7 @@ import {
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
 import { canAccessMenu } from "../../utils/roleAccess";
-import ErrorBoundary from "../ErrorBoundary";
+import ErrorBoundary from "../common/ErrorBoundary";
 import KeyboardShortcuts from "./KeyboardShortcuts";
 import { useTheme } from "../../contexts/ThemeContext";
 import { FiSun, FiMoon } from "react-icons/fi";

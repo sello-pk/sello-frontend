@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import { useGetFilteredCarsQuery } from "../../../redux/services/api"; // Removed - parent handles query
 import toast from "react-hot-toast";
 import RangeFilter from "../../utils/filter/RangeFilter";
 import Input from "../../utils/filter/Input";
@@ -19,15 +18,16 @@ import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import LocationButton from "../../utils/filter/LocationButton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCarCategories } from "../../../hooks/useCarCategories";
-import { useVehicleCategories } from "../../../hooks/useVehicleCategories";
 import { isFieldVisible } from "../../../utils/vehicleFieldConfig";
 
 const FilterForm = ({ onFilter }) => {
-  const { makes, models, getModelsByMake, countries, cities, getCitiesByCountry, isLoading: categoriesLoading } = useCarCategories();
-  const { categories: vehicleCategories, isLoading: vehicleCategoriesLoading } = useVehicleCategories();
+  // Vehicle type options - same as CreatePostForm and HeroFilter
+  const vehicleTypeOptions = ["Car", "Bus", "Truck", "Van", "Bike", "E-bike"];
   const [selectedMake, setSelectedMake] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
+  const [availableStates, setAvailableStates] = useState([]);
   const [availableCities, setAvailableCities] = useState([]);
   
   const [filters, setFilters] = useState({
@@ -70,6 +70,9 @@ const FilterForm = ({ onFilter }) => {
     userLat: "",
     userLng: "",
   });
+
+  // Filter categories by selected vehicle type (must be after filters declaration)
+  const { makes, models, getModelsByMake, years, countries, states, cities, getCitiesByCountry, getStatesByCountry, getCitiesByState, isLoading: categoriesLoading } = useCarCategories(filters.vehicleType || null);
 
   // Removed internal query - parent component handles it
   // const [queryParams, setQueryParams] = useState(null);
@@ -215,13 +218,43 @@ const FilterForm = ({ onFilter }) => {
     }
   }, [filters.make, makes, models, getModelsByMake]);
 
-  // Initialize available cities - show all if no country selected, filtered if country selected
+  // Initialize available states - show all if no country selected, filtered if country selected
+  useEffect(() => {
+    if (filters.country && countries.length > 0 && getStatesByCountry) {
+      const selectedCountryObj = countries.find(c => c.name === filters.country);
+      if (selectedCountryObj) {
+        const countryStates = getStatesByCountry[selectedCountryObj._id] || [];
+        setAvailableStates(countryStates.length > 0 ? countryStates : states);
+      } else {
+        setAvailableStates(states);
+      }
+    } else {
+      // Show all states when no country is selected
+      setAvailableStates(states);
+    }
+  }, [filters.country, countries, states, getStatesByCountry]);
+
+  // Initialize available cities - show all if no country/state selected, filtered if country/state selected
   useEffect(() => {
     if (filters.country && countries.length > 0) {
       const selectedCountryObj = countries.find(c => c.name === filters.country);
       if (selectedCountryObj) {
-        const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
-        setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+        // If state is selected, filter cities by state, otherwise by country
+        if (filters.state && getCitiesByState) {
+          const selectedStateObj = availableStates.find(s => s.name === filters.state);
+          if (selectedStateObj && getCitiesByState[selectedStateObj._id]) {
+            const stateCities = getCitiesByState[selectedStateObj._id] || [];
+            setAvailableCities(stateCities.length > 0 ? stateCities : cities);
+          } else {
+            // Fallback to country cities
+            const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+            setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+          }
+        } else {
+          // Filter by country only
+          const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+          setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+        }
       } else {
         setAvailableCities(cities);
       }
@@ -229,7 +262,7 @@ const FilterForm = ({ onFilter }) => {
       // Show all cities when no country is selected
       setAvailableCities(cities);
     }
-  }, [filters.country, countries, cities, getCitiesByCountry]);
+  }, [filters.country, filters.state, countries, states, cities, getCitiesByCountry, getCitiesByState, availableStates]);
 
   const handleRangeChange = (type, values) => {
     if (type === "price") {
@@ -508,12 +541,11 @@ const FilterForm = ({ onFilter }) => {
             value={filters.vehicleType}
             onChange={(e) => handleChange("vehicleType", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            disabled={vehicleCategoriesLoading}
           >
             <option value="">All Vehicle Types</option>
-            {vehicleCategories.map((category) => (
-              <option key={category._id} value={category.name}>
-                {category.name}
+            {vehicleTypeOptions.map((type) => (
+              <option key={type} value={type}>
+                {type}
               </option>
             ))}
           </select>
@@ -628,8 +660,8 @@ const FilterForm = ({ onFilter }) => {
           </div>
           <RangeFilter
             type="year"
-            min={1990}
-            max={new Date().getFullYear()}
+            min={years && years.length > 0 ? Math.min(...years.map(y => parseInt(y.name) || 1990).filter(y => !isNaN(y))) : 1990}
+            max={years && years.length > 0 ? Math.max(...years.map(y => parseInt(y.name) || new Date().getFullYear()).filter(y => !isNaN(y))) : new Date().getFullYear()}
             onChange={(values) => handleRangeChange("year", values)}
           />
         </div>
@@ -879,20 +911,29 @@ const FilterForm = ({ onFilter }) => {
         {/* Other Filters */}
         {isFieldVisible(filters.vehicleType || "Car", "bodyType") && (
         <BodyTypes
+          vehicleType={filters.vehicleType || "Car"}
           onBodyTypeChange={(value) => handleChange("bodyType", value)}
         />
         )}
         <RegionalSpecs
           onChange={(value) => handleChange("regionalSpec", value)}
         />
-        <FuelSpecs onChange={(value) => handleChange("fuelType", value)} />
-        <TransmissionSpecs
-          onChange={(value) => handleChange("transmission", value)}
-        />
+        {/* Fuel Type - hide for E-bike */}
+        {isFieldVisible(filters.vehicleType || "Car", "fuelType") && (
+          <FuelSpecs onChange={(value) => handleChange("fuelType", value)} />
+        )}
+        {/* Transmission - hide for E-bike */}
+        {isFieldVisible(filters.vehicleType || "Car", "transmission") && (
+          <TransmissionSpecs
+            onChange={(value) => handleChange("transmission", value)}
+          />
+        )}
         <ExteriorColor
+          value={filters.exteriorColor}
           onChange={(value) => handleChange("exteriorColor", value)}
         />
         <InteriorColor
+          value={filters.interiorColor}
           onChange={(value) => handleChange("interiorColor", value)}
         />
         <OwnerTypeSpecs

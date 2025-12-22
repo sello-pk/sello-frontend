@@ -90,11 +90,6 @@ const VerifyOtp = () => {
             </form>
           </div>
         </div>
-
-        {/* Dark Blue Footer */}
-        <AuthFooter
-          text="Sello is a trusted online car marketplace that makes buying and selling cars simple and hassle-free. Whether you want to buy used cars at great prices or quickly sell your car online, Sello provides a seamless experience for every customer. As a leading car buying website, it connects sellers and buyers with transparency and convenience. From budget-friendly options to premium models, you’ll find a wide range of affordable cars for sale. With Sello, your car journey is smarter, faster, and more reliable."
-        />
       </div>
     </>
   );

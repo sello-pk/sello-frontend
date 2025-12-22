@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const SpecsUtility = ({ groupName, specsTypes, onChange, multiple }) => {
-  const [selected, setSelected] = useState(multiple ? [] : null);
+const SpecsUtility = ({ groupName, specsTypes, onChange, multiple, value }) => {
+  const [selected, setSelected] = useState(multiple ? [] : (value || null));
+
+  // Update selected when value prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelected(multiple ? (Array.isArray(value) ? value : []) : value);
+    }
+  }, [value, multiple]);
 
   const handleChange = (titleValue) => {
     if (multiple) {
@@ -20,7 +27,7 @@ const SpecsUtility = ({ groupName, specsTypes, onChange, multiple }) => {
   };
 
   return (
-    <div className="flex items-center gap-4 py-4 overflow-x-auto md:scrollbar-hide hideScrollbar">
+    <div className="flex items-center gap-4 py-4 pl-2 overflow-x-auto md:scrollbar-hide hideScrollbar">
       {specsTypes.map((item, index) => {
         const isChecked = multiple
           ? selected.includes(item.titleValue)
@@ -78,14 +85,17 @@ const SpecsUtility = ({ groupName, specsTypes, onChange, multiple }) => {
             {/* Bottom section: Text / Color */}
             <div className="w-full mt-auto">
               {item.category === "color" ? (
-                <div className="flex items-center gap-2 justify-center">
-                  <span className="text-sm font-medium text-gray-700 truncate">
+                <div className="flex flex-col items-center gap-2 justify-center">
+                  <span
+                    className="w-12 h-12 rounded-lg border-2 border-gray-300 shadow-sm"
+                    style={{ 
+                      backgroundColor: item.hexColor || item.titleValue,
+                      borderColor: item.hexColor === "#FFFFFF" || item.titleValue === "White" ? "#E5E7EB" : "transparent"
+                    }}
+                  ></span>
+                  <span className="text-xs font-medium text-gray-700 truncate text-center w-full">
                     {item.titleValue}
                   </span>
-                  <span
-                    className="w-6 h-6 rounded-full border"
-                    style={{ backgroundColor: item.titleValue }}
-                  ></span>
                 </div>
               ) : (
                 <span className="text-sm font-medium text-gray-700 block text-center truncate">

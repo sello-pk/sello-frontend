@@ -151,7 +151,7 @@ const WhatsAppChatWidget = () => {
         });
 
         newSocket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
+            console.error('Socket connection error', error);
             // Don't show error toast on every reconnect attempt
             if (error.message.includes('Authentication')) {
                 toast.error('Authentication failed. Please login again.');
@@ -159,7 +159,7 @@ const WhatsAppChatWidget = () => {
         });
 
         newSocket.on('error', (error) => {
-            console.error('Socket error:', error);
+            console.error('Socket error', error);
         });
 
         setSocket(newSocket);
@@ -280,7 +280,7 @@ const WhatsAppChatWidget = () => {
             setInitialMessage("");
             refetchChats();
         } catch (error) {
-            console.error("Create support chat error:", error);
+            console.error("Create support chat error", error);
             toast.error(error?.data?.message || "Failed to create support chat");
         }
     };
@@ -318,7 +318,7 @@ const WhatsAppChatWidget = () => {
                 refetchChats();
             }
         } catch (error) {
-            console.error('Send message error:', error);
+            console.error('Send message error', error);
             toast.error(error?.data?.message || "Failed to send message");
         }
     };

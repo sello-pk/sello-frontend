@@ -14,6 +14,7 @@ import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Categories = () => {
     const [activeTab, setActiveTab] = useState("brands"); // brands, models, years, country, state, city
+    const [selectedVehicleType, setSelectedVehicleType] = useState(""); // Filter by vehicle type for car categories
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({
@@ -23,11 +24,14 @@ const Categories = () => {
         year: "",
         country: "",
         state: "",
+        vehicleType: "", // Vehicle type for car categories
         display: "show",
         status: "active",
         image: null,
         imagePreview: null
     });
+
+    const vehicleTypes = ["Car", "Bus", "Truck", "Van", "Bike", "E-bike"];
 
     const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState("name");
@@ -46,23 +50,31 @@ const Categories = () => {
 
     const categories = data || [];
 
-    // Filter categories by active tab
+    // Filter categories by active tab and vehicle type
     const filteredCategories = useMemo(() => {
+        let filtered = [];
+        
         if (activeTab === "brands") {
-            return categories.filter(cat => cat.subType === "make");
+            filtered = categories.filter(cat => cat.subType === "make" && cat.type === "car");
         } else if (activeTab === "models") {
-            return categories.filter(cat => cat.subType === "model");
+            filtered = categories.filter(cat => cat.subType === "model" && cat.type === "car");
         } else if (activeTab === "years") {
-            return categories.filter(cat => cat.subType === "year");
+            filtered = categories.filter(cat => cat.subType === "year" && cat.type === "car");
         } else if (activeTab === "city") {
-            return categories.filter(cat => cat.subType === "city");
+            filtered = categories.filter(cat => cat.subType === "city" && cat.type === "location");
         } else if (activeTab === "state") {
-            return categories.filter(cat => cat.subType === "state");
+            filtered = categories.filter(cat => cat.subType === "state" && cat.type === "location");
         } else if (activeTab === "country") {
-            return categories.filter(cat => cat.subType === "country");
+            filtered = categories.filter(cat => cat.subType === "country" && cat.type === "location");
         }
-        return [];
-    }, [categories, activeTab]);
+        
+        // Filter by vehicle type for car categories (brands, models, years)
+        if (selectedVehicleType && ["brands", "models", "years"].includes(activeTab)) {
+            filtered = filtered.filter(cat => cat.vehicleType === selectedVehicleType);
+        }
+        
+        return filtered;
+    }, [categories, activeTab, selectedVehicleType]);
 
     // Apply search & sort
     const processedCategories = useMemo(() => {
@@ -102,12 +114,30 @@ const Categories = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [activeTab, searchTerm]);
+    }, [activeTab, searchTerm, selectedVehicleType]);
 
-    // Get brands for model/year parent selection
+    // Reset vehicle type filter when switching tabs
+    useEffect(() => {
+        if (!["brands", "models", "years"].includes(activeTab)) {
+            setSelectedVehicleType("");
+        }
+    }, [activeTab]);
+
+    // Get brands for model/year parent selection (filtered by vehicle type if selected)
     const brands = useMemo(() => {
-        return categories.filter(cat => cat.subType === "make" && cat.isActive);
-    }, [categories]);
+        let filtered = categories.filter(cat => cat.subType === "make" && cat.isActive && cat.type === "car");
+        // Filter by vehicle type if specified in form or if editing a category with vehicle type
+        const vehicleTypeFilter = formData.vehicleType || (editingCategory?.vehicleType);
+        if (vehicleTypeFilter) {
+            filtered = filtered.filter(cat => cat.vehicleType === vehicleTypeFilter);
+        }
+        return filtered.sort((a, b) => {
+            const orderA = a.order || 0;
+            const orderB = b.order || 0;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.name || "").localeCompare(b.name || "");
+        });
+    }, [categories, formData.vehicleType, editingCategory]);
 
     // Get models for year parent selection (currently not used in form, but kept for potential future use)
     // const models = useMemo(() => {
@@ -194,6 +224,7 @@ const Categories = () => {
             year: "",
             country: "",
             state: "",
+            vehicleType: selectedVehicleType || "", // Pre-select vehicle type if filtered
             display: "show",
             status: "active",
             image: null,
@@ -212,6 +243,7 @@ const Categories = () => {
             year: "",
             country: "",
             state: "",
+            vehicleType: category.vehicleType || "",
             display: category.isActive ? "show" : "hide",
             status: category.isActive ? "active" : "inactive",
             image: null,
@@ -242,9 +274,14 @@ const Categories = () => {
             const submitData = new FormData();
             
             if (activeTab === "brands") {
+                if (!formData.vehicleType) {
+                    toast.error("Please select a vehicle type");
+                    return;
+                }
                 submitData.append("name", formData.name);
                 submitData.append("type", "car");
                 submitData.append("subType", "make");
+                submitData.append("vehicleType", formData.vehicleType);
                 submitData.append("isActive", formData.status === "active");
                 if (formData.image) {
                     submitData.append("image", formData.image);
@@ -254,16 +291,26 @@ const Categories = () => {
                     toast.error("Please select a brand");
                     return;
                 }
+                if (!formData.vehicleType) {
+                    toast.error("Please select a vehicle type");
+                    return;
+                }
                 submitData.append("name", formData.name);
                 submitData.append("type", "car");
                 submitData.append("subType", "model");
+                submitData.append("vehicleType", formData.vehicleType);
                 submitData.append("parentCategory", formData.brand);
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "years") {
+                if (!formData.vehicleType) {
+                    toast.error("Please select a vehicle type");
+                    return;
+                }
                 // Years are independent (standalone) - no parent category required
                 submitData.append("name", formData.year || formData.name);
                 submitData.append("type", "car");
                 submitData.append("subType", "year");
+                submitData.append("vehicleType", formData.vehicleType);
                 // No parentCategory - years are independent
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "state") {
@@ -317,6 +364,7 @@ const Categories = () => {
                 year: "",
                 country: "",
                 state: "",
+                vehicleType: selectedVehicleType || "",
                 display: "show",
                 status: "active",
                 image: null,
@@ -375,7 +423,7 @@ const Categories = () => {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
                     <div className="p-4">
                         <div className="flex items-center justify-between gap-4 flex-wrap">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                                 {['brands', 'models', 'years', 'country', 'state', 'city'].map((tab) => (
                                     <button
                                         key={tab}
@@ -390,6 +438,26 @@ const Categories = () => {
                                     </button>
                                 ))}
                             </div>
+                            {/* Vehicle Type Filter for Car Categories */}
+                            {["brands", "models", "years"].includes(activeTab) && (
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Vehicle Type:
+                                    </label>
+                                    <select
+                                        value={selectedVehicleType}
+                                        onChange={(e) => setSelectedVehicleType(e.target.value)}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                    >
+                                        <option value="">All Types</option>
+                                        {vehicleTypes.map((vt) => (
+                                            <option key={vt} value={vt}>
+                                                {vt}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             <div className="flex items-center gap-3">
                                 <input
                                     type="text"
@@ -434,6 +502,9 @@ const Categories = () => {
                                         >
                                             Name
                                         </th>
+                                        {["brands", "models", "years"].includes(activeTab) && (
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Vehicle Type</th>
+                                        )}
                                         {activeTab === "brands" && (
                                             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Logo</th>
                                         )}
@@ -472,6 +543,13 @@ const Categories = () => {
                                                     )}
                                                 </div>
                                             </td>
+                                            {["brands", "models", "years"].includes(activeTab) && (
+                                                <td className="px-6 py-4">
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                                        {category.vehicleType || "N/A"}
+                                                    </span>
+                                                </td>
+                                            )}
                                             {activeTab === "brands" && (
                                                 <td className="px-6 py-4">
                                                     {category.image ? (
@@ -575,6 +653,7 @@ const Categories = () => {
                                         year: "",
                                         country: "",
                                         state: "",
+                                        vehicleType: selectedVehicleType || "",
                                         display: "show",
                                         status: "active",
                                         image: null,
@@ -593,6 +672,25 @@ const Categories = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {activeTab === "brands" && (
                                     <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Vehicle Type *
+                                            </label>
+                                            <select
+                                                name="vehicleType"
+                                                value={formData.vehicleType}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                            >
+                                                <option value="">Select Vehicle Type</option>
+                                                {vehicleTypes.map((vt) => (
+                                                    <option key={vt} value={vt}>
+                                                        {vt}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Brand Name *
@@ -675,6 +773,25 @@ const Categories = () => {
                                     <>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Vehicle Type *
+                                            </label>
+                                            <select
+                                                name="vehicleType"
+                                                value={formData.vehicleType}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                            >
+                                                <option value="">Select Vehicle Type</option>
+                                                {vehicleTypes.map((vt) => (
+                                                    <option key={vt} value={vt}>
+                                                        {vt}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Brand *
                                             </label>
                                             <select
@@ -682,9 +799,12 @@ const Categories = () => {
                                                 value={formData.brand}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                                disabled={!formData.vehicleType}
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed"
                                             >
-                                                <option value="">Select Brand</option>
+                                                <option value="">
+                                                    {formData.vehicleType ? "Select Brand" : "Select Vehicle Type first"}
+                                                </option>
                                                 {brands.map((brand) => (
                                                     <option key={brand._id} value={brand._id}>
                                                         {brand.name}
@@ -739,6 +859,25 @@ const Categories = () => {
 
                                 {activeTab === "years" && (
                                     <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Vehicle Type *
+                                            </label>
+                                            <select
+                                                name="vehicleType"
+                                                value={formData.vehicleType}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                                            >
+                                                <option value="">Select Vehicle Type</option>
+                                                {vehicleTypes.map((vt) => (
+                                                    <option key={vt} value={vt}>
+                                                        {vt}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Year *

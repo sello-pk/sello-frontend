@@ -51,6 +51,7 @@ export const VEHICLE_FIELD_CONFIG = {
       // Common fields
       fuelType: { visible: true, required: true },
       transmission: { visible: true, required: true },
+      regionalSpec: { visible: true, required: true },
       mileage: { visible: true, required: false },
     },
   },
@@ -66,6 +67,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "engineCapacity",
       "transmission",
       "regionalSpec",
+      "bodyType", // Bus body types: School Bus, Coach, Mini Bus, Double Decker, etc.
       "city",
       "contactNumber",
       "sellerType",
@@ -82,10 +84,10 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "horsepower",
       "numberOfCylinders",
-      "geoLocation", // Made optional
+      "geoLocation",
     ],
     fields: {
-      bodyType: { visible: false, required: false },
+      bodyType: { visible: true, required: true }, // Important for buses (School Bus, Coach, etc.)
       cylinders: { visible: true, required: false },
       doors: { visible: false, required: false },
       horsepower: { visible: true, required: false },
@@ -94,6 +96,7 @@ export const VEHICLE_FIELD_CONFIG = {
       motorPower: { visible: false, required: false },
       fuelType: { visible: true, required: true },
       transmission: { visible: true, required: true },
+      regionalSpec: { visible: true, required: true },
       mileage: { visible: true, required: false },
     },
   },
@@ -109,6 +112,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "engineCapacity",
       "transmission",
       "regionalSpec",
+      "bodyType", // Truck body types: Pickup, Flatbed, Box Truck, Dump Truck, etc.
       "city",
       "contactNumber",
       "sellerType",
@@ -125,10 +129,10 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "horsepower",
       "numberOfCylinders",
-      "geoLocation", // Made optional
+      "geoLocation",
     ],
     fields: {
-      bodyType: { visible: false, required: false },
+      bodyType: { visible: true, required: true }, // Important for trucks (Pickup, Flatbed, etc.)
       cylinders: { visible: true, required: false },
       doors: { visible: false, required: false },
       horsepower: { visible: true, required: false },
@@ -137,6 +141,7 @@ export const VEHICLE_FIELD_CONFIG = {
       motorPower: { visible: false, required: false },
       fuelType: { visible: true, required: true },
       transmission: { visible: true, required: true },
+      regionalSpec: { visible: true, required: true },
       mileage: { visible: true, required: false },
     },
   },
@@ -158,7 +163,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "sellerType",
       "warranty",
       "ownerType",
-      "geoLocation",
     ],
     optional: [
       "description",
@@ -171,6 +175,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "carDoors",
       "horsepower",
       "numberOfCylinders",
+      "geoLocation",
     ],
     fields: {
       bodyType: { visible: true, required: true },
@@ -182,6 +187,7 @@ export const VEHICLE_FIELD_CONFIG = {
       motorPower: { visible: false, required: false },
       fuelType: { visible: true, required: true },
       transmission: { visible: true, required: true },
+      regionalSpec: { visible: true, required: true },
       mileage: { visible: true, required: false },
     },
   },
@@ -194,7 +200,7 @@ export const VEHICLE_FIELD_CONFIG = {
       "condition",
       "price",
       "fuelType",
-      "engineCapacity",
+      "engineCapacity", // Displacement in cc - important for motorcycles
       "transmission",
       "regionalSpec",
       "city",
@@ -212,11 +218,12 @@ export const VEHICLE_FIELD_CONFIG = {
       "features",
       "location",
       "horsepower",
-      "geoLocation", // Made optional
+      "numberOfCylinders", // Bikes can have 1, 2, 3, 4, or 6 cylinders
+      "geoLocation",
     ],
     fields: {
       bodyType: { visible: false, required: false },
-      cylinders: { visible: false, required: false },
+      cylinders: { visible: true, required: false }, // Bikes have cylinders (1, 2, 3, 4, 6)
       doors: { visible: false, required: false },
       horsepower: { visible: true, required: false },
       engineCapacity: { visible: true, required: true },
@@ -224,6 +231,7 @@ export const VEHICLE_FIELD_CONFIG = {
       motorPower: { visible: false, required: false },
       fuelType: { visible: true, required: true },
       transmission: { visible: true, required: true },
+      regionalSpec: { visible: true, required: true },
       mileage: { visible: true, required: false },
     },
   },
@@ -235,9 +243,6 @@ export const VEHICLE_FIELD_CONFIG = {
       "year",
       "condition",
       "price",
-      "fuelType",
-      "transmission",
-      "regionalSpec",
       "city",
       "contactNumber",
       "sellerType",
@@ -254,7 +259,10 @@ export const VEHICLE_FIELD_CONFIG = {
       "location",
       "batteryRange",
       "motorPower",
-      "geoLocation", // Made optional
+      "fuelType", // E-bikes are electric, but some might want to specify
+      "transmission", // E-bikes may have gears
+      "regionalSpec",
+      "geoLocation",
     ],
     fields: {
       bodyType: { visible: false, required: false },
@@ -262,10 +270,11 @@ export const VEHICLE_FIELD_CONFIG = {
       doors: { visible: false, required: false },
       horsepower: { visible: false, required: false },
       engineCapacity: { visible: false, required: false },
-      batteryRange: { visible: true, required: false },
-      motorPower: { visible: true, required: false },
-      fuelType: { visible: true, required: true },
-      transmission: { visible: true, required: true },
+      batteryRange: { visible: true, required: false }, // Important for E-bikes
+      motorPower: { visible: true, required: false }, // Important for E-bikes
+      fuelType: { visible: false, required: false }, // E-bikes are electric - not required
+      transmission: { visible: false, required: false }, // Optional for E-bikes
+      regionalSpec: { visible: false, required: false }, // Optional for E-bikes
       mileage: { visible: true, required: false },
     },
   },

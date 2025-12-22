@@ -156,7 +156,7 @@ const ProfileHero = () => {
           ratingCount: user?.reviewCount || 0,
       });
       } catch (error) {
-        console.error("Error setting user data:", error);
+        console.error("Error setting user data", error);
       }
     }
   }, [user, savedCarsData]);
@@ -219,7 +219,7 @@ const ProfileHero = () => {
       setIsEditing(false);
       setShowProfilePopup(false);
     } catch (err) {
-      console.error("Update failed:", err);
+      console.error("Update failed", err);
       alert(err?.data?.message || "Failed to update profile. Please try again.");
     }
   };
@@ -231,7 +231,7 @@ const ProfileHero = () => {
       localStorage.removeItem("user");
       navigate("/login");
     } catch (err) {
-      console.error("Logout failed:", err);
+      console.error("Logout failed", err);
       // Clear tokens even if logout request fails
       clearTokens();
       localStorage.removeItem("user");
@@ -251,7 +251,7 @@ const ProfileHero = () => {
   }
 
   if (isError && error?.status !== 401) {
-    console.error("Profile error:", error);
+    console.error("Profile error", error);
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">

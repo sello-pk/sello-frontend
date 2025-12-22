@@ -251,7 +251,7 @@ const SupportChatWidget = () => {
                 refetchChats();
             }
         } catch (error) {
-            console.error('Send message error:', error);
+            console.error('Send message error', error);
             toast.error(error?.data?.message || "Failed to send message");
         }
     };
@@ -558,7 +558,7 @@ const SupportChatWidget = () => {
                                                                                     toast.error(data.message || "Failed to update message");
                                                                                 }
                                                                             } catch (error) {
-                                                                                console.error("Update error:", error);
+                                                                                console.error("Update error", error);
                                                                                 toast.error("Failed to update message");
                                                                             }
                                                                         }}
@@ -630,7 +630,7 @@ const SupportChatWidget = () => {
                                                                                     toast.error(data.message || "Failed to delete message");
                                                                                 }
                                                                             } catch (error) {
-                                                                                console.error("Delete error:", error);
+                                                                                console.error("Delete error", error);
                                                                                 toast.error("Failed to delete message");
                                                                             }
                                                                         }
