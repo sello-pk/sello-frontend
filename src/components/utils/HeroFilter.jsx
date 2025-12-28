@@ -44,7 +44,7 @@ const HeroFilter = () => {
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
-    
+
     // Reset make and model when vehicle type changes
     if (field === "vehicleType") {
       setVehicleType(value);
@@ -55,7 +55,7 @@ const HeroFilter = () => {
   // Parse mileage range to min/max values
   const parseMileage = (mileageStr) => {
     if (!mileageStr) return { min: null, max: null };
-    
+
     if (mileageStr.includes("<")) {
       const max = parseInt(mileageStr.replace(/[^0-9]/g, ""));
       return { min: null, max: max || null };
@@ -63,7 +63,9 @@ const HeroFilter = () => {
       const min = parseInt(mileageStr.replace(/[^0-9]/g, ""));
       return { min: min || null, max: null };
     } else if (mileageStr.includes("-")) {
-      const parts = mileageStr.split("-").map((p) => parseInt(p.replace(/[^0-9]/g, "")));
+      const parts = mileageStr
+        .split("-")
+        .map((p) => parseInt(p.replace(/[^0-9]/g, "")));
       return { min: parts[0] || null, max: parts[1] || null };
     }
     return { min: null, max: null };
@@ -72,25 +74,25 @@ const HeroFilter = () => {
   // Parse engine string to transmission and fuelType
   const parseEngine = (engineStr) => {
     if (!engineStr) return { transmission: null, fuelType: null };
-    
+
     const transmission = engineStr.toLowerCase().includes("manual")
       ? "Manual"
       : engineStr.toLowerCase().includes("auto")
       ? "Automatic"
       : null;
-    
+
     const fuelType = engineStr.toLowerCase().includes("electric")
       ? "Electric"
       : engineStr.toLowerCase().includes("hybrid")
       ? "Hybrid"
       : null;
-    
+
     return { transmission, fuelType };
   };
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
-    
+
     // Build backend query parameters
     const backendFilters = {};
 
@@ -172,19 +174,6 @@ const HeroFilter = () => {
     toast.success("Searching cars...");
   };
 
-  // Navigate to results when search completes
-  useEffect(() => {
-    if (filteredCars && !isSearching && queryParams) {
-      navigate("/filter", {
-        state: {
-          filteredCars,
-          isLoading: isSearching,
-          filters: queryParams,
-        },
-      });
-    }
-  }, [filteredCars, isSearching, queryParams, navigate]);
-
   // Handle search errors
   useEffect(() => {
     if (searchError) {
@@ -194,7 +183,25 @@ const HeroFilter = () => {
     }
   }, [searchError]);
 
-  // Year options from categories - only use dynamic data from admin
+  // Navigate to results when search completes
+  useEffect(() => {
+    if (filteredCars && !isSearching && queryParams) {
+      // Format the data structure expected by FilteredResults component
+      const formattedData = {
+        cars: Array.isArray(filteredCars) ? filteredCars : [],
+        total: Array.isArray(filteredCars) ? filteredCars.length : 0,
+        data: Array.isArray(filteredCars) ? filteredCars : [],
+      };
+
+      navigate("/search-results", {
+        state: {
+          filteredCars: formattedData,
+          isLoading: isSearching,
+          filters: queryParams,
+        },
+      });
+    }
+  }, [filteredCars, isSearching, queryParams, navigate]);
   const yearOptions = useMemo(() => {
     if (years && years.length > 0) {
       return years
@@ -309,7 +316,13 @@ const HeroFilter = () => {
                   onChange={(v) => handleChange("year", v)}
                   options={["", ...yearOptions]}
                   disabled={categoriesLoading}
-                  emptyMessage={categoriesLoading ? "Loading..." : yearOptions.length === 0 ? "No years available" : ""}
+                  emptyMessage={
+                    categoriesLoading
+                      ? "Loading..."
+                      : yearOptions.length === 0
+                      ? "No years available"
+                      : ""
+                  }
                 />
 
                 {/* Make Filter */}
@@ -323,7 +336,13 @@ const HeroFilter = () => {
                   }}
                   options={["", ...makeOptions]}
                   disabled={categoriesLoading}
-                  emptyMessage={categoriesLoading ? "Loading..." : makeOptions.length === 0 ? "No makes available" : ""}
+                  emptyMessage={
+                    categoriesLoading
+                      ? "Loading..."
+                      : makeOptions.length === 0
+                      ? "No makes available"
+                      : ""
+                  }
                 />
 
                 {/* Model Filter */}
@@ -334,11 +353,11 @@ const HeroFilter = () => {
                   options={["", ...modelOptions]}
                   disabled={categoriesLoading}
                   emptyMessage={
-                    categoriesLoading 
-                      ? "Loading..." 
+                    categoriesLoading
+                      ? "Loading..."
                       : modelOptions.length === 0
-                        ? "No models available"
-                        : ""
+                      ? "No models available"
+                      : ""
                   }
                 />
 
@@ -364,7 +383,7 @@ const HeroFilter = () => {
             <div className="bg-gray-800 p-4 lg:w-72 flex flex-col justify-between">
               <div>
                 <h4 className="text-white text-xs font-semibold mb-3">
-                  Pricing ( AED )
+                  Pricing ( PKR )
                 </h4>
 
                 <div className="flex gap-3 mb-4">
@@ -398,7 +417,7 @@ const HeroFilter = () => {
               <button
                 type="submit"
                 disabled={isSearching}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-primary-500 hover:opacity-90 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSearching ? (
                   <>
@@ -438,7 +457,14 @@ const HeroFilter = () => {
 
 /* Reusable Components */
 
-const FilterSelect = ({ label, value, onChange, options, disabled, emptyMessage }) => (
+const FilterSelect = ({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+  emptyMessage,
+}) => (
   <div className="flex flex-col">
     <label className="text-gray-900 text-xs font-bold mb-1 uppercase">
       {label}

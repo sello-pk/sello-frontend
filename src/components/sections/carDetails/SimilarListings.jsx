@@ -91,7 +91,7 @@ const SimilarListings = ({ carId }) => {
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-xl font-bold text-primary-500">
-                                    AED {car.price?.toLocaleString() || '0'}
+                                    PKR {car.price?.toLocaleString() || '0'}
                                 </span>
                                 {car.postedBy?.isVerified && (
                                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">

@@ -16,8 +16,8 @@ const BlogMediaLibrary = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                 <div className="text-center max-w-md mx-auto">
                     <div className="flex justify-center mb-4">
-                        <div className="bg-orange-100 rounded-full p-4">
-                            <FiImage className="h-12 w-12 text-orange-500" />
+                        <div className="bg-primary-100 rounded-full p-4">
+                            <FiImage className="h-12 w-12 text-primary-500" />
                         </div>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Coming Soon</h3>
@@ -25,12 +25,12 @@ const BlogMediaLibrary = () => {
                         The media library feature is currently under development. 
                         You'll be able to upload, organize, and manage media files for your blog posts soon.
                     </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+                    <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 text-left">
                         <div className="flex items-start">
-                            <FiAlertCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
-                            <div className="text-sm text-blue-800">
+                            <FiAlertCircle className="h-5 w-5 text-primary-600 mt-0.5 mr-2 flex-shrink-0" />
+                            <div className="text-sm text-primary-800">
                                 <p className="font-semibold mb-1">What to expect:</p>
-                                <ul className="list-disc list-inside space-y-1 text-blue-700">
+                                <ul className="list-disc list-inside space-y-1 text-primary-700">
                                     <li>Upload images, videos, and documents</li>
                                     <li>Organize media by categories or tags</li>
                                     <li>Search and filter media files</li>

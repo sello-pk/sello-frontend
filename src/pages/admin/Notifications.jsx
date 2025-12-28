@@ -12,6 +12,7 @@ import { MdNotifications, MdNotificationsActive } from "react-icons/md";
 import { io } from "socket.io-client";
 import { SOCKET_BASE_URL } from "../../redux/config";
 import ConfirmModal from "../../components/admin/ConfirmModal";
+import ActionDropdown from "../../components/admin/ActionDropdown";
 
 const Notifications = () => {
     const [showModal, setShowModal] = useState(false);
@@ -158,7 +159,7 @@ const Notifications = () => {
                 return <MdNotifications className="text-purple-500" />;
             case 'info':
             default:
-                return <FiInfo className="text-blue-500" />;
+                return <FiInfo className="text-primary-500" />;
         }
     };
 
@@ -174,7 +175,7 @@ const Notifications = () => {
                 return 'bg-purple-100 text-purple-800 border-purple-200';
             case 'info':
             default:
-                return 'bg-blue-100 text-blue-800 border-blue-200';
+                return 'bg-primary-50 text-primary-800 border-primary-200';
         }
     };
 
@@ -205,7 +206,7 @@ const Notifications = () => {
                         </div>
                         <button
                             onClick={() => setShowModal(true)}
-                            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
+                            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
                         >
                             <FiPlus size={20} />
                             Create Notification
@@ -259,7 +260,7 @@ const Notifications = () => {
                             onClick={() => setFilter("info")}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 filter === "info"
-                                    ? "bg-blue-500 text-white"
+                                    ? "bg-primary-500 text-white"
                                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
                             }`}
                         >
@@ -369,14 +370,13 @@ const Notifications = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {formatDate(notification.createdAt)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <button
-                                                    onClick={() => handleDelete(notification._id)}
-                                                    className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 transition-colors"
-                                                >
-                                                    <FiTrash2 size={16} />
-                                                    Delete
-                                                </button>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                                <ActionDropdown
+                                                    onDelete={() => handleDelete(notification._id)}
+                                                    item={notification}
+                                                    itemName="notification"
+                                                    deleteConfirmMessage="Are you sure you want to delete this notification? This action cannot be undone."
+                                                />
                                             </td>
                                         </tr>
                                     ))}
@@ -534,7 +534,7 @@ const Notifications = () => {
                                     <button
                                         type="submit"
                                         disabled={isCreating}
-                                        className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+                                        className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md hover:shadow-lg flex items-center gap-2"
                                     >
                                         {isCreating ? (
                                             <>

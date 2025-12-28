@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../../redux/services/api";
 
-const BlogPosts = ({ search = '', category = '' }) => {
+const BlogPosts = ({ search = '', category = '', sortBy = 'newest' }) => {
   const [page, setPage] = useState(1);
   
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [search, category]);
+  }, [search, category, sortBy]);
   
   const { data, isLoading, error } = useGetBlogsQuery({ 
     page, 
@@ -18,8 +18,26 @@ const BlogPosts = ({ search = '', category = '' }) => {
     ...(category && { category })
   });
 
-  const blogs = data?.blogs || [];
+  let blogs = data?.blogs || [];
   const pagination = data?.pagination || {};
+  
+  // Client-side sorting (since backend doesn't support sort parameter yet)
+  blogs = [...blogs].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt);
+      case "oldest":
+        return new Date(a.publishedAt || a.createdAt) - new Date(b.publishedAt || b.createdAt);
+      case "mostViewed":
+        return (b.views || 0) - (a.views || 0);
+      case "titleAsc":
+        return (a.title || "").localeCompare(b.title || "");
+      case "titleDesc":
+        return (b.title || "").localeCompare(a.title || "");
+      default:
+        return 0;
+    }
+  });
 
   const formatDate = (dateString) => {
     if (!dateString) return "";

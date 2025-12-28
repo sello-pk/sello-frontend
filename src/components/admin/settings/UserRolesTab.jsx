@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../routes";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../../../redux/config";
 import { getAccessToken } from "../../../utils/tokenRefresh";
+import { useDeleteUserMutation } from "../../../redux/services/adminApi";
 import {
   FaPlus,
   FaUserPlus,
@@ -44,7 +46,13 @@ const UserRolesTab = () => {
   const [userToAssignRole, setUserToAssignRole] = useState(null);
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [assigningRole, setAssigningRole] = useState(false);
-  const dropdownRef = useRef(null);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, userId: null });
+  const [deleteUser] = useDeleteUserMutation();
 
   const fetchData = async () => {
     setLoading(true);
@@ -117,17 +125,19 @@ const UserRolesTab = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if click is outside the dropdown menu
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        // Check if click is on a dropdown button (three dots)
-        const clickedButton = event.target.closest("button");
-        const isDropdownButton =
-          clickedButton &&
-          clickedButton.querySelector('svg[viewBox="0 0 20 20"]');
+      if (!openDropdown) return;
 
-        if (!isDropdownButton) {
-          setOpenDropdown(null);
-        }
+      const dropdownElement = dropdownRefs.current[openDropdown];
+      const buttonElement = buttonRefs.current[openDropdown];
+      
+      // Check if click is on the dropdown button or inside the dropdown
+      const isDropdownButton = buttonElement && buttonElement.contains(event.target);
+      const isInsideDropdown = dropdownElement && dropdownElement.contains(event.target);
+
+      // If click is outside both the dropdown and the button, close it
+      if (!isDropdownButton && !isInsideDropdown) {
+        setOpenDropdown(null);
+        setDropdownPosition({ top: 0, left: 0, userId: null });
       }
     };
 
@@ -143,6 +153,48 @@ const UserRolesTab = () => {
       };
     }
   }, [openDropdown]);
+
+  // Update dropdown position on scroll/resize
+  useEffect(() => {
+    if (!openDropdown || !dropdownPosition.userId) return;
+
+    const updatePosition = () => {
+      const button = buttonRefs.current[dropdownPosition.userId];
+      if (!button) return;
+
+      const rect = button.getBoundingClientRect();
+      const dropdownWidth = 192;
+      const dropdownHeight = 200;
+      const gap = 8;
+      
+      let top = rect.bottom + gap;
+      let left = rect.right - dropdownWidth;
+      
+      // Check if dropdown would go off-screen to the right
+      if (left < 0) {
+        left = rect.left;
+      }
+      
+      // Check if dropdown would go off-screen to the bottom
+      const viewportHeight = window.innerHeight;
+      if (top + dropdownHeight > viewportHeight) {
+        top = rect.top - dropdownHeight - gap;
+        if (top < 0) {
+          top = viewportHeight - dropdownHeight - 10;
+        }
+      }
+      
+      setDropdownPosition(prev => ({ ...prev, top, left }));
+    };
+
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [openDropdown, dropdownPosition.userId]);
 
   const handleEditRole = (role) => {
     setEditingRole(role);
@@ -209,6 +261,44 @@ const UserRolesTab = () => {
     setOpenDropdown(null);
     // Navigate to admin users page with user ID to view details
     navigate(ROUTES.admin.userDetail(user._id));
+  };
+
+  const handleDropdownToggle = (userId, event) => {
+    event.stopPropagation();
+    
+    if (openDropdown === userId) {
+      setOpenDropdown(null);
+      setDropdownPosition({ top: 0, left: 0, userId: null });
+    } else {
+      const button = event.currentTarget;
+      const rect = button.getBoundingClientRect();
+      const dropdownWidth = 192; // w-48 = 192px
+      const dropdownHeight = 200; // Approximate height
+      const gap = 8; // mt-2 = 8px
+      
+      // Calculate position: below the button, aligned to the right
+      let top = rect.bottom + gap;
+      let left = rect.right - dropdownWidth;
+      
+      // Check if dropdown would go off-screen to the right
+      if (left < 0) {
+        left = rect.left; // Align to left edge of button
+      }
+      
+      // Check if dropdown would go off-screen to the bottom
+      const viewportHeight = window.innerHeight;
+      if (top + dropdownHeight > viewportHeight) {
+        // Position above the button instead
+        top = rect.top - dropdownHeight - gap;
+        // If still off-screen at top, position at bottom of viewport
+        if (top < 0) {
+          top = viewportHeight - dropdownHeight - 10;
+        }
+      }
+      
+      setDropdownPosition({ top, left, userId });
+      setOpenDropdown(userId);
+    }
   };
 
   const handleEditUserRole = async (user) => {
@@ -309,7 +399,7 @@ const UserRolesTab = () => {
         fetchData(); // Refresh the user list
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.DEV) {
         console.error("Assign role error:", error);
       }
       toast.error(error.response?.data?.message || "Failed to assign role");
@@ -319,10 +409,25 @@ const UserRolesTab = () => {
   };
 
   const handleRemoveFromTeam = (user) => {
-    // Show confirmation modal
-    toast.info(`Remove ${user.name} from team - Feature coming soon`);
     setOpenDropdown(null);
-    // You can implement this functionality
+    setUserToDelete(user._id);
+    setShowDeleteUserModal(true);
+  };
+
+  const handleDeleteUserConfirm = async () => {
+    if (!userToDelete) return;
+    setIsDeletingUser(true);
+    try {
+      await deleteUser(userToDelete).unwrap();
+      toast.success("User deleted successfully");
+      fetchData();
+    } catch (error) {
+      toast.error(error?.data?.message || error?.message || "Failed to delete user");
+    } finally {
+      setIsDeletingUser(false);
+      setShowDeleteUserModal(false);
+      setUserToDelete(null);
+    }
   };
 
   const handleResetPassword = (user) => {
@@ -375,7 +480,7 @@ const UserRolesTab = () => {
         {activeSection === "users" ? (
           <button
             onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-primary-500 hover:opacity-90 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
             aria-label="Invite a new user to the team"
           >
             <FaUserPlus aria-hidden="true" /> Invite User
@@ -383,7 +488,7 @@ const UserRolesTab = () => {
         ) : (
           <button
             onClick={handleCreateRole}
-            className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-primary-500 hover:opacity-90 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
             aria-label="Create a new role"
           >
             <FaPlus aria-hidden="true" /> New Role
@@ -427,11 +532,11 @@ const UserRolesTab = () => {
               </div>
 
               {/* Active Users Table */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
                   <h3 className="font-bold text-gray-800">Team Members</h3>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto overflow-y-visible">
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
@@ -498,14 +603,12 @@ const UserRolesTab = () => {
                               <td className="px-6 py-4 text-right">
                                 <div className="relative inline-block">
                                   <button
-                                    onClick={() =>
-                                      setOpenDropdown(
-                                        openDropdown === user._id
-                                          ? null
-                                          : user._id
-                                      )
-                                    }
+                                    ref={(el) => {
+                                      if (el) buttonRefs.current[user._id] = el;
+                                    }}
+                                    onClick={(e) => handleDropdownToggle(user._id, e)}
                                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded hover:bg-gray-100"
+                                    aria-label="User actions menu"
                                   >
                                     <svg
                                       className="w-5 h-5"
@@ -515,47 +618,6 @@ const UserRolesTab = () => {
                                       <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                                     </svg>
                                   </button>
-
-                                  {openDropdown === user._id && (
-                                    <div
-                                      ref={dropdownRef}
-                                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1"
-                                    >
-                                      <button
-                                        onClick={() => handleViewUser(user)}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
-                                      >
-                                        <FaEye size={14} />
-                                        View Details
-                                      </button>
-                                      <button
-                                        onClick={() => handleEditUserRole(user)}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
-                                      >
-                                        <FaEdit size={14} />
-                                        Edit Role
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleResetPassword(user)
-                                        }
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
-                                      >
-                                        <FaKey size={14} />
-                                        Reset Password
-                                      </button>
-                                      <hr className="my-1 border-gray-200" />
-                                      <button
-                                        onClick={() =>
-                                          handleRemoveFromTeam(user)
-                                        }
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
-                                      >
-                                        <FaUserTimes size={14} />
-                                        Remove from Team
-                                      </button>
-                                    </div>
-                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -896,6 +958,21 @@ const UserRolesTab = () => {
         variant="danger"
       />
 
+      {/* Delete User Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteUserModal}
+        onClose={() => {
+          setShowDeleteUserModal(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={handleDeleteUserConfirm}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone. All associated data will be permanently deleted."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={isDeletingUser}
+      />
+
       {/* Assign Role Modal */}
       {showAssignRoleModal && userToAssignRole && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
@@ -989,7 +1066,7 @@ const UserRolesTab = () => {
               <button
                 onClick={handleAssignRole}
                 disabled={assigningRole || !selectedRoleId}
-                className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {assigningRole ? (
                   <>
@@ -1005,6 +1082,70 @@ const UserRolesTab = () => {
           </div>
         </div>
       )}
+
+      {/* Portal Dropdown - Rendered outside scrollable container */}
+      {openDropdown && dropdownPosition.userId && (() => {
+        const user = users.find(u => u._id === dropdownPosition.userId);
+        if (!user) return null;
+
+        return createPortal(
+          <div
+            ref={(el) => {
+              if (el) dropdownRefs.current[dropdownPosition.userId] = el;
+            }}
+            className="fixed w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] py-1"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              maxHeight: 'calc(100vh - 200px)',
+              overflowY: 'auto'
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewUser(user);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+            >
+              <FaEye size={14} />
+              View Details
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditUserRole(user);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+            >
+              <FaEdit size={14} />
+              Edit Role
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleResetPassword(user);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+            >
+              <FaKey size={14} />
+              Reset Password
+            </button>
+            <hr className="my-1 border-gray-200" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveFromTeam(user);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+            >
+              <FaTrash size={14} />
+              Delete User
+            </button>
+          </div>,
+          document.body
+        );
+      })()}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../redux/services/api";
 import { formatDate } from "../../../utils/format";
+import { buildBlogUrl } from "../../../utils/urlBuilders";
 
 const LatestBlogsSection = () => {
   const { data, isLoading } = useGetBlogsQuery({ 
@@ -46,7 +47,7 @@ const LatestBlogsSection = () => {
           <p className="text-gray-600">Stay updated with our latest articles and insights</p>
         </div>
         <Link 
-          to="/blog/all" 
+          to="/blog" 
           className="text-primary-500 hover:text-primary-500 font-medium flex items-center gap-2 transition-colors"
         >
           View All
@@ -61,7 +62,7 @@ const LatestBlogsSection = () => {
         {blogs.map((blog) => (
           <Link
             key={blog._id}
-            to={`/blog/${blog.slug || blog._id}`}
+            to={buildBlogUrl(blog)}
             className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
           >
             {/* Blog Image */}

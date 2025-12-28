@@ -6,6 +6,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 import LazyImage from "../components/common/LazyImage";
 import { images } from "../assets/assets";
 import toast from "react-hot-toast";
+import { buildCarUrl } from "../utils/urlBuilders";
 
 const SavedCars = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const SavedCars = () => {
             <p className="text-gray-500 mb-6">You haven't saved any cars yet. Start exploring and save your favorites!</p>
             <button
               onClick={() => navigate("/cars")}
-              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="bg-primary-500 hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
               Browse Cars
             </button>
@@ -126,9 +127,9 @@ const SavedCars = () => {
                       </div>
 
                       <div className="flex items-center justify-between mt-4">
-                        <h6 className="text-lg md:text-xl font-semibold">AED {carPrice}</h6>
+                        <h6 className="text-lg md:text-xl font-semibold">PKR {carPrice}</h6>
                         <button
-                          onClick={() => carId && navigate(`/cars/${carId}`)}
+                          onClick={() => car && navigate(buildCarUrl(car))}
                           className="flex items-center gap-2 text-primary-500 hover:underline text-sm md:text-base"
                         >
                           View Details

@@ -461,7 +461,7 @@ const Payments = () => {
                                     });
                                     setShowPlanModal(true);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
                             >
                                 <FiPlus size={18} />
                                 Add New Plan
@@ -564,7 +564,7 @@ const Payments = () => {
                                                 <div className="text-blue-600">Restricted to: {plan.allowedRoles.join(", ")}</div>
                                             )}
                                             {plan.requiresApproval && (
-                                                <div className="text-orange-600">Requires Approval</div>
+                                                <div className="text-primary-600">Requires Approval</div>
                                             )}
                                         </div>
 
@@ -680,7 +680,7 @@ const Payments = () => {
                                         </button>
                                         <button
                                             onClick={handleUpdateConfirm}
-                                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                                         >
                                             Update
                                         </button>
@@ -995,7 +995,7 @@ const Payments = () => {
                                         <button
                                             type="submit"
                                             disabled={isCreatingPlan || isUpdatingPlan}
-                                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+                                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
                                         >
                                             {isCreatingPlan || isUpdatingPlan ? "Saving..." : editingPlan ? "Update Plan" : "Create Plan"}
                                         </button>

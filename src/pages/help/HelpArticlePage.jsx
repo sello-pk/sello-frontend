@@ -85,7 +85,7 @@ const HelpArticlePage = ({ title, content, category }) => {
             <div className="flex flex-col md:flex-row items-start gap-4">
               <button
                 onClick={() => navigate("/contact")}
-                className="flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
               >
                 <FiMessageCircle className="text-xl" />
                 Contact Support

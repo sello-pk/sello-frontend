@@ -42,18 +42,34 @@ const SubscriptionManagement = () => {
     if (!selectedPlan) return;
 
     try {
-      // Create Stripe checkout session
+      // Create checkout session (Stripe or JazzCash, depending on server config)
       const checkout = await createSubscriptionCheckout({
         plan: selectedPlan,
         autoRenew: autoRenew,
       }).unwrap();
 
-      // Redirect to Stripe checkout
-      if (checkout.url) {
-        window.location.href = checkout.url;
-      } else {
-        toast.error("Failed to create checkout session");
+      // If payment is not required (e.g. free plan activated directly)
+      if (checkout && checkout.paymentRequired === false) {
+        toast.success(checkout.message || "Plan activated successfully.");
+        setShowPaymentModal(false);
+        refetchSubscription();
+        return;
       }
+
+      // Redirect to external payment page (Stripe/JazzCash)
+      if (checkout?.url) {
+        // Stripe-style response
+        window.location.href = checkout.url;
+        return;
+      }
+
+      if (checkout?.paymentUrl) {
+        // JazzCash-style response
+        window.location.href = checkout.paymentUrl;
+        return;
+      }
+
+        toast.error("Failed to create checkout session");
     } catch (error) {
       toast.error(error?.data?.message || "Failed to create checkout session. Please try again.");
     }
@@ -79,7 +95,7 @@ const SubscriptionManagement = () => {
       case "premium":
         return <FiStar className="text-yellow-500" size={24} />;
       case "dealer":
-        return <FiShield className="text-blue-500" size={24} />;
+        return <FiShield className="text-primary-500" size={24} />;
       case "basic":
         return <FiTrendingUp className="text-green-500" size={24} />;
       default:
@@ -184,7 +200,7 @@ const SubscriptionManagement = () => {
                     : planKey === "premium"
                     ? "border-yellow-300 bg-gradient-to-br from-yellow-50 to-white"
                     : planKey === "dealer"
-                    ? "border-blue-300 bg-gradient-to-br from-blue-50 to-white"
+                    ? "border-primary-300 bg-gradient-to-br from-primary-50 to-white"
                     : "border-gray-200 bg-white hover:border-primary-300 hover:shadow-lg"
                 }`}
               >
@@ -233,8 +249,8 @@ const SubscriptionManagement = () => {
                       : planKey === "premium"
                       ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                       : planKey === "dealer"
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
-                      : "bg-primary-500 hover:bg-primary-600 text-white"
+                      ? "bg-primary-500 hover:opacity-90 text-white"
+                      : "bg-primary-500 hover:opacity-90 text-white"
                   }`}
                 >
                   {isCurrentPlan ? "Current Plan" : isUpgrade ? "Upgrade" : "Select Plan"}
@@ -323,9 +339,9 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <FiCreditCard className="text-blue-600" size={16} />
+                  <FiCreditCard className="text-primary-600" size={16} />
                   <span className="font-semibold text-gray-900">Secure Payment</span>
                 </div>
                 <p className="text-sm text-gray-600">
@@ -365,7 +381,7 @@ const SubscriptionManagement = () => {
                 <button
                   onClick={handlePurchase}
                   disabled={isPurchasing || isCreatingCheckout}
-                  className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {(isPurchasing || isCreatingCheckout) ? (
                     <>

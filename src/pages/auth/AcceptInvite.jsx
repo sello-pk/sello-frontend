@@ -15,7 +15,7 @@ import {
   useGetInviteByTokenQuery,
   useAcceptInviteMutation,
 } from "../../redux/services/adminApi";
-import { setAccessToken, setRefreshToken } from "../../utils/tokenRefresh.js";
+import { setAccessToken } from "../../utils/tokenRefresh.js";
 
 // DetailItem component for invitation details
 const DetailItem = ({ icon, label, value, badge = false }) => {
@@ -97,12 +97,8 @@ const AcceptInvite = () => {
       localStorage.removeItem("otp");
 
 
-      // STEP 2: Store tokens and user data using utility functions
+      // STEP 2: Store access token and user data (refresh token handled via httpOnly cookie)
       setAccessToken(tokenData);
-      // Store refresh token if provided (new system)
-      if (res.refreshToken) {
-        setRefreshToken(res.refreshToken);
-      }
 
       const completeUserData = {
         ...userData,
@@ -193,7 +189,7 @@ const AcceptInvite = () => {
             </p>
             <button
               onClick={() => navigate("/login")}
-              className="w-full px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="w-full px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               Go to Login
             </button>

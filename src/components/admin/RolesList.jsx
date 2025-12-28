@@ -35,7 +35,7 @@ const RolesList = ({ onCreateRole }) => {
     const getAccessLevelBadge = (level) => {
         const colors = {
             FULL: "bg-red-100 text-red-800",
-            MEDIUM_HIGH: "bg-orange-100 text-orange-800",
+            MEDIUM_HIGH: "bg-primary-100 text-primary-800",
             MEDIUM: "bg-blue-100 text-blue-800"
         };
         return (
@@ -60,7 +60,7 @@ const RolesList = ({ onCreateRole }) => {
                     <h3 className="text-lg font-semibold text-gray-900">Roles & Permissions</h3>
                     <button
                         onClick={onCreateRole}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
                     >
                         Create Role
                     </button>

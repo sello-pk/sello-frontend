@@ -11,6 +11,7 @@ import Pagination from "../../components/admin/Pagination";
 import toast from "react-hot-toast";
 import { FiPlus, FiEdit, FiTrash2, FiX, FiStar, FiUser } from "react-icons/fi";
 import ConfirmModal from "../../components/admin/ConfirmModal";
+import ActionDropdown from "../../components/admin/ActionDropdown";
 
 const Testimonials = () => {
     const [showModal, setShowModal] = useState(false);
@@ -184,7 +185,7 @@ const Testimonials = () => {
                     </div>
                     <button
                         onClick={handleOpenModal}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2"
                     >
                         <FiPlus size={18} />
                         Add Testimonial
@@ -239,21 +240,14 @@ const Testimonials = () => {
                                             {testimonial.isActive ? "Active" : "Inactive"}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleEdit(testimonial)}
-                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                                            title="Edit"
-                                        >
-                                            <FiEdit size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteClick(testimonial._id)}
-                                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                            title="Delete"
-                                        >
-                                            <FiTrash2 size={18} />
-                                        </button>
+                                    <div className="flex items-center justify-end">
+                                        <ActionDropdown
+                                            onEdit={() => handleEdit(testimonial)}
+                                            onDelete={() => handleDeleteClick(testimonial._id)}
+                                            item={testimonial}
+                                            itemName="testimonial"
+                                            deleteConfirmMessage="Are you sure you want to delete this testimonial? This action cannot be undone."
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -434,7 +428,7 @@ const Testimonials = () => {
                                     <button
                                         type="submit"
                                         disabled={isCreating || isUpdating}
-                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {(isCreating || isUpdating) && <Spinner fullScreen={false} />}
                                         {editingTestimonial ? (isUpdating ? "Updating..." : "Update") : (isCreating ? "Creating..." : "Create")}

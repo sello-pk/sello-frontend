@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildCarUrl } from "../../utils/urlBuilders";
 import {
   FiHome,
   FiPlus,
@@ -111,7 +112,7 @@ const SellerDashboard = () => {
           </p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
           >
             Go Home
           </button>
@@ -147,14 +148,14 @@ const SellerDashboard = () => {
             {user?.dealerInfo?.verified ? (
               <button
                 onClick={() => navigate("/dealer/dashboard")}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
               >
                 Go to Dealer Dashboard
               </button>
             ) : (
               <button
                 onClick={() => navigate("/")}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
               >
                 Go Home
               </button>
@@ -301,7 +302,7 @@ const SellerDashboard = () => {
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Sold Cars</span>
-                    <FiCheckCircle className="text-blue-500" size={20} />
+                    <FiCheckCircle className="text-primary-500" size={20} />
                   </div>
                   <div className="text-3xl font-bold text-gray-900">{stats.soldCars}</div>
                 </div>
@@ -312,7 +313,7 @@ const SellerDashboard = () => {
                     <FiDollarSign className="text-green-500" size={20} />
                   </div>
                   <div className="text-3xl font-bold text-gray-900">
-                    AED {stats.totalEarnings.toLocaleString()}
+                    PKR {stats.totalEarnings.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -337,7 +338,7 @@ const SellerDashboard = () => {
                     <p>No listings yet. Start by posting your first ad!</p>
                     <button
                       onClick={() => navigate("/create-post")}
-                      className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                      className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                     >
                       Post New Ad
                     </button>
@@ -348,7 +349,7 @@ const SellerDashboard = () => {
                       <div
                         key={car._id}
                         className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/cars/${car._id}`)}
+                        onClick={() => navigate(buildCarUrl(car))}
                       >
                         <div className="h-48 relative">
                           <LazyImage
@@ -367,7 +368,7 @@ const SellerDashboard = () => {
                             {car.make} {car.model} {car.year}
                           </h4>
                           <p className="text-primary-500 font-bold mt-1">
-                            AED {car.price?.toLocaleString()}
+                            PKR {car.price?.toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -384,7 +385,7 @@ const SellerDashboard = () => {
                 <h3 className="text-xl font-semibold text-gray-900">My Listings</h3>
                 <button
                   onClick={() => navigate("/create-post")}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2"
                 >
                   <FiPlus size={18} />
                   New Listing
@@ -413,17 +414,17 @@ const SellerDashboard = () => {
                         {car.make} {car.model} {car.year}
                       </h4>
                       <p className="text-primary-500 font-bold mt-1">
-                        AED {car.price?.toLocaleString()}
+                        PKR {car.price?.toLocaleString()}
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <button
                           onClick={() => navigate(`/edit-car/${car._id}`)}
-                          className="flex-1 px-3 py-2 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
+                          className="flex-1 px-3 py-2 bg-primary-500 text-white rounded text-sm hover:opacity-90"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => navigate(`/cars/${car._id}`)}
+                          onClick={() => navigate(buildCarUrl(car))}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
                         >
                           View

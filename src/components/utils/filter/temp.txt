@@ -1,0 +1,19 @@
+                                                              }
+
+        
+        // Suggest manual selection
+        toast(
+          "💡 Tip: You can click on the map or search for a location instead.",
+          {
+            duration: 4000,
+            icon: "📍",
+          }
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000, // Accept cached position up to 1 minute old
+      }
+    );
+  };

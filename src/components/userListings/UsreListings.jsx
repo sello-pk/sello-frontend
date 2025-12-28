@@ -3,6 +3,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { buildCarUrl } from "../../utils/urlBuilders";
 import { useGetMyCarsQuery, useRelistCarMutation } from "../../redux/services/api";
 import LazyImage from "../../components/common/LazyImage";
 import { images } from "../../assets/assets";
@@ -173,10 +174,10 @@ const UserListings = () => {
 
                     <div className="flex items-center justify-between py-4">
                       <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
-                        AED <h5 className={`price ${car?.isSold ? 'line-through text-gray-500' : ''}`}>{carPrice}</h5>
+                        PKR <h5 className={`price ${car?.isSold ? 'line-through text-gray-500' : ''}`}>{carPrice}</h5>
                       </div>
                       <button
-                        onClick={() => car?._id && navigate(`/cars/${car._id}`)}
+                        onClick={() => car && navigate(buildCarUrl(car))}
                         className="text-primary-500 flex items-center gap-2"
                         disabled={!car?._id}
                       >
@@ -213,7 +214,7 @@ const UserListings = () => {
                           className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             car?.isSold
                               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              : "bg-primary-500 hover:bg-primary-600 text-white"
+                              : "bg-primary-500 hover:opacity-90 text-white"
                           }`}
                         >
                           {car?.isSold ? "Edit Disabled" : "Edit"}
@@ -224,7 +225,7 @@ const UserListings = () => {
                           className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             car?.isSold 
                               ? 'bg-green-500 hover:bg-green-600 text-white' 
-                              : 'bg-orange-500 hover:bg-orange-600 text-white'
+                              : 'bg-primary-500 hover:opacity-90 text-white'
                           } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {updatingCars.has(car._id) 
@@ -257,7 +258,7 @@ const UserListings = () => {
                             }
                           }}
                           disabled={isRelisting || updatingCars.has(car?._id)}
-                          className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                          className="w-full px-4 py-2 bg-primary-500 hover:opacity-90 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         >
                           {isRelisting || updatingCars.has(car?._id) ? 'Relisting...' : 'Relist'}
                         </button>

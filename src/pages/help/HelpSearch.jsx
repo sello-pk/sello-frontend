@@ -106,7 +106,7 @@ const HelpSearch = () => {
             />
             <button
               type="submit"
-              className="absolute right-2 top-2 bottom-2 px-6 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              className="absolute right-2 top-2 bottom-2 px-6 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
             >
               Search
             </button>

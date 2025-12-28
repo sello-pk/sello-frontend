@@ -11,6 +11,7 @@ const AllBlog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   
   const { data: categoriesData } = useGetAllCategoriesQuery({ type: "blog", isActive: true });
   const categories = categoriesData || [];
@@ -20,14 +21,26 @@ const AllBlog = () => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (categoryFilter) params.set('category', categoryFilter);
+    if (sortBy && sortBy !== 'newest') params.set('sort', sortBy);
     setSearchParams(params);
   };
 
   const clearFilters = () => {
     setSearch('');
     setCategoryFilter('');
+    setSortBy('newest');
     setSearchParams({});
   };
+  
+  // Update sort when URL param changes
+  React.useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam) {
+      setSortBy(sortParam);
+    } else {
+      setSortBy('newest');
+    }
+  }, [searchParams]);
 
   return (
     <div>
@@ -67,10 +80,30 @@ const AllBlog = () => {
               ))}
             </select>
             
+            {/* Sort Filter */}
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                const params = new URLSearchParams();
+                if (search) params.set('search', search);
+                if (categoryFilter) params.set('category', categoryFilter);
+                if (e.target.value !== 'newest') params.set('sort', e.target.value);
+                setSearchParams(params);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="mostViewed">Most Viewed</option>
+              <option value="titleAsc">Title (A-Z)</option>
+              <option value="titleDesc">Title (Z-A)</option>
+            </select>
+            
             {/* Search Button */}
             <button
               type="submit"
-              className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
             >
               Search
             </button>
@@ -90,7 +123,7 @@ const AllBlog = () => {
         </form>
       </div>
 
-      <BlogPosts search={search} category={categoryFilter} />
+      <BlogPosts search={search} category={categoryFilter} sortBy={sortBy} />
       <NewsLatter />
     </div>
   );

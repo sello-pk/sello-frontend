@@ -8,6 +8,7 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import LazyImage from "../../common/LazyImage";
 import { useSaveCarMutation, useUnsaveCarMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
 import toast from "react-hot-toast";
+import { buildCarUrl } from "../../../utils/urlBuilders";
 
 const FeaturedCarsCarousel = () => {
   const navigate = useNavigate();
@@ -255,7 +256,7 @@ const FeaturedCarsCarousel = () => {
               return (
                 <div
                   key={carId}
-                  onClick={() => navigate(`/cars/${carId}`)}
+                  onClick={() => navigate(buildCarUrl(car))}
                   className="min-w-[320px] md:min-w-[380px] bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all cursor-pointer transform hover:-translate-y-2 flex-shrink-0"
                 >
                   <div className="relative">
@@ -282,7 +283,7 @@ const FeaturedCarsCarousel = () => {
 
                       {/* Boost Badge */}
                       {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && (
-                        <div className="absolute bottom-2 left-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg">
+                        <div className="absolute bottom-2 left-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg">
                           <FiZap size={12} />
                           BOOSTED
                         </div>
@@ -342,15 +343,15 @@ const FeaturedCarsCarousel = () => {
                         <div>
                           <p className="text-sm text-gray-500">Price</p>
                           <p className="text-2xl font-bold text-primary-500">
-                            AED {carPrice}
+                            PKR {carPrice}
                           </p>
                         </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/cars/${carId}`);
+                            navigate(buildCarUrl(car));
                           }}
-                          className="bg-primary-500 hover:bg-primary-600 px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                          className="bg-primary-500 hover:opacity-90 px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
                         >
                           View Details
                           <IoIosArrowRoundUp className="text-lg rotate-[40deg]" />

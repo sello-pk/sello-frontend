@@ -85,6 +85,9 @@ const NotificationsSection = () => {
     }
 
     // Navigate to action URL if available
+    // For support chats, actionUrl will be:
+    // - Users:  `/support?chatId=...`  → handled by SupportRouteRedirect (opens widget)
+    // - Admins: `/admin/support-chatbot/:chatId` → handled by admin routes
     if (notification.actionUrl) {
       navigate(notification.actionUrl);
     }
@@ -124,7 +127,7 @@ const NotificationsSection = () => {
         return 'bg-red-50 border-red-200 text-red-800';
       case 'info':
       default:
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return 'bg-primary-50 border-primary-200 text-primary-800';
     }
   };
 
@@ -162,7 +165,7 @@ const NotificationsSection = () => {
         {unreadCount > 0 && (
           <button
             onClick={handleMarkAllAsRead}
-            className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
           >
             <FaCheckDouble />
             Mark all read

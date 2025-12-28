@@ -141,7 +141,7 @@ const Reports = () => {
                     </div>
                     <button
                         onClick={handleExportPDF}
-                        className="px-4 py-2 bg-gray-900 dark:bg-primary-500 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-primary-600 flex items-center gap-2 text-sm shadow-sm"
+                        className="px-4 py-2 bg-gray-900 dark:bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2 text-sm shadow-sm"
                     >
                         <FiDownload size={18} />
                         Export Report
@@ -159,7 +159,7 @@ const Reports = () => {
                                     {formatCurrency(analytics.earnings?.total || 0)}
                                 </p>
                             </div>
-                            <div className="w-16 h-16 rounded-2xl bg-yellow-500 flex items-center justify-center shadow-lg">
+                            <div className="w-16 h-16 rounded-2xl bg-primary-500 flex items-center justify-center shadow-lg">
                                 <HiCurrencyRupee className="text-white" size={32} />
                             </div>
                         </div>

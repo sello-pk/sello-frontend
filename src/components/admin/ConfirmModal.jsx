@@ -54,7 +54,7 @@ const ConfirmModal = ({
             icon: "text-blue-500"
         },
         default: {
-            button: "bg-primary-500 hover:bg-primary-600 text-white",
+            button: "bg-primary-500 hover:opacity-90 text-white",
             icon: "text-primary-500"
         }
     };

@@ -6,7 +6,6 @@ import { FaCirclePlus, FaBars, FaXmark } from "react-icons/fa6";
 import gsap from "gsap";
 import { useGetMeQuery } from "../redux/services/api";
 import NotificationBell from "./common/NotificationBell";
-import toast from "react-hot-toast";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -206,7 +205,7 @@ const Navbar = () => {
               {currentUser.role === "admin" && (
                 <Link
                   to="/admin/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
                 >
                   Admin
                 </Link>
@@ -214,7 +213,7 @@ const Navbar = () => {
               {user?.role === "dealer" && user?.dealerInfo?.verified && (
                 <Link
                   to="/dealer/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
                 >
                   Dealer Dashboard
                 </Link>
@@ -222,7 +221,7 @@ const Navbar = () => {
               {user?.role === "dealer" && !user?.dealerInfo?.verified && (
                 <Link
                   to="/seller/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
                 >
                   My Dashboard
                 </Link>
@@ -246,7 +245,7 @@ const Navbar = () => {
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="md:px-6 md:py-2 py-1 px-4 bg-primary-500 rounded-md text-lg text-white hover:bg-primary-600 transition-colors"
+              className="md:px-6 md:py-2 py-1 px-4 bg-primary-500 rounded-md text-lg text-white hover:opacity-90 transition-colors"
             >
               Login
             </button>

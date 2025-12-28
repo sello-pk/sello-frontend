@@ -3,6 +3,7 @@ import { images } from "../../../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { useGetCarsQuery } from "../../../redux/services/api";
+import { buildCarUrl } from "../../../utils/urlBuilders";
 
 const PopularMakes = () => {
   const [selectBrand, setSelectBrand] = useState(null);
@@ -160,10 +161,10 @@ const PopularMakes = () => {
 
                   <div className="flex items-center justify-between mt-4">
                     <h6 className="text-lg md:text-xl font-semibold">
-                      AED {carPrice}
+                      PKR {carPrice}
                     </h6>
                     <button
-                      onClick={() => car._id && navigate(`/cars/${car._id}`)}
+                      onClick={() => car && navigate(buildCarUrl(car))}
                       className="flex items-center gap-2 text-primary-500 hover:underline text-sm md:text-base"
                     >
                       View Details

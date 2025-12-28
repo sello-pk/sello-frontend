@@ -40,10 +40,11 @@ export const colors = {
         dark: '#D97706',    // yellow-600
     },
     
+    // Info (secondary) uses a softer orange variant instead of blue
     info: {
-        DEFAULT: '#3B82F6', // blue-500
-        light: '#DBEAFE',  // blue-100
-        dark: '#2563EB',    // blue-600
+        DEFAULT: '#FFB84D', // soft orange
+        light: '#FFF3E0',
+        dark: '#FF8C1A',
     },
     
     // Neutral colors
@@ -79,12 +80,12 @@ export const getColorClass = (colorName, variant = 'DEFAULT') => {
  * Standard button color classes
  */
 export const buttonColors = {
-    primary: 'bg-primary-500 hover:bg-primary-600 text-white',
+    primary: 'bg-primary-500 hover:opacity-90 text-white',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
     success: 'bg-green-500 hover:bg-green-600 text-white',
     danger: 'bg-red-500 hover:bg-red-600 text-white',
     warning: 'bg-yellow-500 hover:bg-yellow-600 text-white',
-    info: 'bg-blue-500 hover:bg-blue-600 text-white',
+    info: 'bg-primary-100 hover:bg-primary-200 text-primary-700',
 };
 
 /**
@@ -95,7 +96,7 @@ export const badgeColors = {
     success: 'bg-green-100 text-green-800',
     danger: 'bg-red-100 text-red-800',
     warning: 'bg-yellow-100 text-yellow-800',
-    info: 'bg-blue-100 text-blue-800',
+    info: 'bg-primary-50 text-primary-600',
     gray: 'bg-gray-100 text-gray-800',
 };
 

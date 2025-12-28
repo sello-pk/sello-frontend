@@ -272,7 +272,7 @@ const CustomerReview = () => {
             {isLoggedIn ? (
               <button
                 onClick={handleOpenReviewForm}
-                className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                className="bg-primary-500 hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
               >
                 Write a Review
               </button>
@@ -283,7 +283,7 @@ const CustomerReview = () => {
                 </p>
                 <button
                   onClick={() => navigate("/login")}
-                  className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                  className="bg-primary-500 hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
                 >
                   Login to Write a Review
                 </button>
@@ -392,7 +392,7 @@ const CustomerReview = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-primary-500 hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">

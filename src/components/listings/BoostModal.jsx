@@ -117,7 +117,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
               <h4 className="font-semibold text-gray-900 mb-1">
                 {car.make} {car.model} {car.year}
               </h4>
-              <p className="text-sm text-gray-600">AED {car.price?.toLocaleString()}</p>
+              <p className="text-sm text-gray-600">PKR {car.price?.toLocaleString()}</p>
               {isBoosted && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
                   <FiCheckCircle size={16} />
@@ -149,7 +149,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
                   >
                     <div className="font-bold text-lg">{days}</div>
                     <div className="text-xs mt-1">day{days > 1 ? "s" : ""}</div>
-                    <div className="text-xs font-semibold mt-1">AED {cost}</div>
+                    <div className="text-xs font-semibold mt-1">PKR {cost}</div>
                   </button>
                 );
               })}
@@ -157,19 +157,19 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
           </div>
 
           {/* Pricing Summary */}
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Price per day</span>
-              <span className="font-semibold">AED {pricePerDay}</span>
+              <span className="font-semibold">PKR {pricePerDay}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Duration</span>
               <span className="font-semibold">{selectedDuration} day{selectedDuration > 1 ? "s" : ""}</span>
             </div>
-            <div className="border-t border-blue-200 pt-2 mt-2">
+            <div className="border-t border-primary-200 pt-2 mt-2">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-gray-900">Total Cost</span>
-                <span className="text-2xl font-bold text-primary-500">AED {totalCost}</span>
+                <span className="text-2xl font-bold text-primary-500">PKR {totalCost}</span>
               </div>
             </div>
           </div>
@@ -200,9 +200,9 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
           )}
 
           {!useCredits && (
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
               <div className="flex items-center gap-2 mb-2">
-                <FiCreditCard className="text-blue-600" size={16} />
+                <FiCreditCard className="text-primary-600" size={16} />
                 <span className="font-semibold text-gray-900">Secure Payment</span>
               </div>
               <p className="text-sm text-gray-600">
@@ -235,7 +235,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
             <button
               onClick={handleBoost}
               disabled={isBoosting || isCreatingCheckout || optionsLoading}
-              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {(isBoosting || isCreatingCheckout) ? (
                 <>

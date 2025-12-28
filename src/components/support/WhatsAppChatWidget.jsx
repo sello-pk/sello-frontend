@@ -417,7 +417,7 @@ const WhatsAppChatWidget = () => {
                     <div className="mb-4">
                     <button
                         onClick={() => setShowCreateForm(true)}
-                        className="w-full bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition"
+                        className="w-full bg-primary-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition"
                     >
                             Start New Chat
                         </button>
@@ -514,7 +514,7 @@ const WhatsAppChatWidget = () => {
                         <div className="flex gap-2">
                             <button
                                 type="submit"
-                                className="flex-1 bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition"
+                                className="flex-1 bg-primary-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition"
                             >
                                 Submit
                             </button>
@@ -631,7 +631,7 @@ const WhatsAppChatWidget = () => {
                                                     {isUser && (
                                                         <>
                                                             {msg.seenBy && msg.seenBy.length > 0 ? (
-                                                                <IoMdDoneAll className="text-blue-500" size={16} />
+                                                                <IoMdDoneAll className="text-primary-500" size={16} />
                                                             ) : msg.isRead ? (
                                                                 <IoMdDoneAll className="text-gray-400" size={16} />
                                                             ) : (
@@ -701,7 +701,7 @@ const WhatsAppChatWidget = () => {
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!message.trim()}
-                                className="p-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2 bg-primary-500 text-white rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <FiSend size={20} />
                             </button>

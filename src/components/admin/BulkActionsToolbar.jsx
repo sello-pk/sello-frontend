@@ -43,7 +43,7 @@ const BulkActionsToolbar = ({
                                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed'
                                     : action.variant === 'success'
                                     ? 'bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                                    : 'bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed'
+                                    : 'bg-primary-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed'
                             }`}
                             aria-label={`${action.label} for ${selectedCount} selected items`}
                         >

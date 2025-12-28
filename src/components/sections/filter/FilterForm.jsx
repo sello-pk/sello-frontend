@@ -16,20 +16,28 @@ import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import LocationButton from "../../utils/filter/LocationButton";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useCarCategories } from "../../../hooks/useCarCategories";
 import { isFieldVisible } from "../../../utils/vehicleFieldConfig";
+
+// Helper function to get dynamic labels based on vehicle type
+const getVehicleLabel = (vehicleType, fieldType) => {
+  const vehicleName = vehicleType || "Vehicle";
+  if (fieldType === "make") {
+    return `${vehicleName} Make`;
+  } else if (fieldType === "model") {
+    return `${vehicleName} Model`;
+  }
+  return `${vehicleName} ${fieldType}`;
+};
 
 const FilterForm = ({ onFilter }) => {
   // Vehicle type options - same as CreatePostForm and HeroFilter
   const vehicleTypeOptions = ["Car", "Bus", "Truck", "Van", "Bike", "E-bike"];
-  const [selectedMake, setSelectedMake] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
   const [availableStates, setAvailableStates] = useState([]);
   const [availableCities, setAvailableCities] = useState([]);
-  
+
   const [filters, setFilters] = useState({
     search: "",
     vehicleType: "",
@@ -72,17 +80,28 @@ const FilterForm = ({ onFilter }) => {
   });
 
   // Filter categories by selected vehicle type (must be after filters declaration)
-  const { makes, models, getModelsByMake, years, countries, states, cities, getCitiesByCountry, getStatesByCountry, getCitiesByState, isLoading: categoriesLoading } = useCarCategories(filters.vehicleType || null);
+  const {
+    makes,
+    models,
+    getModelsByMake,
+    years,
+    countries,
+    states,
+    cities,
+    getCitiesByCountry,
+    getStatesByCountry,
+    getCitiesByState,
+    isLoading: categoriesLoading,
+  } = useCarCategories(filters.vehicleType || null);
 
   // Removed internal query - parent component handles it
   // const [queryParams, setQueryParams] = useState(null);
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   // Read URL parameters on mount and apply filters
   useEffect(() => {
     const urlFilters = {};
-    
+
     // Read all URL parameters
     const city = searchParams.get("city");
     const bodyType = searchParams.get("bodyType");
@@ -99,7 +118,6 @@ const FilterForm = ({ onFilter }) => {
     if (bodyType) urlFilters.bodyType = bodyType;
     if (make) {
       urlFilters.make = make;
-      setSelectedMake(make);
     }
     if (model) urlFilters.model = model;
     if (yearMin) urlFilters.minYear = yearMin;
@@ -113,8 +131,8 @@ const FilterForm = ({ onFilter }) => {
 
     // Update filters state
     if (Object.keys(urlFilters).length > 0) {
-      setFilters(prev => ({ ...prev, ...urlFilters }));
-      
+      setFilters((prev) => ({ ...prev, ...urlFilters }));
+
       // Build backend filters and trigger search
       const backendFilters = {};
       if (urlFilters.city) backendFilters.city = urlFilters.city;
@@ -137,38 +155,61 @@ const FilterForm = ({ onFilter }) => {
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
-    
+
     if (field === "vehicleType") {
       // Clear fields that are not relevant to selected type
       setFilters((prev) => ({
         ...prev,
         bodyType: isFieldVisible(value, "bodyType") ? prev.bodyType : "",
-        minCylinders: isFieldVisible(value, "cylinders") ? prev.minCylinders : "",
-        maxCylinders: isFieldVisible(value, "cylinders") ? prev.maxCylinders : "",
+        minCylinders: isFieldVisible(value, "cylinders")
+          ? prev.minCylinders
+          : "",
+        maxCylinders: isFieldVisible(value, "cylinders")
+          ? prev.maxCylinders
+          : "",
         minDoors: isFieldVisible(value, "doors") ? prev.minDoors : "",
         maxDoors: isFieldVisible(value, "doors") ? prev.maxDoors : "",
-        minHorsePower: isFieldVisible(value, "horsepower") ? prev.minHorsePower : "",
-        maxHorsePower: isFieldVisible(value, "horsepower") ? prev.maxHorsePower : "",
-        minEngineCapacity: isFieldVisible(value, "engineCapacity") ? prev.minEngineCapacity : "",
-        maxEngineCapacity: isFieldVisible(value, "engineCapacity") ? prev.maxEngineCapacity : "",
-        minBatteryRange: isFieldVisible(value, "batteryRange") ? prev.minBatteryRange : "",
-        maxBatteryRange: isFieldVisible(value, "batteryRange") ? prev.maxBatteryRange : "",
-        minMotorPower: isFieldVisible(value, "motorPower") ? prev.minMotorPower : "",
-        maxMotorPower: isFieldVisible(value, "motorPower") ? prev.maxMotorPower : "",
+        minHorsePower: isFieldVisible(value, "horsepower")
+          ? prev.minHorsePower
+          : "",
+        maxHorsePower: isFieldVisible(value, "horsepower")
+          ? prev.maxHorsePower
+          : "",
+        minEngineCapacity: isFieldVisible(value, "engineCapacity")
+          ? prev.minEngineCapacity
+          : "",
+        maxEngineCapacity: isFieldVisible(value, "engineCapacity")
+          ? prev.maxEngineCapacity
+          : "",
+        minBatteryRange: isFieldVisible(value, "batteryRange")
+          ? prev.minBatteryRange
+          : "",
+        maxBatteryRange: isFieldVisible(value, "batteryRange")
+          ? prev.maxBatteryRange
+          : "",
+        minMotorPower: isFieldVisible(value, "motorPower")
+          ? prev.minMotorPower
+          : "",
+        maxMotorPower: isFieldVisible(value, "motorPower")
+          ? prev.maxMotorPower
+          : "",
         // Keep condition and sellerType - they apply to all vehicle types
       }));
     }
-    
+
     // When make changes, update available models
     if (field === "make") {
-      setSelectedMake(value);
       if (value) {
-        const selectedMakeObj = makes.find(m => m.name === value);
+        const selectedMakeObj = makes.find((m) => m.name === value);
         if (selectedMakeObj) {
           const makeModels = getModelsByMake[selectedMakeObj._id] || [];
           setAvailableModels(makeModels.length > 0 ? makeModels : models);
           // Reset model if it's not available for the new make
-          if (filters.model && makeModels.length > 0 && !makeModels.find(m => m.name === filters.model)) {
+          if (
+            filters.model &&
+            makeModels.length > 0 &&
+            !makeModels.find((m) => m.name === filters.model)
+          ) {
             setFilters((prev) => ({ ...prev, model: "" }));
           }
         } else {
@@ -179,17 +220,21 @@ const FilterForm = ({ onFilter }) => {
         setAvailableModels(models);
       }
     }
-    
+
     // When country changes, update available cities
     if (field === "country") {
-      setSelectedCountry(value);
       if (value) {
-        const selectedCountryObj = countries.find(c => c.name === value);
+        const selectedCountryObj = countries.find((c) => c.name === value);
         if (selectedCountryObj) {
-          const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+          const countryCities =
+            getCitiesByCountry[selectedCountryObj._id] || [];
           setAvailableCities(countryCities.length > 0 ? countryCities : cities);
           // Reset city if it's not available for the new country
-          if (filters.city && countryCities.length > 0 && !countryCities.find(c => c.name === filters.city)) {
+          if (
+            filters.city &&
+            countryCities.length > 0 &&
+            !countryCities.find((c) => c.name === filters.city)
+          ) {
             setFilters((prev) => ({ ...prev, city: "" }));
           }
         } else {
@@ -201,11 +246,11 @@ const FilterForm = ({ onFilter }) => {
       }
     }
   };
-  
+
   // Initialize available models - show all if no make selected, filtered if make selected
   useEffect(() => {
     if (filters.make && makes.length > 0) {
-      const selectedMakeObj = makes.find(m => m.name === filters.make);
+      const selectedMakeObj = makes.find((m) => m.name === filters.make);
       if (selectedMakeObj) {
         const makeModels = getModelsByMake[selectedMakeObj._id] || [];
         setAvailableModels(makeModels.length > 0 ? makeModels : models);
@@ -221,7 +266,9 @@ const FilterForm = ({ onFilter }) => {
   // Initialize available states - show all if no country selected, filtered if country selected
   useEffect(() => {
     if (filters.country && countries.length > 0 && getStatesByCountry) {
-      const selectedCountryObj = countries.find(c => c.name === filters.country);
+      const selectedCountryObj = countries.find(
+        (c) => c.name === filters.country
+      );
       if (selectedCountryObj) {
         const countryStates = getStatesByCountry[selectedCountryObj._id] || [];
         setAvailableStates(countryStates.length > 0 ? countryStates : states);
@@ -237,22 +284,30 @@ const FilterForm = ({ onFilter }) => {
   // Initialize available cities - show all if no country/state selected, filtered if country/state selected
   useEffect(() => {
     if (filters.country && countries.length > 0) {
-      const selectedCountryObj = countries.find(c => c.name === filters.country);
+      const selectedCountryObj = countries.find(
+        (c) => c.name === filters.country
+      );
       if (selectedCountryObj) {
         // If state is selected, filter cities by state, otherwise by country
         if (filters.state && getCitiesByState) {
-          const selectedStateObj = availableStates.find(s => s.name === filters.state);
+          const selectedStateObj = availableStates.find(
+            (s) => s.name === filters.state
+          );
           if (selectedStateObj && getCitiesByState[selectedStateObj._id]) {
             const stateCities = getCitiesByState[selectedStateObj._id] || [];
             setAvailableCities(stateCities.length > 0 ? stateCities : cities);
           } else {
             // Fallback to country cities
-            const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
-            setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+            const countryCities =
+              getCitiesByCountry[selectedCountryObj._id] || [];
+            setAvailableCities(
+              countryCities.length > 0 ? countryCities : cities
+            );
           }
         } else {
           // Filter by country only
-          const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+          const countryCities =
+            getCitiesByCountry[selectedCountryObj._id] || [];
           setAvailableCities(countryCities.length > 0 ? countryCities : cities);
         }
       } else {
@@ -262,7 +317,16 @@ const FilterForm = ({ onFilter }) => {
       // Show all cities when no country is selected
       setAvailableCities(cities);
     }
-  }, [filters.country, filters.state, countries, states, cities, getCitiesByCountry, getCitiesByState, availableStates]);
+  }, [
+    filters.country,
+    filters.state,
+    countries,
+    states,
+    cities,
+    getCitiesByCountry,
+    getCitiesByState,
+    availableStates,
+  ]);
 
   const handleRangeChange = (type, values) => {
     if (type === "price") {
@@ -324,7 +388,18 @@ const FilterForm = ({ onFilter }) => {
 
   const handleLocationChange = (locationData) => {
     if (locationData && locationData.coordinates) {
-      handleChange("city", locationData.city || ""); // Map to city for text filter
+      // Store coordinates for location-based filtering
+      handleChange("userLat", locationData.coordinates.lat.toString());
+      handleChange("userLng", locationData.coordinates.lng.toString());
+
+      // Also update city if address is provided
+      if (locationData.address) {
+        // Extract city from address if possible
+        const addressParts = locationData.address.split(",");
+        if (addressParts.length > 0) {
+          handleChange("city", addressParts[addressParts.length - 1].trim());
+        }
+      }
     } else if (typeof locationData === "string") {
       handleChange("city", locationData);
     }
@@ -511,8 +586,6 @@ const FilterForm = ({ onFilter }) => {
     });
     // setQueryParams(null); // Removed - parent handles it
     if (onFilter) onFilter(null); // Notify parent to clear results
-    setSelectedMake("");
-    setSelectedCountry("");
     setAvailableModels(models);
     setAvailableCities(cities);
     toast.success("Filters cleared");
@@ -523,7 +596,9 @@ const FilterForm = ({ onFilter }) => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Filter Cars</h2>
-          <p className="text-sm text-gray-600 mt-1">Find your perfect car with advanced filters</p>
+          <p className="text-sm text-gray-600 mt-1">
+            Find your perfect car with advanced filters
+          </p>
         </div>
         <button
           type="button"
@@ -533,27 +608,35 @@ const FilterForm = ({ onFilter }) => {
           Clear All
         </button>
       </div>
-      <form className="space-y-6 h-auto" onSubmit={handleSubmit}>
-        {/* Vehicle Type */}
-        <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Vehicle Type</label>
-          <select
-            value={filters.vehicleType}
-            onChange={(e) => handleChange("vehicleType", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">All Vehicle Types</option>
-            {vehicleTypeOptions.map((type) => (
-              <option key={type} value={type}>
+      <form className="space-y-4 h-auto" onSubmit={handleSubmit}>
+        {/* Vehicle Type Selection - Button Style like CreatePostForm */}
+        <div className="mb-6">
+          <label className="block mb-3 text-center font-medium text-gray-700">
+            Vehicle Type
+          </label>
+          <div className="flex justify-center gap-4 flex-wrap">
+            {["Car", "Bus", "Truck", "Van", "Bike", "E-bike"].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleChange("vehicleType", type)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                  filters.vehicleType === type
+                    ? "bg-primary-500 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
                 {type}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
 
-        {/* Title Search */}
+        {/* Title Search - Full Width */}
         <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Search by Title</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Search by Title
+          </label>
           <Input
             inputType="text"
             value={filters.search}
@@ -592,48 +675,50 @@ const FilterForm = ({ onFilter }) => {
           />
         </div>
 
-        {/* Car Make & Model */}
+        {/* Vehicle Make */}
         <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Car Make</label>
-              <select
-                value={filters.make}
-                onChange={(e) => handleChange("make", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                disabled={categoriesLoading}
-              >
-                <option value="">All Makes</option>
-                {makes.map((make) => (
-                  <option key={make._id} value={make.name}>
-                    {make.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Car Model</label>
-              <select
-                value={filters.model}
-                onChange={(e) => handleChange("model", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                disabled={categoriesLoading}
-              >
-                <option value="">
-                  {categoriesLoading 
-                    ? "Loading..." 
-                    : availableModels.length === 0 
-                      ? "No models available" 
-                      : "All Models"}
-                </option>
-                {availableModels.map((model) => (
-                  <option key={model._id} value={model.name}>
-                    {model.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {getVehicleLabel(filters.vehicleType || "Vehicle", "make")}
+          </label>
+          <select
+            value={filters.make}
+            onChange={(e) => handleChange("make", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            disabled={categoriesLoading}
+          >
+            <option value="">All Makes</option>
+            {makes.map((make) => (
+              <option key={make._id} value={make.name}>
+                {make.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Vehicle Model */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {getVehicleLabel(filters.vehicleType || "Vehicle", "model")}
+          </label>
+          <select
+            value={filters.model}
+            onChange={(e) => handleChange("model", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            disabled={categoriesLoading}
+          >
+            <option value="">
+              {categoriesLoading
+                ? "Loading..."
+                : availableModels.length === 0
+                ? "No models available"
+                : "All Models"}
+            </option>
+            {availableModels.map((model) => (
+              <option key={model._id} value={model.name}>
+                {model.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Year */}
@@ -660,8 +745,24 @@ const FilterForm = ({ onFilter }) => {
           </div>
           <RangeFilter
             type="year"
-            min={years && years.length > 0 ? Math.min(...years.map(y => parseInt(y.name) || 1990).filter(y => !isNaN(y))) : 1990}
-            max={years && years.length > 0 ? Math.max(...years.map(y => parseInt(y.name) || new Date().getFullYear()).filter(y => !isNaN(y))) : new Date().getFullYear()}
+            min={
+              years && years.length > 0
+                ? Math.min(
+                    ...years
+                      .map((y) => parseInt(y.name) || 1990)
+                      .filter((y) => !isNaN(y))
+                  )
+                : 1990
+            }
+            max={
+              years && years.length > 0
+                ? Math.max(
+                    ...years
+                      .map((y) => parseInt(y.name) || new Date().getFullYear())
+                      .filter((y) => !isNaN(y))
+                  )
+                : new Date().getFullYear()
+            }
             onChange={(values) => handleRangeChange("year", values)}
           />
         </div>
@@ -698,191 +799,205 @@ const FilterForm = ({ onFilter }) => {
 
         {/* Cylinders */}
         {isFieldVisible(filters.vehicleType || "Car", "cylinders") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Cylinders From</label>
-              <Input
-                inputType="number"
-                value={filters.minCylinders}
-                onChange={(e) => handleChange("minCylinders", e.target.value)}
-                placeholder="Min"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Cylinders From</label>
+                <Input
+                  inputType="number"
+                  value={filters.minCylinders}
+                  onChange={(e) => handleChange("minCylinders", e.target.value)}
+                  placeholder="Min"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxCylinders}
+                  onChange={(e) => handleChange("maxCylinders", e.target.value)}
+                  placeholder="Max"
+                />
+              </div>
             </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxCylinders}
-                onChange={(e) => handleChange("maxCylinders", e.target.value)}
-                placeholder="Max"
-              />
-            </div>
+            <RangeFilter
+              type="cylinders"
+              min={1}
+              max={16}
+              onChange={(values) => handleRangeChange("cylinders", values)}
+            />
           </div>
-          <RangeFilter
-            type="cylinders"
-            min={1}
-            max={16}
-            onChange={(values) => handleRangeChange("cylinders", values)}
-          />
-        </div>
         )}
 
         {/* Doors */}
         {isFieldVisible(filters.vehicleType || "Car", "doors") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Doors From</label>
-              <Input
-                inputType="number"
-                value={filters.minDoors}
-                onChange={(e) => handleChange("minDoors", e.target.value)}
-                placeholder="Min"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Doors From</label>
+                <Input
+                  inputType="number"
+                  value={filters.minDoors}
+                  onChange={(e) => handleChange("minDoors", e.target.value)}
+                  placeholder="Min"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxDoors}
+                  onChange={(e) => handleChange("maxDoors", e.target.value)}
+                  placeholder="Max"
+                />
+              </div>
             </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxDoors}
-                onChange={(e) => handleChange("maxDoors", e.target.value)}
-                placeholder="Max"
-              />
-            </div>
+            <RangeFilter
+              type="doors"
+              min={1}
+              max={8}
+              onChange={(values) => handleRangeChange("doors", values)}
+            />
           </div>
-          <RangeFilter
-            type="doors"
-            min={1}
-            max={8}
-            onChange={(values) => handleRangeChange("doors", values)}
-          />
-        </div>
         )}
 
         {/* Horsepower */}
         {isFieldVisible(filters.vehicleType || "Car", "horsepower") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Horsepower From</label>
-              <Input
-                inputType="number"
-                value={filters.minHorsePower}
-                onChange={(e) => handleChange("minHorsePower", e.target.value)}
-                placeholder="Min"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Horsepower From</label>
+                <Input
+                  inputType="number"
+                  value={filters.minHorsePower}
+                  onChange={(e) =>
+                    handleChange("minHorsePower", e.target.value)
+                  }
+                  placeholder="Min"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxHorsePower}
+                  onChange={(e) =>
+                    handleChange("maxHorsePower", e.target.value)
+                  }
+                  placeholder="Max"
+                />
+              </div>
             </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxHorsePower}
-                onChange={(e) => handleChange("maxHorsePower", e.target.value)}
-                placeholder="Max"
-              />
-            </div>
+            <RangeFilter
+              type="horsePower"
+              min={50}
+              max={1000}
+              onChange={(values) => handleRangeChange("horsePower", values)}
+            />
           </div>
-          <RangeFilter
-            type="horsePower"
-            min={50}
-            max={1000}
-            onChange={(values) => handleRangeChange("horsePower", values)}
-          />
-        </div>
         )}
 
         {/* Engine Capacity */}
         {isFieldVisible(filters.vehicleType || "Car", "engineCapacity") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Engine Capacity From</label>
-              <Input
-                inputType="number"
-                value={filters.minEngineCapacity}
-                onChange={(e) =>
-                  handleChange("minEngineCapacity", e.target.value)
-                }
-                placeholder="Min (cc)"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Engine Capacity From</label>
+                <Input
+                  inputType="number"
+                  value={filters.minEngineCapacity}
+                  onChange={(e) =>
+                    handleChange("minEngineCapacity", e.target.value)
+                  }
+                  placeholder="Min (cc)"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxEngineCapacity}
+                  onChange={(e) =>
+                    handleChange("maxEngineCapacity", e.target.value)
+                  }
+                  placeholder="Max (cc)"
+                />
+              </div>
             </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxEngineCapacity}
-                onChange={(e) =>
-                  handleChange("maxEngineCapacity", e.target.value)
-                }
-                placeholder="Max (cc)"
-              />
-            </div>
+            <RangeFilter
+              type="engineCapacity"
+              min={0}
+              max={5000}
+              onChange={(values) => handleRangeChange("engineCapacity", values)}
+            />
           </div>
-          <RangeFilter
-            type="engineCapacity"
-            min={0}
-            max={5000}
-            onChange={(values) => handleRangeChange("engineCapacity", values)}
-          />
-        </div>
         )}
 
         {/* Battery Range (E-bike) */}
         {isFieldVisible(filters.vehicleType || "Car", "batteryRange") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Battery Range From (km)</label>
-              <Input
-                inputType="number"
-                value={filters.minBatteryRange}
-                onChange={(e) => handleChange("minBatteryRange", e.target.value)}
-                placeholder="Min"
-              />
-            </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxBatteryRange}
-                onChange={(e) => handleChange("maxBatteryRange", e.target.value)}
-                placeholder="Max"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Battery Range From (km)</label>
+                <Input
+                  inputType="number"
+                  value={filters.minBatteryRange}
+                  onChange={(e) =>
+                    handleChange("minBatteryRange", e.target.value)
+                  }
+                  placeholder="Min"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxBatteryRange}
+                  onChange={(e) =>
+                    handleChange("maxBatteryRange", e.target.value)
+                  }
+                  placeholder="Max"
+                />
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {/* Motor Power (E-bike) */}
         {isFieldVisible(filters.vehicleType || "Car", "motorPower") && (
-        <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Motor Power From (W)</label>
-              <Input
-                inputType="number"
-                value={filters.minMotorPower}
-                onChange={(e) => handleChange("minMotorPower", e.target.value)}
-                placeholder="Min"
-              />
-            </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
-              <Input
-                inputType="number"
-                value={filters.maxMotorPower}
-                onChange={(e) => handleChange("maxMotorPower", e.target.value)}
-                placeholder="Max"
-              />
+          <div className="field space-y-2">
+            <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">Motor Power From (W)</label>
+                <Input
+                  inputType="number"
+                  value={filters.minMotorPower}
+                  onChange={(e) =>
+                    handleChange("minMotorPower", e.target.value)
+                  }
+                  placeholder="Min"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label className="block mb-1">To</label>
+                <Input
+                  inputType="number"
+                  value={filters.maxMotorPower}
+                  onChange={(e) =>
+                    handleChange("maxMotorPower", e.target.value)
+                  }
+                  placeholder="Max"
+                />
+              </div>
             </div>
           </div>
-        </div>
         )}
 
-        {/* Condition Filter */}
+        {/* Condition Filter - Full Width */}
         <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Condition</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Condition
+          </label>
           <select
             value={filters.condition || ""}
             onChange={(e) => handleChange("condition", e.target.value)}
@@ -894,9 +1009,11 @@ const FilterForm = ({ onFilter }) => {
           </select>
         </div>
 
-        {/* Seller Type Filter */}
+        {/* Seller Type Filter - Full Width */}
         <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Seller Type</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Seller Type
+          </label>
           <select
             value={filters.sellerType || ""}
             onChange={(e) => handleChange("sellerType", e.target.value)}
@@ -908,89 +1025,152 @@ const FilterForm = ({ onFilter }) => {
           </select>
         </div>
 
-        {/* Other Filters */}
+        {/* Body Type Filter - Full Width */}
         {isFieldVisible(filters.vehicleType || "Car", "bodyType") && (
-        <BodyTypes
-          vehicleType={filters.vehicleType || "Car"}
-          onBodyTypeChange={(value) => handleChange("bodyType", value)}
-        />
+          <div className="field space-y-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Body Type
+            </label>
+            <BodyTypes
+              vehicleType={filters.vehicleType || "Car"}
+              onBodyTypeChange={(value) => handleChange("bodyType", value)}
+            />
+          </div>
         )}
-        <RegionalSpecs
-          onChange={(value) => handleChange("regionalSpec", value)}
-        />
-        {/* Fuel Type - hide for E-bike */}
+
+        {/* Regional Spec Filter - Full Width */}
+        {isFieldVisible(filters.vehicleType || "Car", "regionalSpec") && (
+          <div className="field space-y-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Regional Spec
+            </label>
+            <RegionalSpecs
+              onChange={(value) => handleChange("regionalSpec", value)}
+            />
+          </div>
+        )}
+
+        {/* Fuel Type Filter - Full Width */}
         {isFieldVisible(filters.vehicleType || "Car", "fuelType") && (
-          <FuelSpecs onChange={(value) => handleChange("fuelType", value)} />
+          <div className="field space-y-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Fuel Type
+            </label>
+            <FuelSpecs
+              vehicleType={filters.vehicleType || "Car"}
+              onChange={(value) => handleChange("fuelType", value)}
+            />
+          </div>
         )}
-        {/* Transmission - hide for E-bike */}
+
+        {/* Transmission Filter - Full Width */}
         {isFieldVisible(filters.vehicleType || "Car", "transmission") && (
-          <TransmissionSpecs
-            onChange={(value) => handleChange("transmission", value)}
-          />
+          <div className="field space-y-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Transmission
+            </label>
+            <TransmissionSpecs
+              onChange={(value) => handleChange("transmission", value)}
+            />
+          </div>
         )}
-        <ExteriorColor
-          value={filters.exteriorColor}
-          onChange={(value) => handleChange("exteriorColor", value)}
-        />
-        <InteriorColor
-          value={filters.interiorColor}
-          onChange={(value) => handleChange("interiorColor", value)}
-        />
-        <OwnerTypeSpecs
-          onChange={(value) => handleChange("ownerType", value)}
-        />
-        <WarrantyType onChange={(value) => handleChange("warranty", value)} />
+
+        {/* Exterior Color - Full Width */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Exterior Color
+          </label>
+          <ExteriorColor
+            value={filters.exteriorColor}
+            onChange={(value) => handleChange("exteriorColor", value)}
+          />
+        </div>
+
+        {/* Interior Color - Full Width */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Interior Color
+          </label>
+          <InteriorColor
+            value={filters.interiorColor}
+            onChange={(value) => handleChange("interiorColor", value)}
+          />
+        </div>
+
+        {/* Owner Type - Full Width */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Owner Type
+          </label>
+          <OwnerTypeSpecs
+            onChange={(value) => handleChange("ownerType", value)}
+          />
+        </div>
+
+        {/* Warranty - Full Width */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Warranty
+          </label>
+          <WarrantyType onChange={(value) => handleChange("warranty", value)} />
+        </div>
+
+        {/* Technical features full width */}
         <TechnicalFeaturesSpecs
           onChange={(value) => handleChange("technicalFeatures", value)}
         />
-        
-        {/* Country and City */}
+
+        {/* Country - Full Width */}
         <div className="field space-y-2">
-          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Country</label>
-              <select
-                value={filters.country}
-                onChange={(e) => handleChange("country", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                disabled={categoriesLoading}
-              >
-                <option value="">All Countries</option>
-                {countries.map((country) => (
-                  <option key={country._id} value={country.name}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="w-full sm:w-1/2">
-              <label className="block mb-1">City</label>
-              <select
-                value={filters.city}
-                onChange={(e) => handleChange("city", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                disabled={categoriesLoading}
-              >
-                <option value="">
-                  {categoriesLoading 
-                    ? "Loading..." 
-                    : availableCities.length === 0 
-                      ? "No cities available" 
-                      : "All Cities"}
-                </option>
-                {availableCities.map((city) => (
-                  <option key={city._id} value={city.name}>
-                    {city.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Country
+          </label>
+          <select
+            value={filters.country}
+            onChange={(e) => handleChange("country", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            disabled={categoriesLoading}
+          >
+            <option value="">All Countries</option>
+            {countries.map((country) => (
+              <option key={country._id} value={country.name}>
+                {country.name}
+              </option>
+            ))}
+          </select>
         </div>
-        
+
+        {/* City - Full Width */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            City
+          </label>
+          <select
+            value={filters.city}
+            onChange={(e) => handleChange("city", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            disabled={categoriesLoading}
+          >
+            <option value="">
+              {categoriesLoading
+                ? "Loading..."
+                : availableCities.length === 0
+                ? "No cities available"
+                : "All Cities"}
+            </option>
+            {availableCities.map((city) => (
+              <option key={city._id} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Location Radius Filter - Styled like reference */}
         <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">📍 Find Cars Near Me</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            📍 Find Cars Near Me
+          </label>
           <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <button
               type="button"
@@ -1007,8 +1187,10 @@ const FilterForm = ({ onFilter }) => {
                     handleChange("userLng", lng.toString());
                     toast.success("Location captured! Now select a radius.");
                   },
-                  (error) => {
-                    toast.error("Failed to get your location. Please allow location access.");
+                  () => {
+                    toast.error(
+                      "Failed to get your location. Please allow location access."
+                    );
                   },
                   {
                     enableHighAccuracy: true,
@@ -1023,24 +1205,57 @@ const FilterForm = ({ onFilter }) => {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  filters.userLat && filters.userLng ? "bg-green-100" : "bg-blue-100"
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    filters.userLat && filters.userLng
+                      ? "bg-green-100"
+                      : "bg-primary-100"
+                  }`}
+                >
                   {filters.userLat && filters.userLng ? (
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   ) : (
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg
+                      className="w-5 h-5 text-primary-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
                     </svg>
                   )}
                 </div>
                 <div className="text-left">
-                  <div className={`text-sm font-medium ${
-                    filters.userLat && filters.userLng ? "text-green-700" : "text-gray-700"
-                  }`}>
+                  <div
+                    className={`text-sm font-medium ${
+                      filters.userLat && filters.userLng
+                        ? "text-green-700"
+                        : "text-gray-700"
+                    }`}
+                  >
                     {filters.userLat && filters.userLng
                       ? "Location Captured"
                       : "Where are you?"}
@@ -1052,14 +1267,26 @@ const FilterForm = ({ onFilter }) => {
                   </div>
                 </div>
               </div>
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
-            
+
             {filters.userLat && filters.userLng && (
               <div className="border-t border-gray-200 p-3 bg-gray-50">
-                <label className="block text-xs font-medium text-gray-700 mb-2">Search Radius</label>
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Search Radius
+                </label>
                 <select
                   value={filters.radius}
                   onChange={(e) => handleChange("radius", e.target.value)}
@@ -1081,14 +1308,30 @@ const FilterForm = ({ onFilter }) => {
             )}
           </div>
         </div>
-        
-        <LocationButton onChange={handleLocationChange} />
+
+        {/* Location Picker */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Location
+          </label>
+          <LocationButton
+            value={
+              filters.userLat && filters.userLng
+                ? JSON.stringify([
+                    parseFloat(filters.userLng),
+                    parseFloat(filters.userLat),
+                  ])
+                : null
+            }
+            onChange={handleLocationChange}
+          />
+        </div>
 
         {/* Submit */}
         <div>
           <button
             type="submit"
-            className="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold"
+            className="bg-primary-500 text-white px-4 py-2 rounded hover:opacity-90 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold"
           >
             Apply Filters
           </button>

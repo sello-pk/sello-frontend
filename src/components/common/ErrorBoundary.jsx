@@ -1,5 +1,17 @@
-import React from 'react';
-import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
+import React from "react";
+import {
+  useRouteError,
+  isRouteErrorResponse,
+  useNavigate,
+} from "react-router-dom";
+
+// Functional component wrapper for ErrorBoundary with navigate
+const ErrorBoundaryWithNavigate = ({ children }) => {
+  const navigate = useNavigate();
+  return (
+    <ErrorBoundaryClass navigate={navigate}>{children}</ErrorBoundaryClass>
+  );
+};
 
 class ErrorBoundaryClass extends React.Component {
   constructor(props) {
@@ -13,32 +25,32 @@ class ErrorBoundaryClass extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // Log error to console
-    console.error('ErrorBoundary caught an error', error, {
+    console.error("ErrorBoundary caught an error", error, {
       componentStack: errorInfo?.componentStack,
-      errorInfo
+      errorInfo,
     });
-    
+
     // Send to Sentry if available
     if (window.Sentry) {
       try {
         window.Sentry.captureException(error, {
           contexts: {
             react: {
-              componentStack: errorInfo?.componentStack
-            }
+              componentStack: errorInfo?.componentStack,
+            },
           },
           tags: {
-            errorBoundary: true
-          }
+            errorBoundary: true,
+          },
         });
       } catch (sentryError) {
         // Sentry failed, continue without it
       }
     }
-    
+
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
   }
 
@@ -66,20 +78,21 @@ class ErrorBoundaryClass extends React.Component {
               Something went wrong
             </h1>
             <p className="text-gray-600 mb-6">
-              We're sorry, but something unexpected happened. Please try refreshing the page.
+              We're sorry, but something unexpected happened. Please try
+              refreshing the page.
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => {
                   this.setState({ hasError: false, error: null });
-                  window.location.href = '/';
+                  this.props.navigate("/");
                 }}
-                className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
               >
                 Go to Homepage
               </button>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => this.props.navigate(0)}
                 className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Refresh Page
@@ -108,8 +121,8 @@ class ErrorBoundaryClass extends React.Component {
 // Functional component wrapper for React Router error handling
 export const ErrorPage = () => {
   const error = useRouteError();
-  
-  let errorMessage = 'An unexpected error occurred';
+
+  let errorMessage = "An unexpected error occurred";
   let errorStatus = null;
 
   if (isRouteErrorResponse(error)) {
@@ -138,21 +151,23 @@ export const ErrorPage = () => {
           </svg>
         </div>
         {errorStatus && (
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">{errorStatus}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            {errorStatus}
+          </h1>
         )}
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {errorStatus ? 'Page Not Found' : 'Something went wrong'}
+          {errorStatus ? "Page Not Found" : "Something went wrong"}
         </h2>
         <p className="text-gray-600 mb-6">{errorMessage}</p>
         <div className="space-y-3">
           <button
-            onClick={() => (window.location.href = '/')}
-            className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+            onClick={() => navigate("/")}
+            className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
           >
             Go to Homepage
           </button>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
             className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
           >
             Go Back
@@ -163,5 +178,4 @@ export const ErrorPage = () => {
   );
 };
 
-export default ErrorBoundaryClass;
-
+export default ErrorBoundaryWithNavigate;

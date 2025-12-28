@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { SOCKET_BASE_URL } from "../../redux/config";
 import { FaBell, FaCheck, FaCheckDouble } from "react-icons/fa";
@@ -16,6 +16,7 @@ const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const token = localStorage.getItem("token");
 
@@ -41,27 +42,26 @@ const NotificationBell = () => {
     const newSocket = io(SOCKET_BASE_URL, {
       auth: { token },
       query: { token },
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
     });
 
-    newSocket.on('connect', () => {
+    newSocket.on("connect", () => {
       // Join user's notification room
-      newSocket.emit('join-notifications');
+      newSocket.emit("join-notifications");
     });
 
-    newSocket.on('disconnect', () => {
-    });
+    newSocket.on("disconnect", () => {});
 
     // Listen for new notifications
-    newSocket.on('new-notification', (data) => {
+    newSocket.on("new-notification", (data) => {
       // WhatsApp-style bubble toast (bottom-right, richer preview)
       toast.success(data.message || data.title || "New notification", {
-        icon: '🔔',
+        icon: "🔔",
         duration: 7000,
-        position: 'bottom-right',
+        position: "bottom-right",
       });
 
       // Refetch notifications so the bell counter updates instantly
@@ -83,9 +83,9 @@ const NotificationBell = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -95,13 +95,16 @@ const NotificationBell = () => {
         await markAsRead(notification._id).unwrap();
         refetch();
       } catch (err) {
-        console.error('Failed to mark notification as read:', err);
+        console.error("Failed to mark notification as read:", err);
       }
     }
 
     setIsOpen(false);
 
     // Navigate to action URL if available
+    // For support chats, actionUrl will be:
+    // - Users:  `/support?chatId=...`  → handled by SupportRouteRedirect (opens widget)
+    // - Admins: `/admin/support-chatbot/:chatId` → handled by admin routes
     if (notification.actionUrl) {
       navigate(notification.actionUrl);
     }
@@ -119,15 +122,15 @@ const NotificationBell = () => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'success':
-        return '✅';
-      case 'warning':
-        return '⚠️';
-      case 'error':
-        return '❌';
-      case 'info':
+      case "success":
+        return "✅";
+      case "warning":
+        return "⚠️";
+      case "error":
+        return "❌";
+      case "info":
       default:
-        return 'ℹ️';
+        return "ℹ️";
     }
   };
 
@@ -136,10 +139,12 @@ const NotificationBell = () => {
     const notificationDate = new Date(date);
     const diffInSeconds = Math.floor((now - notificationDate) / 1000);
 
-    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 60) return "Just now";
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return notificationDate.toLocaleDateString();
   };
 
@@ -155,11 +160,17 @@ const NotificationBell = () => {
           {unreadCount > 0 ? (
             <MdNotificationsActive className="text-2xl text-current" />
           ) : (
-            <MdNotifications className="text-2xl text-current" />
+            <MdNotifications
+              className={`text-2xl ${
+                location.pathname === "/cars"
+                  ? "text-primary-500"
+                  : "text-current"
+              }`}
+            />
           )}
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-lg border-2 border-white transform translate-x-1/2 -translate-y-1/2 z-10">
-              {unreadCount > 99 ? '99+' : unreadCount > 9 ? '9+' : unreadCount}
+              {unreadCount > 99 ? "99+" : unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </div>
@@ -197,18 +208,26 @@ const NotificationBell = () => {
                     key={notification._id}
                     onClick={() => handleNotificationClick(notification)}
                     className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      !notification.isRead ? 'bg-blue-50' : ''
+                      !notification.isRead ? "bg-primary-50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`text-2xl ${!notification.isRead ? 'animate-pulse' : ''}`}>
+                      <div
+                        className={`text-2xl ${
+                          !notification.isRead ? "animate-pulse" : ""
+                        }`}
+                      >
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`text-sm font-semibold ${
-                            !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
+                          <h4
+                            className={`text-sm font-semibold ${
+                              !notification.isRead
+                                ? "text-gray-900"
+                                : "text-gray-700"
+                            }`}
+                          >
                             {notification.title}
                           </h4>
                           {!notification.isRead && (
@@ -240,7 +259,7 @@ const NotificationBell = () => {
           {notifications.length > 0 && (
             <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
               <button
-                onClick={() => navigate('/notifications')}
+                onClick={() => navigate("/notifications")}
                 className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 View all notifications
@@ -254,4 +273,3 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
-

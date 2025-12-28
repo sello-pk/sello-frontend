@@ -79,7 +79,7 @@ const UserReviewSection = ({ userId, carId, sellerName }) => {
         {canReview && (
           <button
             onClick={() => setShowReviewForm(true)}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
           >
             Write Review
           </button>
@@ -234,7 +234,7 @@ const UserReviewSection = ({ userId, carId, sellerName }) => {
                 <button
                   type="submit"
                   disabled={isSubmitting || !comment.trim()}
-                  className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>

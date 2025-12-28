@@ -3,6 +3,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { buildCarUrl } from "../../../utils/urlBuilders";
 import { images } from "../../../assets/assets";
 import LazyImage from "../../common/LazyImage";
 import { 
@@ -157,7 +158,7 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                       )}
                       {/* Featured Badge */}
                       {car?.featured && !car?.isSold && (
-                        <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
+                        <div className="absolute top-3 left-3 bg-primary-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
                           FEATURED
                         </div>
                       )}
@@ -242,7 +243,7 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                             Starting from
                           </div>
                           <div className={`text-xl font-bold ${car?.isSold ? 'line-through text-gray-400' : 'text-primary-500'}`}>
-                            AED {carPrice}
+                            PKR {carPrice}
                           </div>
                           {car?.isSold && (
                             <div className="text-sm text-red-600 font-medium mt-1">Sold Out</div>
@@ -252,14 +253,14 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!car?.isSold) {
-                              navigate(`/cars/${carId}`);
+                              navigate(buildCarUrl(car));
                             }
                           }}
                           disabled={car?.isSold}
                           className={`flex items-center text-sm font-medium px-4 py-2.5 rounded-lg transition-colors ${
                             car?.isSold 
                               ? 'bg-gray-400 cursor-not-allowed text-white' 
-                              : 'bg-primary-500 hover:bg-primary-600 text-white'
+                              : 'bg-primary-500 hover:opacity-90 text-white'
                           }`}
                         >
                           {car?.isSold ? 'Sold Out' : 'View Details'}

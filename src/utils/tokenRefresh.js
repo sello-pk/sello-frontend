@@ -3,26 +3,7 @@
  * Handles automatic token refresh when access tokens expire
  */
 
-const REFRESH_TOKEN_KEY = 'refreshToken';
 const ACCESS_TOKEN_KEY = 'token';
-
-/**
- * Get refresh token from storage
- */
-export const getRefreshToken = () => {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-};
-
-/**
- * Store refresh token
- */
-export const setRefreshToken = (token) => {
-  if (token) {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  } else {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }
-};
 
 /**
  * Store access token
@@ -46,26 +27,27 @@ export const getAccessToken = () => {
  * Clear all tokens
  */
 export const clearTokens = () => {
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 };
 
 /**
  * Refresh access token using refresh token
- * @param {string} refreshToken - The refresh token
- * @returns {Promise<{accessToken: string}>} New access token
+ * NOTE: Refresh token is now stored in httpOnly cookie
+ * so it is NOT passed from client-side JS.
+ * @returns {Promise<{accessToken: string}>} New access token (and rotated refresh cookie on server)
  */
-export const refreshAccessToken = async (refreshToken) => {
+export const refreshAccessToken = async () => {
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
   
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: {
+        // No body needed; backend reads refresh token from httpOnly cookie
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({}),
     });
 
     const data = await response.json();
@@ -75,7 +57,6 @@ export const refreshAccessToken = async (refreshToken) => {
     }
 
     const newAccessToken = data.data?.accessToken || data.data?.token;
-    const newRefreshToken = data.data?.refreshToken;
     
     if (!newAccessToken) {
       throw new Error('No access token in refresh response');
@@ -84,14 +65,8 @@ export const refreshAccessToken = async (refreshToken) => {
     // Store new access token
     setAccessToken(newAccessToken);
     
-    // TOKEN ROTATION: Store new refresh token if provided (old one is now invalid)
-    if (newRefreshToken) {
-      setRefreshToken(newRefreshToken);
-    }
-
     return { 
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken 
+      accessToken: newAccessToken
     };
   } catch (error) {
     // If refresh fails, clear all tokens

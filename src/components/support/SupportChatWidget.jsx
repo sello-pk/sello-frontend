@@ -305,7 +305,7 @@ const SupportChatWidget = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => setIsMinimized(!isMinimized)}
-                        className="hover:bg-primary-600 p-1 rounded"
+                        className="hover:opacity-90 p-1 rounded"
                     >
                         <FiMinimize2 size={18} />
                     </button>
@@ -316,7 +316,7 @@ const SupportChatWidget = () => {
                             setSelectedChat(null);
                             setShowCreateForm(false);
                         }}
-                        className="hover:bg-primary-600 p-1 rounded"
+                        className="hover:opacity-90 p-1 rounded"
                     >
                         <FiX size={18} />
                     </button>
@@ -330,7 +330,7 @@ const SupportChatWidget = () => {
                             <div className="mb-4">
                                 <button
                                     onClick={() => setShowCreateForm(true)}
-                                    className="w-full bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition"
+                                    className="w-full bg-primary-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition"
                                 >
                                     Start New Chat
                                 </button>
@@ -363,7 +363,7 @@ const SupportChatWidget = () => {
                                                 <span
                                                     className={`text-xs px-2 py-0.5 rounded ${
                                                         chat.status === "open"
-                                                            ? "bg-blue-100 text-blue-800"
+                                                            ? "bg-primary-50 text-primary-800"
                                                             : chat.status === "resolved"
                                                             ? "bg-green-100 text-green-800"
                                                             : "bg-gray-100 text-gray-800"
@@ -428,7 +428,7 @@ const SupportChatWidget = () => {
                                 <div className="flex gap-2">
                                     <button
                                         type="submit"
-                                        className="flex-1 bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition"
+                                        className="flex-1 bg-primary-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition"
                                     >
                                         Submit
                                     </button>
@@ -635,7 +635,7 @@ const SupportChatWidget = () => {
                                                                             }
                                                                         }
                                                                     }}
-                                                                    className="opacity-0 group-hover:opacity-100 ml-1 text-white hover:text-orange-200 transition-opacity"
+                                                                    className="opacity-0 group-hover:opacity-100 ml-1 text-white hover:text-primary-100 transition-opacity"
                                                                     title="Delete message"
                                                                 >
                                                                     <FiTrash2 size={12} />
@@ -665,7 +665,7 @@ const SupportChatWidget = () => {
                                     <button
                                         onClick={handleSendMessage}
                                         disabled={!message.trim()}
-                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <FiSend />
                                     </button>

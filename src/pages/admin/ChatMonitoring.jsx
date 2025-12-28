@@ -82,7 +82,7 @@ const ChatMonitoring = () => {
                                         : totalMessages}
                                 </p>
                             </div>
-                            <div className="w-16 h-16 rounded-2xl bg-yellow-500 flex items-center justify-center shadow-lg">
+                            <div className="w-16 h-16 rounded-2xl bg-primary-500 flex items-center justify-center shadow-lg">
                                 <HiChatBubbleLeftRight className="text-white" size={28} />
                             </div>
                         </div>
@@ -183,8 +183,8 @@ const ChatMonitoring = () => {
                                             <tr key={chat._id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                                                            <span className="text-sm font-medium text-yellow-700">
+                                                        <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-sm font-medium text-primary-700">
                                                                 {(user.name || 'U').charAt(0).toUpperCase()}
                                                             </span>
                                                         </div>
@@ -206,8 +206,8 @@ const ChatMonitoring = () => {
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                                         chatType === 'support' 
-                                                            ? 'bg-purple-100 text-purple-800'
-                                                            : 'bg-blue-100 text-blue-800'
+                                                            ? 'bg-primary-100 text-primary-800'
+                                                            : 'bg-primary-50 text-primary-800'
                                                     }`}>
                                                         {chatType === 'support' ? 'Support' : 'Car Inquiry'}
                                                     </span>
@@ -220,9 +220,9 @@ const ChatMonitoring = () => {
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                                         chatStatus === "active" || chatStatus === "open"
-                                                            ? "bg-green-100 text-green-800"
-                                                            : chatStatus === "pending"
-                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            ? "bg-primary-100 text-primary-800"
+                                                        : chatStatus === "pending"
+                                                            ? "bg-primary-50 text-primary-800"
                                                             : "bg-gray-100 text-gray-800"
                                                     }`}>
                                                         {chatStatus}
@@ -231,7 +231,7 @@ const ChatMonitoring = () => {
                                                 <td className="px-6 py-4">
                                                     <button
                                                         onClick={() => handleOpenChat(chat._id, chatType)}
-                                                        className="flex items-center gap-2 px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm"
+                                                        className="flex items-center gap-2 px-3 py-1 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors text-sm"
                                                     >
                                                         <FiEye size={16} />
                                                         Open Chat

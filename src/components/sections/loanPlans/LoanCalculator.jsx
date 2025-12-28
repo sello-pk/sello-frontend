@@ -144,7 +144,7 @@ export default function LoanCalculator() {
         </div>
 
         {/* Search Button */}
-        <button className="w-full bg-primary-500 hover:bg-primary-600 text-white rounded-xl py-2 flex justify-center items-center font-medium gap-2 transition-colors">
+        <button className="w-full bg-primary-500 hover:opacity-90 text-white rounded-xl py-2 flex justify-center items-center font-medium gap-2 transition-colors">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4"

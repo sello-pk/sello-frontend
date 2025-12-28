@@ -12,7 +12,7 @@ import {
 } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
 import DealerSignup from "./DealerSignup";
-import { setAccessToken, setRefreshToken } from "../../utils/tokenRefresh.js";
+import { setAccessToken } from "../../utils/tokenRefresh.js";
 
 // Check if Google OAuth is configured
 const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -107,18 +107,14 @@ const SignUp = () => {
       // Check response structure - handle both transformed and raw responses
       const responseToken = res?.token || res?.accessToken || res?.data?.token;
       const responseUser = res?.user || res?.data?.user;
-      const responseRefreshToken = res?.refreshToken || res?.data?.refreshToken;
 
       if (!responseToken || !responseUser) {
         console.error("Invalid Google signup response structure", { response: res });
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      // Use utility functions for token storage
+      // Store access token (refresh token is handled via httpOnly cookie on the server)
       setAccessToken(responseToken);
-      if (responseRefreshToken) {
-        setRefreshToken(responseRefreshToken);
-      }
       localStorage.setItem("user", JSON.stringify(responseUser));
 
       toast.success("Google sign-up successful!");
@@ -320,7 +316,7 @@ const SignUp = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4 disabled:opacity-50"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-colors mb-4 disabled:opacity-50"
               >
                 {loading ? (
                   <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5 inline-block"></span>

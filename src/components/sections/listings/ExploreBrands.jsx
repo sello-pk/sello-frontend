@@ -22,7 +22,7 @@ const ExploreBrands = () => {
           </p>
           <button
             onClick={() => navigate("/view-all-brands")}
-            className="mt-6 md:text-lg bg-primary-500 px-7 py-2.5 hover:bg-primary-600 rounded-md flex items-center gap-3 text-white transition-colors"
+            className="mt-6 md:text-lg bg-primary-500 px-7 py-2.5 hover:opacity-90 rounded-md flex items-center gap-3 text-white transition-colors"
           >
             Show All Brands
             <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />

@@ -51,7 +51,7 @@ const ResetSuccess = () => {
           {/* Go to Login Button */}
           <button
             onClick={() => navigate("/login")}
-            className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors"
+            className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-colors"
           >
             Go to Login
           </button>

@@ -119,7 +119,7 @@ const Btns = () => {
               <button
                 onClick={handleChat}
                 disabled={!currentUser || (car && currentUser._id === car.postedBy?._id)}
-                className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaCommentDots />
                 {currentUser && car && currentUser._id === car.postedBy?._id
@@ -132,7 +132,7 @@ const Btns = () => {
             {!isSold && car?.contactNumber && (
               <button
                 onClick={handleCall}
-                className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors"
+                className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors"
               >
                 <FaPhone />
                 Call Now

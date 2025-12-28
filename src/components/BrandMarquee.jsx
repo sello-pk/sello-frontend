@@ -1,23 +1,21 @@
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarCategories } from "../hooks/useCarCategories";
 
 const BrandMarquee = ({ brands: propBrands = [] }) => {
   const sliderRef = useRef(null);
   const navigate = useNavigate();
-  const [isPaused, setIsPaused] = useState(false);
-  const autoScrollRef = useRef(null);
-  
+
   // Fetch brands from admin categories - always prioritize admin data
   const { makes, isLoading } = useCarCategories();
-  
+
   // Always use admin categories if available (even if empty), only fall back to prop brands if no makes at all
   const brands = useMemo(() => {
     // If we have makes from admin, use them (filter for active ones with images)
     if (makes && makes.length > 0) {
       // Filter for active brands with images, then sort by order field
       return makes
-        .filter(brand => brand.isActive && brand.image)
+        .filter((brand) => brand.isActive && brand.image)
         .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
     // Only use prop brands if admin categories haven't loaded yet or are empty
@@ -25,7 +23,7 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
     return propBrands || [];
   }, [makes, propBrands]);
 
-  // For infinite scroll marquee, we need duplicates for seamless loop
+  // For infinite scroll marquee, we need duplicates for seamless CSS animation
   // Only duplicate if we have multiple brands (for single brand, no need to duplicate)
   const items = useMemo(() => {
     if (brands.length === 0) return [];
@@ -33,94 +31,62 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
     if (brands.length === 1) {
       return brands;
     }
-    // For multiple brands, duplicate twice for seamless infinite scroll
+    // For multiple brands, duplicate once for seamless infinite scroll with CSS animation
     return [...brands, ...brands];
   }, [brands]);
-  
+
   // Handle brand click - navigate to filter page with brand search
   const handleBrandClick = (brandName) => {
     // Navigate to filter page with make parameter
     navigate(`/filter?make=${encodeURIComponent(brandName)}`);
   };
 
-  const scroll = (direction) => {
-    if (!sliderRef.current) return;
-    const amount = direction === "left" ? -400 : 400;
-    sliderRef.current.scrollBy({ left: amount, behavior: "smooth" });
-  };
-
-  // Auto-scroll for infinite loop (only if we have multiple brands)
+  // Auto-scroll using CSS animation for smoother infinite scroll
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || items.length === 0 || brands.length === 0) return;
-    
+
     // Don't auto-scroll if only 1 brand (no need for infinite loop)
     if (brands.length === 1) return;
 
-    // Wait for DOM to render and calculate widths
-    const initScroll = () => {
-      if (!el) return;
-      
-      // Ensure we start at the beginning
-      el.scrollLeft = 0;
+    // Create CSS animation for infinite scroll
+    const animationName = `marquee-${brands.length}-${Date.now()}`;
+    const animationDuration = Math.max(20, brands.length * 3); // 3s per brand minimum
 
-      // Calculate the width of one set of brands (original array, not duplicated)
-      // Since we duplicate twice, scrollWidth / 2 gives us the width of one set
-      const calculateSingleSetWidth = () => {
-        // Get the first brand element to calculate width
-        const firstBrand = el.querySelector('[data-brand-item]');
-        if (!firstBrand) return el.scrollWidth / 2;
-        
-        const brandWidth = firstBrand.offsetWidth;
-        const gap = 24; // gap-6 = 24px
-        return brands.length * (brandWidth + gap);
-      };
-      
-      const singleSetWidth = calculateSingleSetWidth();
-
-      // Clear any existing interval
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
+    // Create keyframes for the animation
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @keyframes ${animationName} {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
       }
+      .${animationName} {
+        animation: ${animationName} ${animationDuration}s linear infinite;
+      }
+      .${animationName}:hover {
+        animation-play-state: paused;
+      }
+    `;
+    document.head.appendChild(styleSheet);
 
-      const speed = 0.8; // px per tick (smooth scroll speed)
-      
-      autoScrollRef.current = setInterval(() => {
-        if (!el || isPaused) return;
-
-        // Get current scroll position
-        const currentScroll = el.scrollLeft;
-        const maxScroll = el.scrollWidth - el.clientWidth;
-        
-        // Reset when we've scrolled through one complete set of brands
-        // This prevents showing duplicates - reset happens at exactly half the total width
-        if (currentScroll >= singleSetWidth - 10) {
-          // Reset to start for seamless loop (without animation for instant reset)
-          el.scrollLeft = 0;
-        } else if (currentScroll < maxScroll) {
-          // Continue scrolling
-          el.scrollLeft = currentScroll + speed;
-        }
-      }, 16); // ~60fps for smooth animation
-    };
-
-    // Small delay to ensure DOM is ready and images are loaded
-    const timeout = setTimeout(initScroll, 200);
+    // Apply animation to the container
+    el.classList.add(animationName);
 
     return () => {
-      clearTimeout(timeout);
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
+      // Clean up
+      if (el && el.classList.contains(animationName)) {
+        el.classList.remove(animationName);
+      }
+      if (styleSheet.parentNode) {
+        styleSheet.parentNode.removeChild(styleSheet);
       }
     };
-  }, [items.length, brands.length, isPaused]);
+  }, [items.length, brands.length]);
 
   return (
     <div className="w-full py-6 backdrop-blur-sm">
-      <div 
+      <div
         className="relative rounded-xl px-10 py-4 overflow-hidden"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
         {/* Slider buttons */}
         {brands.length > 1 && (
@@ -148,11 +114,11 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
         <div
           ref={sliderRef}
           className="flex gap-4 md:gap-6 overflow-x-hidden scrollbar-hide"
-          style={{ 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            scrollBehavior: 'auto', // Use auto for programmatic scrolling
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+            scrollBehavior: "auto", // Use auto for programmatic scrolling
             // Disable snap for smooth infinite scroll
           }}
         >
@@ -166,9 +132,10 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
             </div>
           ) : (
             items.map((brand, index) => {
-              const brandName = brand.name || brand.brandName || `brand-${index}`;
+              const brandName =
+                brand.name || brand.brandName || `brand-${index}`;
               const brandImage = brand.image || brand.img;
-              
+
               return (
                 <div
                   key={`brand-${brand._id || index}-${index}`}
@@ -185,8 +152,9 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
                         loading="lazy"
                         onError={(e) => {
                           // Hide broken images instead of showing fallback
-                          e.target.style.display = 'none';
-                          e.target.parentElement.innerHTML = '<div class="text-gray-400 text-xs">No Image</div>';
+                          e.target.style.display = "none";
+                          e.target.parentElement.innerHTML =
+                            '<div class="text-gray-400 text-xs">No Image</div>';
                         }}
                       />
                     </div>

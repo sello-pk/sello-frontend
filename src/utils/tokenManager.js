@@ -6,7 +6,7 @@
  * and makes it easier to implement security improvements (e.g., httpOnly cookies)
  */
 
-import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from './tokenRefresh.js';
+import { getAccessToken, setAccessToken, clearTokens } from './tokenRefresh.js';
 
 /**
  * Check if access token is expired (client-side check)
@@ -83,13 +83,11 @@ export const clearAuth = () => {
 };
 
 /**
- * Store authentication data (tokens + user)
+ * Store authentication data (access token + user)
+ * Refresh token is managed server-side via httpOnly cookie.
  */
-export const storeAuth = (accessToken, refreshToken, user) => {
+export const storeAuth = (accessToken, _refreshToken, user) => {
   setAccessToken(accessToken);
-  if (refreshToken) {
-    setRefreshToken(refreshToken);
-  }
   if (user) {
     localStorage.setItem('user', JSON.stringify(user));
   }
@@ -104,9 +102,7 @@ export default {
   storeAuth,
   // Re-export token refresh utilities
   getAccessToken,
-  getRefreshToken,
   setAccessToken,
-  setRefreshToken,
   clearTokens
 };
 

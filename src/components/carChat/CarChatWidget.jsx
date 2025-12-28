@@ -359,7 +359,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => setIsMinimized(!isMinimized)}
-                        className="hover:bg-primary-600 p-1 rounded"
+                        className="hover:opacity-90 p-1 rounded"
                     >
                         <FiMinimize2 size={18} />
                     </button>
@@ -368,7 +368,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                             setIsOpen(false);
                             if (onClose) onClose();
                         }}
-                        className="hover:bg-primary-600 p-1 rounded"
+                        className="hover:opacity-90 p-1 rounded"
                     >
                         <FiX size={18} />
                     </button>
@@ -526,7 +526,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!message.trim() || !chatId}
-                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <FiSend />
                             </button>

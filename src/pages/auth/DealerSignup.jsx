@@ -747,7 +747,7 @@ const DealerSignup = ({ onBack }) => {
                       <button
                         type="button"
                         onClick={() => addToArray("specialties", specialtyInput, setSpecialtyInput)}
-                        className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+                        className="px-4 py-2 bg-primary-500 text-white rounded hover:opacity-90"
                       >
                         <FaPlus />
                       </button>
@@ -811,7 +811,7 @@ const DealerSignup = ({ onBack }) => {
                       <button
                         type="button"
                         onClick={() => addToArray("languages", languageInput, setLanguageInput)}
-                        className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+                        className="px-4 py-2 bg-primary-500 text-white rounded hover:opacity-90"
                       >
                         <FaPlus />
                       </button>
@@ -1092,7 +1092,7 @@ const DealerSignup = ({ onBack }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
+                  className="px-6 py-2 bg-primary-500 text-white font-semibold rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">

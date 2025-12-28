@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildCarUrl } from "../../utils/urlBuilders";
 import {
   FiHome,
   FiPlus,
@@ -30,27 +31,40 @@ import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import LazyImage from "../../components/common/LazyImage";
 import { images } from "../../assets/assets";
+import AccountDeletionRequest from "../../components/profile/AccountDeletionRequest";
 
 const DealerDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const { data: user, isLoading: userLoading, refetch: refetchUser } = useGetMeQuery(undefined, {
+  const [activeSection, setActiveSection] = useState("");
+  const {
+    data: user,
+    isLoading: userLoading,
+    refetch: refetchUser,
+  } = useGetMeQuery(undefined, {
     pollingInterval: 30000, // Refetch every 30 seconds to check verification status
   });
-  const { data: carsData, isLoading: carsLoading, refetch: refetchCars } = useGetMyCarsQuery();
-  const { data: chatsData } = useGetSellerBuyerChatsQuery(undefined, { pollingInterval: 5000 });
+  const {
+    data: carsData,
+    isLoading: carsLoading,
+    refetch: refetchCars,
+  } = useGetMyCarsQuery();
+  const { data: chatsData } = useGetSellerBuyerChatsQuery(undefined, {
+    pollingInterval: 5000,
+  });
   const { data: notificationsData } = useGetUserNotificationsQuery(
     { page: 1, limit: 10 },
     { pollingInterval: 30000 }
   );
   const { data: subscriptionPlansData } = useGetSubscriptionPlansQuery();
   const [logout] = useLogoutMutation();
-  
+
   // Check if subscription tab should be shown
   // If showSubscriptionTab is explicitly false, hide it
   // Otherwise, show it (default behavior when undefined or true)
-  const showSubscriptionTab = subscriptionPlansData?.showSubscriptionTab !== false;
-  
+  const showSubscriptionTab =
+    subscriptionPlansData?.showSubscriptionTab !== false;
+
   // Redirect if user is on payments tab but it's disabled
   useEffect(() => {
     if (!showSubscriptionTab && activeTab === "payments") {
@@ -64,21 +78,30 @@ const DealerDashboard = () => {
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   // Calculate statistics - handle undefined/null safely
-  const activeListingsCount = Array.isArray(cars) ? cars.filter((c) => c && !c.isSold && (c.isActive || c.status === 'active')).length : 0;
-  const isSubscriptionActive = user?.subscription?.isActive && 
-    user?.subscription?.endDate && 
+  const activeListingsCount = Array.isArray(cars)
+    ? cars.filter(
+        (c) => c && !c.isSold && (c.isActive || c.status === "active")
+      ).length
+    : 0;
+  const isSubscriptionActive =
+    user?.subscription?.isActive &&
+    user?.subscription?.endDate &&
     new Date(user.subscription.endDate) > new Date();
-  
+
   // Subscription limits based on plan
   const getListingLimit = () => {
-    if (user?.subscription?.plan === 'free') return 5;
-    if (['basic', 'premium', 'dealer'].includes(user?.subscription?.plan)) return -1; // unlimited
+    if (user?.subscription?.plan === "free") return 5;
+    if (["basic", "premium", "dealer"].includes(user?.subscription?.plan))
+      return -1; // unlimited
     return 5; // default free plan
   };
-  
+
   const listingLimit = isSubscriptionActive ? getListingLimit() : 5;
   const canPostMore = listingLimit === -1 || activeListingsCount < listingLimit;
-  const listingsRemaining = listingLimit === -1 ? 'Unlimited' : Math.max(0, listingLimit - activeListingsCount);
+  const listingsRemaining =
+    listingLimit === -1
+      ? "Unlimited"
+      : Math.max(0, listingLimit - activeListingsCount);
 
   const stats = {
     totalAds: cars.length,
@@ -86,7 +109,7 @@ const DealerDashboard = () => {
     pendingApproval: cars.filter((c) => !c.isActive && !c.isSold).length,
     totalInquiries: chats.length,
     profileCompletion: user?.dealerInfo?.verified ? 100 : 70,
-    subscriptionPlan: user?.subscription?.plan || 'free',
+    subscriptionPlan: user?.subscription?.plan || "free",
     subscriptionActive: isSubscriptionActive,
     listingLimit,
     listingsRemaining,
@@ -120,7 +143,7 @@ const DealerDashboard = () => {
   // DealerDashboard is ONLY for VERIFIED dealers
   const isDealer = user?.role === "dealer";
   const isVerified = user?.dealerInfo?.verified === true;
-  
+
   // Redirect unverified dealers to seller dashboard
   useEffect(() => {
     if (!userLoading && user) {
@@ -136,19 +159,31 @@ const DealerDashboard = () => {
       }
     }
   }, [user, userLoading, isDealer, isVerified, navigate]);
-  
+
   if (!user || !isDealer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
           <div className="mb-4">
-            <svg className="mx-auto h-16 w-16 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="mx-auto h-16 w-16 text-yellow-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Access Denied
+          </h2>
           <p className="text-gray-600 mb-6">
-            {!isDealer 
+            {!isDealer
               ? "You need to be a verified dealer to access this dashboard."
               : "Your dealer account is pending verification. Please wait for admin approval."}
           </p>
@@ -156,14 +191,14 @@ const DealerDashboard = () => {
             {!isDealer ? (
               <button
                 onClick={() => navigate("/profile")}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
               >
                 Go to Profile
               </button>
             ) : (
               <button
                 onClick={() => navigate("/seller/dashboard")}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
               >
                 Go to Seller Dashboard
               </button>
@@ -337,13 +372,19 @@ const DealerDashboard = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold overflow-hidden">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     user.name.charAt(0).toUpperCase()
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {user.name}
+                  </p>
                   <p className="text-xs text-gray-500">Dealer</p>
                 </div>
               </div>
@@ -359,42 +400,62 @@ const DealerDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Total Ads Posted</span>
+                    <span className="text-sm text-gray-600">
+                      Total Ads Posted
+                    </span>
                     <FiTrendingUp className="text-primary-500" size={20} />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats.totalAds}</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {stats.totalAds}
+                  </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Active Listings</span>
+                    <span className="text-sm text-gray-600">
+                      Active Listings
+                    </span>
                     <FiCheckCircle className="text-green-500" size={20} />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats.activeListings}</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {stats.activeListings}
+                  </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Pending Approval</span>
+                    <span className="text-sm text-gray-600">
+                      Pending Approval
+                    </span>
                     <FiClock className="text-yellow-500" size={20} />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats.pendingApproval}</div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Total Inquiries</span>
-                    <FiMessageSquare className="text-blue-500" size={20} />
+                  <div className="text-3xl font-bold text-gray-900">
+                    {stats.pendingApproval}
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats.totalInquiries}</div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Profile Completion</span>
+                    <span className="text-sm text-gray-600">
+                      Total Inquiries
+                    </span>
+                    <FiMessageSquare className="text-primary-500" size={20} />
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {stats.totalInquiries}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">
+                      Profile Completion
+                    </span>
                     <FiUser className="text-purple-500" size={20} />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats.profileCompletion}%</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {stats.profileCompletion}%
+                  </div>
                   <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-primary-500 h-2 rounded-full"
@@ -408,40 +469,60 @@ const DealerDashboard = () => {
               {showSubscriptionTab && (
                 <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-sm border border-gray-200 p-6 text-white">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Subscription Status</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      stats.subscriptionActive 
-                        ? "bg-green-500 text-white" 
-                        : "bg-yellow-500 text-white"
-                    }`}>
+                    <h3 className="text-lg font-semibold">
+                      Subscription Status
+                    </h3>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        stats.subscriptionActive
+                          ? "bg-green-500 text-white"
+                          : "bg-yellow-500 text-white"
+                      }`}
+                    >
                       {stats.subscriptionActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-primary-100">Current Plan</p>
-                      <p className="font-semibold text-lg capitalize">{stats.subscriptionPlan} Plan</p>
+                      <p className="font-semibold text-lg capitalize">
+                        {stats.subscriptionPlan} Plan
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-primary-100">Active Listings</p>
-                      <p className="font-semibold text-lg">{stats.activeListings} / {stats.listingLimit === -1 ? "∞" : stats.listingLimit}</p>
+                      <p className="text-sm text-primary-100">
+                        Active Listings
+                      </p>
+                      <p className="font-semibold text-lg">
+                        {stats.activeListings} /{" "}
+                        {stats.listingLimit === -1 ? "∞" : stats.listingLimit}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-primary-100">Remaining</p>
-                      <p className="font-semibold text-lg">{stats.listingsRemaining}</p>
+                      <p className="font-semibold text-lg">
+                        {stats.listingsRemaining}
+                      </p>
                     </div>
                   </div>
-                  {stats.subscriptionEndDate && stats.subscriptionActive && !isNaN(new Date(stats.subscriptionEndDate).getTime()) && (
-                    <p className="text-sm text-primary-100 mb-4">
-                      Expires on: {new Date(stats.subscriptionEndDate).toLocaleDateString()}
-                    </p>
-                  )}
+                  {stats.subscriptionEndDate &&
+                    stats.subscriptionActive &&
+                    !isNaN(new Date(stats.subscriptionEndDate).getTime()) && (
+                      <p className="text-sm text-primary-100 mb-4">
+                        Expires on:{" "}
+                        {new Date(
+                          stats.subscriptionEndDate
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
                   {(!stats.subscriptionActive || !stats.canPostMore) && (
                     <button
                       onClick={() => navigate("/profile")}
                       className="w-full md:w-auto px-6 py-2 bg-white text-primary-500 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
                     >
-                      {!stats.subscriptionActive ? "Upgrade Subscription" : "Manage Subscription"}
+                      {!stats.subscriptionActive
+                        ? "Upgrade Subscription"
+                        : "Manage Subscription"}
                     </button>
                   )}
                 </div>
@@ -450,7 +531,9 @@ const DealerDashboard = () => {
               {/* Quick Stats Summary */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Business Overview</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Business Overview
+                  </h3>
                   <button
                     onClick={() => navigate("/profile")}
                     className="text-sm text-primary-500 hover:text-primary-500 font-medium"
@@ -487,7 +570,7 @@ const DealerDashboard = () => {
                       )}
                     </span>
                   </div>
-                  <div className="border-l-4 border-blue-500 pl-4">
+                  <div className="border-l-4 border-primary-500 pl-4">
                     <p className="text-sm text-gray-600">Location</p>
                     <p className="font-semibold text-gray-900">
                       {user.dealerInfo?.city || "Not set"}
@@ -499,7 +582,9 @@ const DealerDashboard = () => {
               {/* Recent Listings */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Recent Listings</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Recent Listings
+                  </h3>
                   <button
                     onClick={() => navigate("/create-post")}
                     className="text-primary-500 hover:text-primary-500 font-medium"
@@ -516,7 +601,7 @@ const DealerDashboard = () => {
                     <p>No listings yet. Start by posting your first ad!</p>
                     <button
                       onClick={() => navigate("/create-post")}
-                      className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                      className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                     >
                       Post New Ad
                     </button>
@@ -527,7 +612,7 @@ const DealerDashboard = () => {
                       <div
                         key={car._id}
                         className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/cars/${car._id}`)}
+                        onClick={() => navigate(buildCarUrl(car))}
                       >
                         <div className="h-48 relative">
                           <LazyImage
@@ -546,7 +631,7 @@ const DealerDashboard = () => {
                             {car.make} {car.model} {car.year}
                           </h4>
                           <p className="text-primary-500 font-bold mt-1">
-                            AED {car.price?.toLocaleString()}
+                            PKR {car.price?.toLocaleString()}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <span
@@ -570,50 +655,71 @@ const DealerDashboard = () => {
 
           {activeTab === "post-ad" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Post a New Listing</h3>
-              {!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <FiClock className="text-yellow-600 mt-0.5" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-yellow-900 mb-1">Listing Limit Reached</h4>
-                      <p className="text-sm text-yellow-700 mb-3">
-                        You've used all {stats.listingLimit} listings on your free plan. Upgrade to post more listings.
-                      </p>
-                      <button
-                        onClick={() => navigate("/profile")}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 text-sm font-medium"
-                      >
-                        Upgrade Subscription
-                      </button>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Post a New Listing
+              </h3>
+              {!stats.canPostMore &&
+                !stats.subscriptionActive &&
+                showSubscriptionTab && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <FiClock className="text-yellow-600 mt-0.5" size={20} />
+                      <div>
+                        <h4 className="font-semibold text-yellow-900 mb-1">
+                          Listing Limit Reached
+                        </h4>
+                        <p className="text-sm text-yellow-700 mb-3">
+                          You've used all {stats.listingLimit} listings on your
+                          free plan. Upgrade to post more listings.
+                        </p>
+                        <button
+                          onClick={() => navigate("/profile")}
+                          className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 text-sm font-medium"
+                        >
+                          Upgrade Subscription
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
               <button
                 onClick={() => {
-                  if (!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab) {
-                    toast.error(`You've reached your listing limit. Please upgrade your subscription.`);
+                  if (
+                    !stats.canPostMore &&
+                    !stats.subscriptionActive &&
+                    showSubscriptionTab
+                  ) {
+                    toast.error(
+                      `You've reached your listing limit. Please upgrade your subscription.`
+                    );
                     navigate("/profile");
                     return;
                   }
                   navigate("/create-post");
                 }}
-                disabled={!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab}
+                disabled={
+                  !stats.canPostMore &&
+                  !stats.subscriptionActive &&
+                  showSubscriptionTab
+                }
                 className="w-full py-12 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors flex flex-col items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FiPlus size={48} className="text-gray-400" />
                 <span className="text-lg font-medium text-gray-700">
-                  {!stats.canPostMore && !stats.subscriptionActive && showSubscriptionTab
-                    ? "Upgrade to Post More Listings" 
+                  {!stats.canPostMore &&
+                  !stats.subscriptionActive &&
+                  showSubscriptionTab
+                    ? "Upgrade to Post More Listings"
                     : "Click to Create New Listing"}
                 </span>
               </button>
               {stats.canPostMore && (
                 <p className="text-center text-sm text-gray-500 mt-4">
-                  {stats.listingsRemaining === 'Unlimited' 
-                    ? "Unlimited listings available" 
-                    : `${stats.listingsRemaining} listing${stats.listingsRemaining !== 1 ? 's' : ''} remaining`}
+                  {stats.listingsRemaining === "Unlimited"
+                    ? "Unlimited listings available"
+                    : `${stats.listingsRemaining} listing${
+                        stats.listingsRemaining !== 1 ? "s" : ""
+                      } remaining`}
                 </p>
               )}
             </div>
@@ -622,10 +728,12 @@ const DealerDashboard = () => {
           {activeTab === "listings" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">My Listings</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  My Listings
+                </h3>
                 <button
                   onClick={() => navigate("/create-post")}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2"
                 >
                   <FiPlus size={18} />
                   New Listing
@@ -654,18 +762,18 @@ const DealerDashboard = () => {
                         {car.make} {car.model} {car.year}
                       </h4>
                       <p className="text-primary-500 font-bold mt-1">
-                        AED {car.price?.toLocaleString()}
+                        PKR {car.price?.toLocaleString()}
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <button
                           onClick={() => navigate(`/edit-car/${car._id}`)}
-                          className="flex-1 px-3 py-2 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
+                          className="flex-1 px-3 py-2 bg-primary-500 text-white rounded text-sm hover:opacity-90"
                         >
                           <FiEdit className="inline mr-1" size={14} />
                           Edit
                         </button>
                         <button
-                          onClick={() => navigate(`/cars/${car._id}`)}
+                          onClick={() => navigate(buildCarUrl(car))}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
                         >
                           <FiEye className="inline mr-1" size={14} />
@@ -681,35 +789,86 @@ const DealerDashboard = () => {
 
           {activeTab === "messages" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Messages</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Messages
+              </h3>
               <button
                 onClick={() => navigate("/seller/chats")}
                 className="w-full py-12 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors flex flex-col items-center justify-center gap-3"
               >
                 <FiMessageSquare size={48} className="text-gray-400" />
-                <span className="text-lg font-medium text-gray-700">View All Messages</span>
+                <span className="text-lg font-medium text-gray-700">
+                  View All Messages
+                </span>
               </button>
             </div>
           )}
 
           {activeTab === "payments" && showSubscriptionTab && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Payments</h3>
-              <p className="text-gray-600">Payment history and subscription management coming soon.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Payments
+              </h3>
+              <p className="text-gray-600">
+                Payment history and subscription management coming soon.
+              </p>
             </div>
           )}
 
           {activeTab === "analytics" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Analytics</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Analytics
+              </h3>
               <p className="text-gray-600">Analytics dashboard coming soon.</p>
             </div>
           )}
 
           {activeTab === "settings" && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Settings</h3>
-              <p className="text-gray-600">Settings page coming soon.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Settings
+              </h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                    Account Management
+                  </h4>
+                  <p className="text-gray-600 mb-4">
+                    Manage your account settings and preferences.
+                  </p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium text-left"
+                    >
+                      Edit Profile Information
+                    </button>
+                    <button
+                      onClick={() => setActiveSection("account-deletion")}
+                      className="w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-sm font-medium text-left"
+                    >
+                      Request Account Deletion
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                    Business Settings
+                  </h4>
+                  <p className="text-gray-600">
+                    Business settings and preferences coming soon.
+                  </p>
+                </div>
+              </div>
+
+              {/* Account Deletion Section */}
+              {activeSection === "account-deletion" && (
+                <div className="mt-6 border-t border-gray-200 pt-6">
+                  <AccountDeletionRequest user={user} />
+                </div>
+              )}
             </div>
           )}
         </main>
@@ -719,4 +878,3 @@ const DealerDashboard = () => {
 };
 
 export default DealerDashboard;
-

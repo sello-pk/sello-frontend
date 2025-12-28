@@ -11,6 +11,7 @@ import {
   useGoogleLoginMutation,
   api,
 } from "../../redux/services/api";
+import { setAccessToken } from "../../utils/tokenRefresh.js";
 import { store } from "../../redux/store";
 import Spinner from "../../components/Spinner";
 
@@ -19,8 +20,7 @@ const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [data, setData] = useState({ email: "", password: "" });
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [data, setData] = useState({ email: "", password: "", rememberMe: true });
 
   const navigate = useNavigate();
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -35,7 +35,11 @@ const Login = () => {
     }
 
     try {
-      const res = await loginUser(data).unwrap();
+      const res = await loginUser({
+        email: data.email,
+        password: data.password,
+        rememberMe: !!data.rememberMe,
+      }).unwrap();
       
       if (!res) {
         throw new Error("Empty response from server");
@@ -53,28 +57,20 @@ const Login = () => {
       // Store tokens using utility functions for consistency
       const token = res.token || res.accessToken || res.data?.token;
       const user = res.user || res.data?.user;
-      const refreshToken = res.refreshToken || res.data?.refreshToken;
       
       if (!token || !user) {
         throw new Error("Failed to extract login credentials from response.");
       }
 
-      // Use utility functions for token storage
+      // Store access token (refresh token is handled via httpOnly cookie on the server)
       setAccessToken(token);
-      if (refreshToken) {
-        setRefreshToken(refreshToken);
-      }
       
       // Store user data
       localStorage.setItem("user", JSON.stringify(user));
 
       // Invalidate and refetch user queries (mutation already does this, but ensure it happens)
-      try {
         if (api?.util?.invalidateTags) {
           store.dispatch(api.util.invalidateTags(["User"]));
-        }
-      } catch (error) {
-        // This is not critical - the mutation already invalidates tags
       }
 
       toast.success("Login successful");
@@ -117,8 +113,6 @@ const Login = () => {
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
-      setGoogleLoading(true);
-      
       if (!credentialResponse?.credential) {
         throw new Error("No credential received from Google");
       }
@@ -127,7 +121,7 @@ const Login = () => {
       const res = await googleLogin(token).unwrap();
 
       // Check response structure - handle both transformed and raw responses
-      const responseToken = res?.token || res?.data?.token;
+      const responseToken = res?.token || res?.accessToken || res?.data?.token;
       const responseUser = res?.user || res?.data?.user;
 
       if (!responseToken || !responseUser) {
@@ -135,21 +129,13 @@ const Login = () => {
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      // Use utility functions for token storage
-      const responseRefreshToken = res?.refreshToken || res?.data?.refreshToken;
+      // Store access token (refresh token is handled via httpOnly cookie on the server)
       setAccessToken(responseToken);
-      if (responseRefreshToken) {
-        setRefreshToken(responseRefreshToken);
-      }
       localStorage.setItem("user", JSON.stringify(responseUser));
 
       // Invalidate and refetch user queries
-      try {
         if (api?.util?.invalidateTags) {
           store.dispatch(api.util.invalidateTags(["User"]));
-        }
-      } catch (error) {
-        // This is not critical - the mutation already invalidates tags
       }
 
       toast.success("Google login successful");
@@ -223,7 +209,7 @@ const Login = () => {
       
       toast.error(errorMessage);
     } finally {
-      setGoogleLoading(false);
+      // no-op
     }
   };
 
@@ -305,6 +291,10 @@ const Login = () => {
                   <input
                     type="checkbox"
                     className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+                    checked={data.rememberMe}
+                    onChange={(e) =>
+                      setData({ ...data, rememberMe: e.target.checked })
+                    }
                   />
                   <span className="text-sm text-gray-700">Remember for 30 days</span>
                 </div>
@@ -319,7 +309,7 @@ const Login = () => {
               {/* Sign In Button */}
               <button
                 type="submit"
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-colors mb-4"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing In..." : "Sign In"}

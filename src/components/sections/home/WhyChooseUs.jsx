@@ -38,7 +38,7 @@ const WhyChooseUs = () => {
             ))}
           </div>
 
-          <button className="mt-8 bg-primary-500 text-white flex items-center gap-2 text-lg px-6 py-2 rounded-md hover:bg-primary-600 transition-colors">
+          <button className="mt-8 bg-primary-500 text-white flex items-center gap-2 text-lg px-6 py-2 rounded-md hover:opacity-90 transition-colors">
             Get Started
             <IoIosArrowRoundUp className="text-xl rotate-45" />
           </button>

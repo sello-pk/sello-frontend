@@ -105,7 +105,7 @@ const BlogSection = () => {
             </h3>
             <p className="text-base text-gray-600 mb-6">{post.description}</p>
             <div className="flex  sm:flex-row items-center sm:items-center gap-6 justify-between">
-              <button className="bg-primary-500 text-white hover:bg-primary-600 transition-colors flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
+              <button className="bg-primary-500 text-white hover:opacity-90 transition-colors flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
                 Get Started
                 <MdArrowRightAlt className="text-xl -rotate-[42deg]" />
               </button>

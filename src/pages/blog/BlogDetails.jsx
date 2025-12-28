@@ -1,27 +1,36 @@
 import React, { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useGetBlogByIdQuery, useGetBlogsQuery } from "../../redux/services/api";
+import {
+  useGetBlogByIdQuery,
+  useGetBlogsQuery,
+} from "../../redux/services/api";
 import { formatDate } from "../../utils/format";
 import BlogsHeroSection from "../../components/sections/blogs/BlogsHeroSection";
 import SEO from "../../components/common/SEO";
 import Spinner from "../../components/Spinner";
+import { buildBlogUrl } from "../../utils/urlBuilders";
 
 const BlogDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: blog, isLoading, error, isError } = useGetBlogByIdQuery(id);
-  
-  // Get related blogs (same category, excluding current blog)
-  const { data: relatedBlogsData } = useGetBlogsQuery({
-    limit: 3,
-    status: 'published',
-    category: blog?.category?._id,
-    ...(blog?._id && { exclude: blog._id })
-  }, {
-    skip: !blog?.category?._id
-  });
 
-  const relatedBlogs = relatedBlogsData?.blogs?.filter(b => b._id !== blog?._id).slice(0, 3) || [];
+  // Get related blogs (same category, excluding current blog)
+  const { data: relatedBlogsData } = useGetBlogsQuery(
+    {
+      limit: 3,
+      status: "published",
+      category: blog?.category?._id,
+      ...(blog?._id && { exclude: blog._id }),
+    },
+    {
+      skip: !blog?.category?._id,
+    }
+  );
+
+  const relatedBlogs =
+    relatedBlogsData?.blogs?.filter((b) => b._id !== blog?._id).slice(0, 3) ||
+    [];
 
   // Redirect to 404 or show error
   useEffect(() => {
@@ -48,11 +57,16 @@ const BlogDetails = () => {
         <BlogsHeroSection />
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h2>
-            <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist or has been removed.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Blog Post Not Found
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The blog post you're looking for doesn't exist or has been
+              removed.
+            </p>
             <Link
-              to="/blog/all"
-              className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              to="/blog"
+              className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
             >
               Back to All Blogs
             </Link>
@@ -66,9 +80,13 @@ const BlogDetails = () => {
     <div>
       <SEO
         title={blog.metaTitle || blog.title}
-        description={blog.metaDescription || blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').substring(0, 160)}
+        description={
+          blog.metaDescription ||
+          blog.excerpt ||
+          blog.content?.replace(/<[^>]*>/g, "").substring(0, 160)
+        }
         image={blog.featuredImage}
-        url={`/blog/${blog.slug || blog._id}`}
+        url={buildBlogUrl(blog)}
       />
       <BlogsHeroSection />
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
@@ -87,7 +105,12 @@ const BlogDetails = () => {
         <div className="mb-8">
           {/* Author and Date Info */}
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <span>By <span className="font-semibold text-gray-900">{blog.author?.name || "Admin"}</span></span>
+            <span>
+              By{" "}
+              <span className="font-semibold text-gray-900">
+                {blog.author?.name || "Admin"}
+              </span>
+            </span>
             <span>|</span>
             <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
           </div>
@@ -292,7 +315,9 @@ const BlogDetails = () => {
         {/* Related Blogs Section */}
         {relatedBlogs.length > 0 && (
           <div className="border-t border-gray-200 pt-8 mt-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Related Articles</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              Related Articles
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedBlogs.map((relatedBlog) => (
                 <Link
@@ -314,10 +339,15 @@ const BlogDetails = () => {
                       {relatedBlog.title}
                     </h4>
                     <p className="text-sm text-gray-500 mb-2">
-                      {formatDate(relatedBlog.publishedAt || relatedBlog.createdAt)}
+                      {formatDate(
+                        relatedBlog.publishedAt || relatedBlog.createdAt
+                      )}
                     </p>
                     <p className="text-sm text-gray-600 line-clamp-2">
-                      {relatedBlog.excerpt || relatedBlog.content?.replace(/<[^>]*>/g, '').substring(0, 100) + "..."}
+                      {relatedBlog.excerpt ||
+                        relatedBlog.content
+                          ?.replace(/<[^>]*>/g, "")
+                          .substring(0, 100) + "..."}
                     </p>
                   </div>
                 </Link>

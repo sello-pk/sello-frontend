@@ -51,16 +51,16 @@ const ContactCard = ({ contact }) => (
 const ContactMap = () => {
   const contact = {
     title: "Visit Our Office",
-    subtitle: "Sello.ae Head Office",
-    phone: "+97145061300",
+    subtitle: "Sello Head Office",
+    phone: "+92421234567",
     email: "info@sello.ae",
-    address: "Sello.ae Head Office, JLT, Dubai, UAE",
+    address: "Sello Head Office, Gulberg, Lahore, Pakistan",
     hours: [
       { day: "Sunday - Thursday", hours: "9:00 AM - 6:00 PM" },
       { day: "Friday", hours: "9:00 AM - 1:00 PM" },
       { day: "Saturday", hours: "Closed" },
     ],
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.198509618!2d55.1414!3d25.0657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDAzJzU2LjUiTiA1NcKwMDgnMzAuMSJF!5e0!3m2!1sen!2sae!4v1234567890",
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d27222.35469644249!2d74.3380!3d31.5204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391904f88cbd0f2f%3A0xede2ef749acd972b!2sGulberg%2C%20Lahore%2C%20Pakistan!5e0!3m2!1sen!2sPK!4v1700000000000",
   };
 
   return (

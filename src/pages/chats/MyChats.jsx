@@ -13,6 +13,7 @@ import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { SOCKET_BASE_URL } from "../../redux/config";
+import { buildCarUrl } from "../../utils/urlBuilders";
 
 const MyChats = () => {
     const navigate = useNavigate();
@@ -284,7 +285,7 @@ const MyChats = () => {
                                         </p>
                                         <button
                                             onClick={() => refetchChats()}
-                                            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                                         >
                                             Retry
                                         </button>
@@ -397,8 +398,8 @@ const MyChats = () => {
                                                         </div>
                                                         {selectedChatData.car && (
                                                             <button
-                                                                onClick={() => navigate(`/cars/${selectedChatData.car._id}`)}
-                                                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 text-sm"
+                                                                onClick={() => navigate(buildCarUrl(selectedChatData.car))}
+                                                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 text-sm"
                                                             >
                                                                 View Car
                                                             </button>
@@ -423,7 +424,7 @@ const MyChats = () => {
                                                 </p>
                                                 <button
                                                     onClick={() => refetchMessages()}
-                                                    className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                                    className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                                                 >
                                                     Retry
                                                 </button>
@@ -568,7 +569,7 @@ const MyChats = () => {
                                             <button
                                                 onClick={handleSendMessage}
                                                 disabled={!message.trim()}
-                                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                             >
                                                 <FiSend />
                                                 Send

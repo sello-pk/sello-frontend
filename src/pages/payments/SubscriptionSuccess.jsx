@@ -70,7 +70,7 @@ const SubscriptionSuccess = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/profile")}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full bg-primary-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Go to Profile
               </button>
@@ -105,7 +105,7 @@ const SubscriptionSuccess = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/subscription")}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full bg-primary-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Try Again
               </button>

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { buildCarUrl } from "../../utils/urlBuilders";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import LazyImage from "./LazyImage";
@@ -59,7 +60,7 @@ const CarCard = ({ car }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/cars/${carId}`);
+    navigate(buildCarUrl(car));
   };
 
   return (
@@ -183,9 +184,9 @@ const CarCard = ({ car }) => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/cars/${carId}`);
+                navigate(buildCarUrl(car));
               }}
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition"
             >
               View Details
             </button>

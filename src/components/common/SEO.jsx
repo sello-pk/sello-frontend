@@ -6,11 +6,11 @@ import { useLocation } from 'react-router-dom';
  * Usage: <SEO title="Page Title" description="Page description" image="image-url" />
  */
 const SEO = ({ 
-  title = 'Sello - Buy and Sell Cars in UAE',
-  description = 'Find your perfect car on Sello. Browse thousands of new and used cars from trusted sellers. Buy or sell your car today!',
+  title = 'Sello - Buy and Sell Cars in Pakistan',
+  description = 'Find your perfect car on Sello Pakistan. Browse thousands of new and used cars from trusted sellers across Pakistan. Buy or sell your car today!',
   image = '/logo.png',
   type = 'website',
-  keywords = 'cars, buy cars, sell cars, used cars, new cars, UAE, Dubai, car marketplace',
+  keywords = 'cars, buy cars, sell cars, used cars, new cars, Pakistan, Lahore, Karachi, Islamabad, car marketplace',
   author = 'Sello',
   url
 }) => {

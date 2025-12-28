@@ -1,13 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens, refreshAccessToken, shouldRefreshToken } from "../../utils/tokenRefresh.js";
+import {
+  getAccessToken,
+  setAccessToken,
+  clearTokens,
+  refreshAccessToken,
+  shouldRefreshToken,
+} from "@utils/tokenRefresh";
+import { logger } from "@utils/logger";
 
 // Use environment variable or default to port 4000 (matching server)
 // VITE_API_URL is REQUIRED in production
-const BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.DEV 
-    ? "http://localhost:4000/api" 
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:4000/api"
     : (() => {
-        console.error("VITE_API_URL is required in production!");
+        logger.error("VITE_API_URL is required in production!");
         return ""; // Fail fast if not configured
       })());
 
@@ -44,10 +52,9 @@ export const api = createApi({
       // Handle 401 errors - try to refresh token
       if (baseResult.error && baseResult.error.status === 401) {
         const url = args?.url || "";
-        const refreshToken = getRefreshToken();
 
-        // Try to refresh token if we have a refresh token and this isn't an auth endpoint
-        if (refreshToken && shouldRefreshToken(401, url)) {
+        // Try to refresh token (stored in httpOnly cookie) if this isn't an auth endpoint
+        if (shouldRefreshToken(401, url)) {
           try {
             // If already refreshing, wait for that promise
             if (isRefreshing && refreshPromise) {
@@ -55,8 +62,8 @@ export const api = createApi({
             } else if (!isRefreshing) {
               // Start refresh process
               isRefreshing = true;
-              refreshPromise = refreshAccessToken(refreshToken);
-              
+              refreshPromise = refreshAccessToken();
+
               try {
                 await refreshPromise;
               } finally {
@@ -158,16 +165,12 @@ export const api = createApi({
       transformResponse: (response) => {
         // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
         if (response?.data) {
-          // Store refresh token if provided
-          if (response.data.refreshToken) {
-            setRefreshToken(response.data.refreshToken);
-          }
+          // Access token will be stored explicitly where needed; refresh token is in httpOnly cookie
           return {
             message: response.message,
             user: response.data.user,
             token: response.data.token || response.data.accessToken,
             accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken,
           };
         }
         return response;
@@ -183,14 +186,9 @@ export const api = createApi({
       transformResponse: (response) => {
         // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
         if (response?.data?.user) {
-          // Store refresh token if provided
-          if (response.data.refreshToken) {
-            setRefreshToken(response.data.refreshToken);
-          }
           return {
             token: response.data.token || response.data.accessToken,
             accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken,
             user: response.data.user,
           };
         }
@@ -219,14 +217,9 @@ export const api = createApi({
       transformResponse: (response) => {
         // Backend format: { success, message, data: { user, token, accessToken, refreshToken } }
         if (response?.data?.user) {
-          // Store refresh token if provided
-          if (response.data.refreshToken) {
-            setRefreshToken(response.data.refreshToken);
-          }
           return {
             token: response.data.token || response.data.accessToken,
             accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken,
             user: response.data.user,
             message: response.message,
           };
@@ -240,7 +233,9 @@ export const api = createApi({
           };
         }
         // If response structure is unexpected, return as is
-        console.warn("Unexpected Google login response structure", { response });
+        console.warn("Unexpected Google login response structure", {
+          response,
+        });
         return response;
       },
       transformErrorResponse: (response, meta, arg) => {
@@ -394,11 +389,11 @@ export const api = createApi({
     }),
     logout: builder.mutation({
       query: () => {
-        const refreshToken = getRefreshToken();
         return {
           url: "/auth/logout",
           method: "POST",
-          body: refreshToken ? { refreshToken } : {},
+          // Refresh token is read server-side from httpOnly cookie
+          body: {},
         };
       },
       invalidatesTags: ["User"],
@@ -978,6 +973,20 @@ export const api = createApi({
       }),
       transformResponse: (response) => response?.data || response,
     }),
+
+    // Account Deletion endpoints
+    createDeletionRequest: builder.mutation({
+      query: (data) => ({
+        url: "/account-deletion/request-deletion",
+        method: "POST",
+        body: data,
+      }),
+      transformResponse: (response) => response?.data || response,
+    }),
+    getDeletionRequestStatus: builder.query({
+      query: () => "/account-deletion/deletion-request-status",
+      transformResponse: (response) => response?.data || response,
+    }),
   }),
 });
 
@@ -1050,4 +1059,6 @@ export const {
   useAddUserReviewMutation,
   useGetUserReviewsQuery,
   useCreateReportMutation,
+  useCreateDeletionRequestMutation,
+  useGetDeletionRequestStatusQuery,
 } = api;

@@ -10,8 +10,8 @@ const ToggleSwitch = ({ checked, onChange }) => (
   <button
     type="button"
     onClick={() => onChange(!checked)}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-      checked ? "bg-orange-500" : "bg-gray-200 dark:bg-gray-700"
+    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+      checked ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
     }`}
   >
     <span
@@ -279,8 +279,8 @@ const GeneralSettingsTab = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -291,13 +291,13 @@ const GeneralSettingsTab = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FaGlobe className="text-orange-500" />
+          <FaGlobe className="text-primary-500" />
             <h3 className="font-bold text-gray-800 dark:text-white">General Settings</h3>
           </div>
-          <button
+            <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-bold shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>
@@ -354,7 +354,7 @@ const GeneralSettingsTab = () => {
               type="text"
               value={settings.siteName}
               onChange={(e) => handleChange("siteName", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
             />
           </div>
           <div>
@@ -365,7 +365,7 @@ const GeneralSettingsTab = () => {
               type="email"
               value={settings.contactEmail}
               onChange={(e) => handleChange("contactEmail", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
             />
           </div>
           <div>
@@ -376,7 +376,7 @@ const GeneralSettingsTab = () => {
               type="number"
               value={settings.maxListingsPerDealer}
               onChange={(e) => handleChange("maxListingsPerDealer", Number(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
             />
           </div>
           <div>
@@ -387,7 +387,7 @@ const GeneralSettingsTab = () => {
               type="number"
               value={settings.commissionRate}
               onChange={(e) => handleChange("commissionRate", Number(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
@@ -396,7 +396,7 @@ const GeneralSettingsTab = () => {
       {/* Security & Access */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-2">
-          <FaShieldAlt className="text-orange-500" />
+          <FaShieldAlt className="text-primary-500" />
           <h3 className="font-bold text-gray-800 dark:text-white">Security & Access</h3>
         </div>
         <div className="p-6 space-y-4">
@@ -451,7 +451,7 @@ const GeneralSettingsTab = () => {
       {/* Approval Settings */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-2">
-          <FaCheckCircle className="text-orange-500" />
+          <FaCheckCircle className="text-primary-500" />
           <h3 className="font-bold text-gray-800 dark:text-white">Approval Settings</h3>
         </div>
         <div className="p-6 space-y-4">
@@ -491,7 +491,7 @@ const GeneralSettingsTab = () => {
       {/* Notification Settings */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-2">
-          <FaBell className="text-orange-500" />
+          <FaBell className="text-primary-500" />
           <h3 className="font-bold text-gray-800 dark:text-white">Notification Settings</h3>
         </div>
         <div className="p-6 space-y-4">
@@ -521,7 +521,7 @@ const GeneralSettingsTab = () => {
       {/* Payment System Settings */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-2">
-          <FaDollarSign className="text-orange-500" />
+          <FaDollarSign className="text-primary-500" />
           <h3 className="font-bold text-gray-800 dark:text-white">Payment System Control</h3>
         </div>
         <div className="p-6 space-y-4">

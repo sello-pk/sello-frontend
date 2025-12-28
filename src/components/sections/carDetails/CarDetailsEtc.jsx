@@ -340,7 +340,7 @@ const CarDetailsEtc = () => {
                   <div className="space-y-3 mt-6">
                     <button
                       onClick={() => setShowChat(true)}
-                      className="w-full bg-primary-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-primary-500 text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center justify-center gap-2"
                     >
                       <FaEnvelope />
                       Contact Seller
@@ -413,7 +413,7 @@ const CarDetailsEtc = () => {
                         }
                       }}
                       disabled={isUpdatingStatus}
-                      className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+                      className="w-full bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-colors"
                     >
                       {isUpdatingStatus
                         ? "Updating..."

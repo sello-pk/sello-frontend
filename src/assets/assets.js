@@ -819,11 +819,13 @@ export const goThemBuyOrSell = [
     {
         title: "Are You Looking for a Car?",
         image: electricSvg,
+        redirect:"/cars",
         description: "Find the best cars for sale in Pakistan without the hassle. Browse verified listings, trusted sellers, and competitive deals across Karachi, Islamabad, Lahore, and all major cities. Whether you're searching for a new ride or used cars for sale in Pakistan, we make it easy to compare, choose, and buy your perfect car."
     },
     {
         title: "Do You Want to Sell a Car?",
         image: electricSvg2,
+        redirect:"/create-post",
         description: "Turn your car into cash quickly. List your vehicle in minutes and reach thousands of genuine buyers looking for cars for sale across Pakistan. Whether your car is in Karachi, Islamabad, or Lahore, our platform helps you sell smarter with maximum visibility and reliable customer support."
     },
 ]

@@ -39,7 +39,7 @@ const RoleDetails = ({ role, isOpen, onClose }) => {
     const getAccessLevelColor = (level) => {
         const colors = {
             FULL: "bg-red-100 text-red-800 border-red-200",
-            MEDIUM_HIGH: "bg-orange-100 text-orange-800 border-orange-200",
+            MEDIUM_HIGH: "bg-primary-100 text-primary-800 border-primary-200",
             MEDIUM: "bg-blue-100 text-blue-800 border-blue-200"
         };
         return colors[level] || "bg-gray-100 text-gray-800 border-gray-200";

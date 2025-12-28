@@ -19,7 +19,7 @@ const UserListingHero = () => {
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 my-5 md:my-7">
             <button
               onClick={() => navigate("/create-post")}
-              className="flex items-center justify-center space-x-3 bg-primary-500 text-white px-5 py-2.5 rounded text-base md:text-lg hover:bg-primary-600 font-medium w-full sm:w-auto transition-colors"
+              className="flex items-center justify-center space-x-3 bg-primary-500 text-white px-5 py-2.5 rounded text-base md:text-lg hover:opacity-90 font-medium w-full sm:w-auto transition-colors"
             >
               <span>ADD Posts</span>
               <GoArrowUpRight />

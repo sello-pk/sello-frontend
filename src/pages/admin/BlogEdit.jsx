@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetAllBlogsQuery, useUpdateBlogMutation, useGetAllCategoriesQuery } from "../../redux/services/adminApi";
+import { useGetBlogByIdQuery } from "../../redux/services/api";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
@@ -10,7 +11,8 @@ import TiptapEditor from "../../components/admin/TiptapEditor";
 const BlogEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data: blogsData, isLoading: isLoadingBlog } = useGetAllBlogsQuery({});
+    // Use direct blog query for better performance
+    const { data: blogData, isLoading: isLoadingBlog } = useGetBlogByIdQuery(id, { skip: !id });
     const { data: categoriesData, isLoading: categoriesLoading } = useGetAllCategoriesQuery({ type: "blog", isActive: true });
     const [updateBlog, { isLoading }] = useUpdateBlogMutation();
     const blogCategories = categoriesData || [];
@@ -22,6 +24,7 @@ const BlogEdit = () => {
         category: "",
         tags: "",
         status: "draft",
+        isFeatured: false,
         metaTitle: "",
         metaDescription: "",
         publishDate: "",
@@ -29,8 +32,7 @@ const BlogEdit = () => {
         slug: ""
     });
 
-    const blogs = blogsData?.blogs || [];
-    const blog = blogs.find((b) => b._id === id);
+    const blog = blogData;
 
     useEffect(() => {
         if (blog) {
@@ -42,11 +44,12 @@ const BlogEdit = () => {
                 category: blog.category?._id || "",
                 tags: Array.isArray(blog.tags) ? blog.tags.join(", ") : blog.tags || "",
                 status: blog.status || "draft",
+                isFeatured: blog.isFeatured || false,
                 metaTitle: blog.metaTitle || "",
                 metaDescription: blog.metaDescription || "",
                 slug: blog.slug || "",
-                publishDate: blog.publishDate ? new Date(blog.publishDate).toISOString().split('T')[0] : "",
-                publishTime: blog.publishDate ? new Date(blog.publishDate).toTimeString().slice(0, 5) : ""
+                publishDate: blog.publishedAt ? new Date(blog.publishedAt).toISOString().split('T')[0] : "",
+                publishTime: blog.publishedAt ? new Date(blog.publishedAt).toTimeString().slice(0, 5) : ""
             });
         }
     }, [blog]);
@@ -87,6 +90,9 @@ const BlogEdit = () => {
             if (formData.category) {
                 formDataToSend.append("category", formData.category);
             }
+            
+            // Handle isFeatured
+            formDataToSend.append("isFeatured", formData.isFeatured ? "true" : "false");
 
             await updateBlog({ blogId: id, formData: formDataToSend }).unwrap();
             toast.success("Blog updated successfully! Changes will reflect on the public site immediately.");
@@ -113,7 +119,7 @@ const BlogEdit = () => {
                 <p className="text-gray-600">Blog not found</p>
                 <button
                     onClick={() => navigate("/admin/blogs")}
-                    className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                    className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                 >
                     Back to Blogs
                 </button>
@@ -169,7 +175,7 @@ const BlogEdit = () => {
                                         onChange={handleChange}
                                         required
                                         placeholder="Enter blog post title"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 
@@ -183,7 +189,7 @@ const BlogEdit = () => {
                                         value={formData.slug}
                                         onChange={handleChange}
                                         placeholder="auto-generated-from-title"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                             </div>
@@ -195,6 +201,9 @@ const BlogEdit = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Short Summary *
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.excerpt.length}/200 characters)
+                                        </span>
                                     </label>
                                     <textarea
                                         name="excerpt"
@@ -202,9 +211,15 @@ const BlogEdit = () => {
                                         onChange={handleChange}
                                         required
                                         rows="3"
-                                        placeholder="Enter a brief summary of your blog post"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        maxLength={200}
+                                        placeholder="Enter a brief summary of your blog post (recommended: 150-200 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.excerpt.length > 200 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.excerpt.length > 200 && (
+                                        <p className="text-xs text-red-500 mt-1">Summary should be 200 characters or less</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -234,29 +249,47 @@ const BlogEdit = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Meta Title
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.metaTitle.length}/60 characters)
+                                        </span>
                                     </label>
                                     <input
                                         type="text"
                                         name="metaTitle"
                                         value={formData.metaTitle}
                                         onChange={handleChange}
-                                        placeholder="Enter meta title for SEO"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        maxLength={60}
+                                        placeholder="Enter meta title for SEO (recommended: 50-60 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.metaTitle.length > 60 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.metaTitle.length > 60 && (
+                                        <p className="text-xs text-red-500 mt-1">Meta title should be 60 characters or less</p>
+                                    )}
                                 </div>
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Meta Description
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.metaDescription.length}/160 characters)
+                                        </span>
                                     </label>
                                     <textarea
                                         name="metaDescription"
                                         value={formData.metaDescription}
                                         onChange={handleChange}
                                         rows="3"
-                                        placeholder="Enter meta description for SEO"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        maxLength={160}
+                                        placeholder="Enter meta description for SEO (recommended: 150-160 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.metaDescription.length > 160 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.metaDescription.length > 160 && (
+                                        <p className="text-xs text-red-500 mt-1">Meta description should be 160 characters or less</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -276,7 +309,7 @@ const BlogEdit = () => {
                                         name="status"
                                         value={formData.status}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     >
                                         <option value="draft">Draft</option>
                                         <option value="published">Published</option>
@@ -295,14 +328,14 @@ const BlogEdit = () => {
                                             name="publishDate"
                                             value={formData.publishDate}
                                             onChange={handleChange}
-                                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         />
                                         <input
                                             type="time"
                                             name="publishTime"
                                             value={formData.publishTime}
                                             onChange={handleChange}
-                                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         />
                                     </div>
                                 </div>
@@ -340,8 +373,26 @@ const BlogEdit = () => {
                                         value={formData.tags}
                                         onChange={handleChange}
                                         placeholder="Enter tags separated by commas"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
+                                </div>
+                                
+                                <div>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="isFeatured"
+                                            checked={formData.isFeatured}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))}
+                                            className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">
+                                            Feature this blog post
+                                        </span>
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Featured blogs appear prominently on the homepage
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -356,22 +407,38 @@ const BlogEdit = () => {
                                         name="featuredImage"
                                         onChange={handleChange}
                                         accept="image/*"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 {blog.featuredImage && !formData.featuredImage && (
-                                    <div className="mt-2">
+                                    <div className="mt-4">
                                         <p className="text-sm text-gray-600 mb-2">Current image:</p>
-                                        <img 
-                                            src={blog.featuredImage} 
-                                            alt="Featured" 
-                                            className="w-full h-32 object-cover rounded-lg"
-                                        />
+                                        <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                                            <img 
+                                                src={blog.featuredImage} 
+                                                alt="Featured" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                                 {formData.featuredImage && (
-                                    <div className="mt-2">
-                                        <p className="text-sm text-gray-600">Selected: {formData.featuredImage.name}</p>
+                                    <div className="mt-4">
+                                        <p className="text-sm text-gray-600 mb-2">New image: {formData.featuredImage.name}</p>
+                                        <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                                            <img
+                                                src={URL.createObjectURL(formData.featuredImage)}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, featuredImage: null }))}
+                                            className="mt-2 text-sm text-red-600 hover:text-red-800"
+                                        >
+                                            Remove New Image
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -392,7 +459,7 @@ const BlogEdit = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
                         >
                             {isLoading && <Spinner fullScreen={false} />}
                             <FiSave size={18} />

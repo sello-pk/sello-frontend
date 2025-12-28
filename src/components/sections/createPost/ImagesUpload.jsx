@@ -151,9 +151,9 @@ const ImagesUpload = ({ onImagesChange }) => {
   const completedUploads = uploads.filter((u) => u.status === "done");
 
   return (
-    <div className="max-w-2xl mx-auto  rounded-xl  overflow-hidden">
+    <div className="max-w-xl mx-auto rounded-xl overflow-hidden">
       <div
-        className={`relative px-6 py-14 transition-all duration-300 ${
+        className={`relative px-4 py-8 transition-all duration-300 ${
           isDragging
             ? "bg-primary-300 ring-4 ring-primary-300 ring-opacity-50"
             : "bg-gray-100"
@@ -162,9 +162,9 @@ const ImagesUpload = ({ onImagesChange }) => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="box md:h-16 md:w-16 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-9 z-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-gray-300"></div>
+        <div className="box h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-6 z-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-md shadow-gray-300"></div>
         {/* Preview */}
-        <div className="bg-white rounded-xl  border-2 border-primary-300 border-dashed  h-64 flex items-center justify-center  overflow-hidden group relative">
+        <div className="bg-white rounded-xl border-2 border-primary-300 border-dashed h-40 md:h-48 flex items-center justify-center overflow-hidden group relative">
           {activeIndex !== null ? (
             <>
               <img
@@ -188,7 +188,7 @@ const ImagesUpload = ({ onImagesChange }) => {
         </div>
 
         {/* Uploading Progress */}
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-2">
           {uploads
             .filter((u) => u.status === "uploading")
             .map((upload) => (
@@ -215,7 +215,7 @@ const ImagesUpload = ({ onImagesChange }) => {
         </div>
 
         {/* Upload button */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <input
             ref={fileInputRef}
             type="file"

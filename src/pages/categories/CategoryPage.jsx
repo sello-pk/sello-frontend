@@ -89,7 +89,7 @@ const CategoryPage = () => {
                     <p className="text-gray-600 mb-6">The category you're looking for doesn't exist.</p>
                     <Link
                         to="/listings"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition"
                     >
                         <HiOutlineArrowLeft /> Back to Listings
                     </Link>
@@ -158,7 +158,7 @@ const CategoryPage = () => {
                                 </p>
                                 <Link
                                     to="/create-post"
-                                    className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+                                    className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition"
                                 >
                                     Post a Listing
                                 </Link>

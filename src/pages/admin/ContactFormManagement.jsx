@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../routes";
 import { useGetAllContactFormsQuery, useConvertToChatMutation, useUpdateContactFormStatusMutation, useDeleteContactFormMutation } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
@@ -7,8 +8,10 @@ import toast from "react-hot-toast";
 import { FiSearch, FiTrash2, FiMessageSquare, FiCheckCircle, FiClock, FiXCircle, FiRefreshCw } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import ConfirmModal from "../../components/admin/ConfirmModal";
+import ActionDropdown from "../../components/admin/ActionDropdown";
 
 const ContactFormManagement = () => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [selectedForm, setSelectedForm] = useState(null);
@@ -73,7 +76,7 @@ const ContactFormManagement = () => {
                     ? result.data.chat._id
                     : result.data.chat._id.toString();
                 // Redirect to support chat with the new chat ID
-                window.location.href = ROUTES.admin.supportChatWithId(chatId);
+                navigate(`/admin/chat/${chatId}`);
             }
         } catch (error) {
             toast.error(error?.data?.message || "Failed to convert to chat");
@@ -155,7 +158,7 @@ const ContactFormManagement = () => {
                         <button
                             onClick={() => refetch()}
                             disabled={isLoading}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Refresh"
                         >
                             <FiRefreshCw className={isLoading ? "animate-spin" : ""} size={18} />
@@ -306,25 +309,6 @@ const ContactFormManagement = () => {
                                                             className="text-primary-500 hover:text-primary-500 flex items-center gap-1"
                                                             title="Convert to Chat"
                                                         >
-                                                            <FiMessageSquare size={16} />
-                                                            <span className="hidden md:inline">Chat</span>
-                                                        </button>
-                                                    )}
-                                                    {form.chatId && (
-                                                      <a
-                                                        href={ROUTES.admin.supportChatWithId(
-                                                          typeof form.chatId === "string"
-                                                            ? form.chatId
-                                                            : form.chatId?._id ||
-                                                              form.chatId?.toString() ||
-                                                              ""
-                                                        )}
-                                                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                                        title="View Chat"
-                                                      >
-                                                        <FiMessageSquare size={16} />
-                                                        <span className="hidden md:inline">View Chat</span>
-                                                      </a>
                                                     )}
                                                     <select
                                                         value={form.status}
@@ -339,16 +323,12 @@ const ContactFormManagement = () => {
                                                         <option value="in_progress">In Progress</option>
                                                         <option value="resolved">Resolved</option>
                                                     </select>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(form._id);
-                                                        }}
-                                                        className="text-red-600 hover:text-red-800"
-                                                        title="Delete"
-                                                    >
-                                                        <FiTrash2 size={16} />
-                                                    </button>
+                                                    <ActionDropdown
+                                                        onDelete={() => handleDelete(form._id)}
+                                                        item={form}
+                                                        itemName="contact form"
+                                                        deleteConfirmMessage="Are you sure you want to delete this contact form? This action cannot be undone."
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>
@@ -410,18 +390,18 @@ const ContactFormManagement = () => {
                                         {form.chatId && (
                                           <div className="col-span-2">
                                             <label className="text-sm font-medium text-gray-500">Chat</label>
-                                            <a
-                                              href={ROUTES.admin.supportChatWithId(
+                                            <button
+                                              onClick={() => navigate(ROUTES.admin.supportChatWithId(
                                                 typeof form.chatId === "string"
                                                   ? form.chatId
                                                   : form.chatId?._id ||
                                                     form.chatId?.toString() ||
                                                     ""
-                                              )}
+                                              ))}
                                               className="text-primary-500 hover:underline"
                                             >
                                               View Chat Conversation
-                                            </a>
+                                            </button>
                                           </div>
                                         )}
                                     </div>
@@ -429,7 +409,7 @@ const ContactFormManagement = () => {
                                         <div className="mt-4">
                                             <button
                                                 onClick={() => handleConvertToChat(form._id)}
-                                                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
+                                                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
                                             >
                                                 Convert to Chat
                                             </button>

@@ -93,7 +93,7 @@ const BoostSuccess = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/my-listings")}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full bg-primary-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 View My Listings
               </button>
@@ -128,7 +128,7 @@ const BoostSuccess = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/my-listings")}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full bg-primary-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Go to My Listings
               </button>

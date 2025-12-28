@@ -1,14 +1,14 @@
 import React from "react";
-import UserListingHero from "../../components/userListings/UserListingHero";
-import BrandMarquee from "../../components/BrandMarquee";
+import UserListingHero from "@components/userListings/UserListingHero";
+import BrandMarquee from "@components/BrandMarquee";
 import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
-import UserListings from "../../components/userListings/UsreListings";
-import BannerInUesrListings from "../../components/userListings/BannerInUesrListings";
-import Ads from '../../components/utils/Ads'
-import ReviewSectionInUser from "../../components/userListings/ReviewSectionInUser";
-import ContactMap from "../../components/userListings/ContactMap";
-import NewsLatter from "../../components/utils/NewsLatter";
+import UserListings from "@components/userListings/UsreListings";
+import BannerInUesrListings from "@components/userListings/BannerInUesrListings";
+import Ads from "@components/utils/Ads";
+import ReviewSectionInUser from "@components/userListings/ReviewSectionInUser";
+import ContactMap from "@components/userListings/ContactMap";
+import NewsLatter from "@components/utils/NewsLatter";
 
 const UserListingPage = () => {
   return (
@@ -31,7 +31,7 @@ const UserListingPage = () => {
       </div>
       <UserListings />
       <BannerInUesrListings />
-      <Ads/>
+      <Ads />
       <ReviewSectionInUser />
       <ContactMap />
       <NewsLatter />

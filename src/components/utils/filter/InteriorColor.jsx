@@ -48,7 +48,9 @@ const InteriorColor = ({ onChange, value }) => {
   const [colorNameInput, setColorNameInput] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [tempColor, setTempColor] = useState(value || "#000000");
-  const [tempHexInput, setTempHexInput] = useState(value ? value.replace("#", "") : "000000");
+  const [tempHexInput, setTempHexInput] = useState(
+    value ? value.replace("#", "") : "000000"
+  );
   const [tempColorName, setTempColorName] = useState("");
   const [customColors, setCustomColors] = useState([]); // Track custom colors
   const colorInputRef = useRef(null);
@@ -58,12 +60,12 @@ const InteriorColor = ({ onChange, value }) => {
     if (value) {
       setSelectedColor(value);
       setHexInput(value.replace("#", ""));
-      
+
       // Check if it matches a popular color
       const matchingPopularColor = popularInteriorColors.find(
         (color) => color.hex.toUpperCase() === value.toUpperCase()
       );
-      
+
       if (matchingPopularColor) {
         setColorNameInput(matchingPopularColor.name);
       } else {
@@ -74,8 +76,10 @@ const InteriorColor = ({ onChange, value }) => {
         if (foundName) {
           setColorNameInput(foundName);
           // Add as custom color if not in popular list
-          setCustomColors(prev => {
-            const exists = prev.some(c => c.hex.toUpperCase() === value.toUpperCase());
+          setCustomColors((prev) => {
+            const exists = prev.some(
+              (c) => c.hex.toUpperCase() === value.toUpperCase()
+            );
             if (!exists) {
               return [{ name: foundName, hex: value, isCustom: true }, ...prev];
             }
@@ -83,10 +87,19 @@ const InteriorColor = ({ onChange, value }) => {
           });
         } else {
           // Add as custom color with hex as name
-          setCustomColors(prev => {
-            const exists = prev.some(c => c.hex.toUpperCase() === value.toUpperCase());
+          setCustomColors((prev) => {
+            const exists = prev.some(
+              (c) => c.hex.toUpperCase() === value.toUpperCase()
+            );
             if (!exists) {
-              return [{ name: `Custom ${value.toUpperCase()}`, hex: value, isCustom: true }, ...prev];
+              return [
+                {
+                  name: `Custom ${value.toUpperCase()}`,
+                  hex: value,
+                  isCustom: true,
+                },
+                ...prev,
+              ];
             }
             return prev;
           });
@@ -150,36 +163,43 @@ const InteriorColor = ({ onChange, value }) => {
     const matchingPopularColor = popularInteriorColors.find(
       (color) => color.hex.toUpperCase() === tempColor.toUpperCase()
     );
-    
+
     // If it matches a popular color, use the popular color's exact hex to ensure selection works
-    const finalColor = matchingPopularColor ? matchingPopularColor.hex : tempColor;
-    const finalHexInput = matchingPopularColor ? matchingPopularColor.hex.replace("#", "") : tempHexInput;
-    const finalColorName = matchingPopularColor ? matchingPopularColor.name : (tempColorName || `Custom ${tempColor.toUpperCase()}`);
-    
+    const finalColor = matchingPopularColor
+      ? matchingPopularColor.hex
+      : tempColor;
+    const finalHexInput = matchingPopularColor
+      ? matchingPopularColor.hex.replace("#", "")
+      : tempHexInput;
+    const finalColorName = matchingPopularColor
+      ? matchingPopularColor.name
+      : tempColorName || `Custom ${tempColor.toUpperCase()}`;
+
     setSelectedColor(finalColor);
     setHexInput(finalHexInput);
     setColorNameInput(finalColorName);
-    
+
     // Add custom color to the list if it doesn't match a popular color
     if (!matchingPopularColor) {
       const customColorEntry = {
         name: finalColorName,
         hex: finalColor,
-        isCustom: true
+        isCustom: true,
       };
-      setCustomColors(prev => {
+      setCustomColors((prev) => {
         // Remove if already exists and add to beginning
-        const filtered = prev.filter(c => c.hex.toUpperCase() !== finalColor.toUpperCase());
+        const filtered = prev.filter(
+          (c) => c.hex.toUpperCase() !== finalColor.toUpperCase()
+        );
         return [customColorEntry, ...filtered];
       });
     }
-    
+
     if (onChange) {
       onChange(finalColor);
     }
     closeModal();
   };
-
 
   const isSelected = (hexColor) => {
     if (!selectedColor || !hexColor) return false;
@@ -190,11 +210,15 @@ const InteriorColor = ({ onChange, value }) => {
 
   // Combine custom colors (at start) with popular colors, filtering out duplicates
   const allColors = useMemo(() => {
-    const customColorsList = customColors.map(c => ({ ...c, isCustom: true }));
+    const customColorsList = customColors.map((c) => ({
+      ...c,
+      isCustom: true,
+    }));
     const popularColorsList = popularInteriorColors.filter(
-      popColor => !customColors.some(custom => 
-        custom.hex.toUpperCase() === popColor.hex.toUpperCase()
-      )
+      (popColor) =>
+        !customColors.some(
+          (custom) => custom.hex.toUpperCase() === popColor.hex.toUpperCase()
+        )
     );
     return [...customColorsList, ...popularColorsList];
   }, [customColors]);
@@ -202,61 +226,55 @@ const InteriorColor = ({ onChange, value }) => {
   return (
     <div>
       <label className="block mb-1 pl-2">Interior Color</label>
-      {/* Color Cards Grid - Same style as other SpecsUtility components */}
-      <div className="flex items-center gap-4 py-4 pl-2 overflow-x-auto md:scrollbar-hide hideScrollbar">
+      {/* Color Cards Grid - Slightly smaller for colors */}
+      {/* Color Cards - Horizontal Layout */}
+      <div className="flex gap-3 py-3 pl-2 overflow-x-auto hideScrollbar">
         {allColors.map((color, index) => {
           const selected = isSelected(color.hex);
           return (
             <div
               key={`${color.hex}-${index}`}
               onClick={() => handleColorSelect(color.hex, color.name)}
-              className={`bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center p-3 cursor-pointer min-w-[150px] h-[120px] ${
-                selected ? "ring-2 ring-primary-500 shadow-md" : "shadow-sm"
-              }`}
+              className={`min-w-[160px] cursor-pointer rounded-lg border transition-all
+                ${
+                  selected
+                    ? "border-primary-500 ring-2 ring-primary-500 bg-white shadow-md"
+                    : "border-gray-200 bg-[#F5F5F5] shadow-sm hover:shadow-md"
+                }
+              `}
             >
-              {/* Top section: Radio Button */}
-              <div className="flex w-full justify-between items-start">
+              <div className="flex items-center gap-3 px-3 py-2">
                 {/* Color Swatch */}
                 <div
-                  className="w-10 h-10 rounded-full border-2 border-gray-300 shadow-sm flex-shrink-0"
-                  style={{ backgroundColor: color.hex }}
-                ></div>
+                  className="w-7 h-7 rounded-md border flex-shrink-0"
+                  style={{
+                    backgroundColor: color.hex,
+                    borderColor:
+                      color.hex === "#FFFFFF" ? "#E5E7EB" : "transparent",
+                  }}
+                />
+
+                {/* Color Name */}
+                <span className="text-xs font-medium text-gray-700 truncate flex-1">
+                  {color.name}
+                </span>
 
                 {/* Radio Button */}
-                <label className="relative flex items-center cursor-pointer">
+                <label className="relative flex items-center flex-shrink-0">
                   <input
                     type="radio"
                     checked={selected}
                     name="interiorColor"
                     readOnly
                     aria-label={color.name}
-                    className={`peer h-5 w-5 appearance-none rounded-full bg-gray-100 shadow hover:shadow-md border border-gray-300 checked:border-primary-500 cursor-pointer transition-all`}
+                    className={`peer h-5 w-5 appearance-none border border-gray-300 bg-white transition-all rounded-full
+                      checked:border-primary-500
+                    `}
                   />
-                  <span className="absolute text-primary-500 opacity-0 peer-checked:opacity-100 transition-opacity duration-200 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-primary-500 opacity-0 peer-checked:opacity-100 text-sm font-bold">
+                    ✓
                   </span>
                 </label>
-              </div>
-
-              {/* Bottom section: Color Name */}
-              <div className="w-full mt-auto">
-                <span className="text-sm font-medium text-gray-700 block text-center truncate">
-                  {color.name}
-                </span>
-                {color.isCustom && (
-                  <span className="text-xs text-primary-600 block text-center mt-1">Custom</span>
-                )}
               </div>
             </div>
           );
@@ -289,7 +307,9 @@ const InteriorColor = ({ onChange, value }) => {
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">Select Custom Color</h3>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Select Custom Color
+              </h3>
               <button
                 type="button"
                 onClick={closeModal}
@@ -339,7 +359,9 @@ const InteriorColor = ({ onChange, value }) => {
                   className="sr-only"
                 />
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 mb-1">Click the color box to open color picker</p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    Click the color box to open color picker
+                  </p>
                   <div className="text-lg font-mono font-semibold text-gray-700">
                     {tempColor.toUpperCase()}
                   </div>
@@ -353,7 +375,9 @@ const InteriorColor = ({ onChange, value }) => {
                 Hex Code
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 font-mono text-lg font-semibold">#</span>
+                <span className="text-gray-500 font-mono text-lg font-semibold">
+                  #
+                </span>
                 <input
                   type="text"
                   value={tempHexInput}
@@ -378,7 +402,9 @@ const InteriorColor = ({ onChange, value }) => {
                 className="w-full px-4 py-3 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               {tempColorName && colorNames[tempColorName.toLowerCase()] && (
-                <p className="mt-1 text-xs text-green-600">✓ Color name recognized</p>
+                <p className="mt-1 text-xs text-green-600">
+                  ✓ Color name recognized
+                </p>
               )}
             </div>
 
@@ -394,7 +420,7 @@ const InteriorColor = ({ onChange, value }) => {
               <button
                 type="button"
                 onClick={applyCustomColor}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:opacity-90 rounded-lg transition-colors"
               >
                 Apply Color
               </button>

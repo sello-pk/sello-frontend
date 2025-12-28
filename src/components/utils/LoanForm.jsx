@@ -92,14 +92,14 @@ const LoanForm = () => {
       {result && (
         <div className="mb-6 text-center text-lg font-semibold text-gray-800">
           Monthly Payment:{" "}
-          <span className="text-primary-500">AED {result}</span>
+          <span className="text-primary-500">PKR {result}</span>
         </div>
       )}
 
       {/* Calculate Button */}
       <button
         type="submit"
-        className="w-full bg-primary-500 text-white hover:bg-primary-600 font-medium py-4 rounded-xl transition-colors flex justify-center items-center gap-2"
+        className="w-full bg-primary-500 text-white hover:opacity-90 font-medium py-4 rounded-xl transition-colors flex justify-center items-center gap-2"
       >
         Calculate{" "}
         <span className="text-xl">

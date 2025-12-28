@@ -25,7 +25,7 @@ const Notification = ({
             case "error":
                 return <FiAlertCircle className="h-6 w-6 text-red-500" />;
             default:
-                return <FiInfo className="h-6 w-6 text-blue-500" />;
+                return <FiInfo className="h-6 w-6 text-primary-500" />;
         }
     };
 
@@ -36,7 +36,7 @@ const Notification = ({
             case "error":
                 return "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800";
             default:
-                return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
+                return "bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800";
         }
     };
 

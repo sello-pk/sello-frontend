@@ -111,7 +111,7 @@ const ResetPassword = () => {
               {/* Change Password Button */}
               <button
                 type="submit"
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-colors mb-4"
                 disabled={isLoading}
               >
                 {isLoading ? "Changing..." : "Change Password"}

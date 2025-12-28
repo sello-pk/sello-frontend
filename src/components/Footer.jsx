@@ -77,7 +77,7 @@ const Footer = () => {
               <div className="space-y-3 text-sm text-gray-300">
                 <p>
                   <span className="font-medium text-white">Address:</span>{" "}
-                  Sello.ae Head Office, JLT, Dubai, UAE
+                  Sello Head Office, Gulberg, Lahore, Pakistan
                 </p>
                 <p>
                   <span className="font-medium text-white">Phone:</span>{" "}

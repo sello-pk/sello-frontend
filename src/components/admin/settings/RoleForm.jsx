@@ -305,7 +305,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-8 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold text-lg shadow-sm hover:shadow-md transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-8 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-bold text-lg shadow-sm hover:shadow-md transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
@@ -332,7 +332,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
               name="displayName"
               value={formData.displayName}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-700 bg-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-gray-700 bg-white"
               disabled={role?.isPreset}
             />
           </div>
@@ -346,7 +346,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
               value={formData.description}
               onChange={handleChange}
               rows="4"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none text-gray-700 bg-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none text-gray-700 bg-white"
             />
           </div>
 
@@ -361,7 +361,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                     type="checkbox" 
                     checked={formData.isTeamRole}
                     onChange={(e) => setFormData(prev => ({ ...prev, isTeamRole: e.target.checked }))}
-                    className="w-6 h-6 border-2 border-gray-400 rounded text-orange-500 focus:ring-orange-500 cursor-pointer"
+                    className="w-6 h-6 border-2 border-gray-400 rounded text-primary-500 focus:ring-primary-500 cursor-pointer"
                 />
             </div>
           </div>
@@ -394,7 +394,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                                     type="checkbox"
                                     checked={isFull}
                                     onChange={() => handleMatrixChange(module.id, null, true)}
-                                    className="w-5 h-5 border-2 border-gray-300 rounded text-orange-500 focus:ring-orange-500 transition-colors"
+                                    className="w-5 h-5 border-2 border-gray-300 rounded text-primary-500 focus:ring-primary-500 transition-colors"
                                 />
                             </label>
 
@@ -406,7 +406,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                                     checked={isChecked(module.keys, "view")}
                                     onChange={() => handleMatrixChange(module.id, "view")}
                                     disabled={!module.keys.view}
-                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-orange-500 focus:ring-orange-500 transition-colors ${!module.keys.view ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
+                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-primary-500 focus:ring-primary-500 transition-colors ${!module.keys.view ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
                                 />
                             </label>
 
@@ -418,7 +418,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                                     checked={isChecked(module.keys, "create")}
                                     onChange={() => handleMatrixChange(module.id, "create")}
                                     disabled={!module.keys.create}
-                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-orange-500 focus:ring-orange-500 transition-colors ${!module.keys.create ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
+                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-primary-500 focus:ring-primary-500 transition-colors ${!module.keys.create ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
                                 />
                             </label>
 
@@ -430,7 +430,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                                     checked={isChecked(module.keys, "edit")}
                                     onChange={() => handleMatrixChange(module.id, "edit")}
                                     disabled={!module.keys.edit}
-                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-orange-500 focus:ring-orange-500 transition-colors ${!module.keys.edit ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
+                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-primary-500 focus:ring-primary-500 transition-colors ${!module.keys.edit ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
                                 />
                             </label>
 
@@ -442,7 +442,7 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
                                     checked={isChecked(module.keys, "delete")}
                                     onChange={() => handleMatrixChange(module.id, "delete")}
                                     disabled={!module.keys.delete}
-                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-orange-500 focus:ring-orange-500 transition-colors ${!module.keys.delete ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
+                                    className={`w-5 h-5 border-2 border-gray-300 rounded text-primary-500 focus:ring-primary-500 transition-colors ${!module.keys.delete ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}`}
                                 />
                             </label>
                         </div>

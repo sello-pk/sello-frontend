@@ -487,7 +487,7 @@ const SellerChats = () => {
                                             <button
                                                 onClick={handleSendMessage}
                                                 disabled={!message.trim()}
-                                                className="p-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="p-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                             >
                                                 <FiSend size={20} />
                                             </button>

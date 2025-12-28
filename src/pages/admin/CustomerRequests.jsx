@@ -17,6 +17,7 @@ import { FiSearch, FiEdit2, FiTrash2, FiMessageSquare, FiClock, FiCheckCircle, F
 import { formatDistanceToNow } from "date-fns";
 import { ROUTES } from "../../routes";
 import ConfirmModal from "../../components/admin/ConfirmModal";
+import ActionDropdown from "../../components/admin/ActionDropdown";
 
 const CustomerRequests = () => {
     const [requestType, setRequestType] = useState("all"); // "all", "requests", "contact_forms"
@@ -214,8 +215,8 @@ const CustomerRequests = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "open": return "bg-blue-100 text-blue-800 border-blue-200";
-            case "in_progress": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+            case "open": return "bg-primary-50 text-primary-800 border-primary-200";
+            case "in_progress": return "bg-primary-100 text-primary-800 border-primary-300";
             case "resolved": return "bg-green-100 text-green-800 border-green-200";
             case "closed": return "bg-gray-100 text-gray-800 border-gray-200";
             default: return "bg-gray-100 text-gray-800 border-gray-200";
@@ -225,9 +226,9 @@ const CustomerRequests = () => {
     const getPriorityColor = (priority) => {
         switch (priority) {
             case "urgent": return "bg-red-100 text-red-800";
-            case "high": return "bg-orange-100 text-orange-800";
-            case "medium": return "bg-yellow-100 text-yellow-800";
-            case "low": return "bg-green-100 text-green-800";
+            case "high": return "bg-primary-100 text-primary-800";
+            case "medium": return "bg-primary-50 text-primary-800";
+            case "low": return "bg-gray-100 text-gray-800";
             default: return "bg-gray-100 text-gray-800";
         }
     };
@@ -259,12 +260,12 @@ const CustomerRequests = () => {
                                 refetchRequests();
                                 refetchContactForms();
                             }}
-                            className="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:border-yellow-300 dark:hover:border-yellow-600 transition-colors duration-200"
+                            className="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-300 dark:hover:border-primary-600 transition-colors duration-200"
                             title="Refresh data"
                         >
                             <FiMessageSquare size={20} />
                         </button>
-                        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center">
+                        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center">
                             <FiMessageSquare className="mr-2" size={20} />
                             <span className="font-semibold">{allItems.length} Total Items</span>
                         </div>
@@ -277,12 +278,12 @@ const CustomerRequests = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">Open Requests</p>
-                                <p className="text-2xl font-bold text-blue-600">
+                                <p className="text-2xl font-bold text-primary-600">
                                     {stats?.openRequests || 0}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100">
-                                <FiMessageSquare className="text-blue-500 text-xl" />
+                            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center border border-primary-100">
+                                <FiMessageSquare className="text-primary-500 text-xl" />
                             </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-100">
@@ -290,7 +291,7 @@ const CustomerRequests = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-yellow-200 dark:border-yellow-800/30 p-5 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-primary-200 dark:border-primary-800/30 p-5 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">In Progress</p>
@@ -298,8 +299,8 @@ const CustomerRequests = () => {
                                     {stats?.inProgressRequests || 0}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center border border-yellow-100">
-                                <FiClock className="text-yellow-500 text-xl" />
+                            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center border border-primary-100">
+                                <FiClock className="text-primary-500 text-xl" />
                             </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-100">
@@ -307,16 +308,16 @@ const CustomerRequests = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-purple-200 dark:border-purple-800/30 p-5 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-primary-200 dark:border-primary-800/30 p-5 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">Total Requests</p>
-                                <p className="text-2xl font-bold text-purple-600">
+                                <p className="text-2xl font-bold text-primary-600">
                                     {stats?.totalRequests || 0}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center border border-purple-100">
-                                <FiMessageSquare className="text-purple-500 text-xl" />
+                            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center border border-primary-100">
+                                <FiMessageSquare className="text-primary-500 text-xl" />
                             </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-100">
@@ -351,7 +352,7 @@ const CustomerRequests = () => {
                                 onClick={() => setRequestType("all")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     requestType === "all" 
-                                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -361,7 +362,7 @@ const CustomerRequests = () => {
                                 onClick={() => setRequestType("requests")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     requestType === "requests" 
-                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -372,7 +373,7 @@ const CustomerRequests = () => {
                                 onClick={() => setRequestType("contact_forms")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     requestType === "contact_forms" 
-                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -387,7 +388,7 @@ const CustomerRequests = () => {
                                 onClick={() => setActiveTab("all")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     activeTab === "all" 
-                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -397,7 +398,7 @@ const CustomerRequests = () => {
                                 onClick={() => setActiveTab("open")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     activeTab === "open" 
-                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -407,7 +408,7 @@ const CustomerRequests = () => {
                                 onClick={() => setActiveTab("in_progress")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     activeTab === "in_progress" 
-                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -417,7 +418,7 @@ const CustomerRequests = () => {
                                 onClick={() => setActiveTab("resolved")}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                     activeTab === "resolved" 
-                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md' 
+                                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' 
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 }`}
                             >
@@ -499,12 +500,12 @@ const CustomerRequests = () => {
                                         <tr key={item._id} className="hover:bg-gray-50 transition-colors duration-150">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {item.itemType === "contact_form" ? (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-800">
                                                         <FiMail className="mr-1" size={12} />
                                                         Contact Form
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-800">
                                                         <FiMessageSquare className="mr-1" size={12} />
                                                         Request
                                                     </span>
@@ -515,7 +516,7 @@ const CustomerRequests = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-600 flex items-center justify-center text-white text-sm font-semibold overflow-hidden border-2 border-white shadow-sm">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold overflow-hidden border-2 border-white shadow-sm">
                                                         {item.user?.avatar ? (
                                                             <img
                                                                 src={item.user.avatar}
@@ -554,15 +555,15 @@ const CustomerRequests = () => {
                                                 {item.itemType === "customer_request" && item.priority ? (
                                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${{
                                                         urgent: 'bg-red-100 text-red-800 border border-red-200',
-                                                        high: 'bg-orange-100 text-orange-800 border border-orange-200',
+                                                        high: 'bg-primary-100 text-primary-800 border border-primary-200',
                                                         medium: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
                                                         low: 'bg-green-100 text-green-800 border border-green-200'
                                                     }[item.priority] || 'bg-gray-100 text-gray-800 border border-gray-200'}`}>
                                                         <span className={`w-2 h-2 rounded-full mr-2 ${
                                                             item.priority === 'urgent' ? 'bg-red-500' :
-                                                            item.priority === 'high' ? 'bg-orange-500' :
-                                                            item.priority === 'medium' ? 'bg-yellow-500' :
-                                                            item.priority === 'low' ? 'bg-green-500' :
+                                                            item.priority === 'high' ? 'bg-primary-500' :
+                                                            item.priority === 'medium' ? 'bg-primary-400' :
+                                                            item.priority === 'low' ? 'bg-gray-400' :
                                                             'bg-gray-500'
                                                         }`}></span>
                                                         {item.priority?.charAt(0).toUpperCase() + item.priority?.slice(1) || 'Medium'}
@@ -579,9 +580,9 @@ const CustomerRequests = () => {
                                                             const newStatus = e.target.value;
                                                             handleContactFormStatusChange(item._id, newStatus);
                                                         }}
-                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border focus:outline-none focus:ring-1 focus:ring-yellow-500 transition-all ${{
-                                                            new: 'bg-blue-50 text-blue-700 border-blue-200',
-                                                            in_progress: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border focus:outline-none focus:ring-1 focus:ring-primary-500 transition-all ${{
+                                                            new: 'bg-primary-50 text-primary-700 border-primary-200',
+                                                            in_progress: 'bg-primary-100 text-primary-700 border-primary-300',
                                                             resolved: 'bg-green-50 text-green-700 border-green-200',
                                                         }[item.status === "open" ? "new" : item.status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}
                                                     >
@@ -593,9 +594,9 @@ const CustomerRequests = () => {
                                                     <select
                                                         value={item.status}
                                                         onChange={(e) => handleStatusChange(item._id, e.target.value)}
-                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border focus:outline-none focus:ring-1 focus:ring-yellow-500 transition-all ${{
-                                                            open: 'bg-blue-50 text-blue-700 border-blue-200',
-                                                            in_progress: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border focus:outline-none focus:ring-1 focus:ring-primary-500 transition-all ${{
+                                                            open: 'bg-primary-50 text-primary-700 border-primary-200',
+                                                            in_progress: 'bg-primary-100 text-primary-700 border-primary-300',
                                                             resolved: 'bg-green-50 text-green-700 border-green-200',
                                                             closed: 'bg-gray-50 text-gray-700 border-gray-200'
                                                         }[item.status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}
@@ -642,7 +643,7 @@ const CustomerRequests = () => {
                                                             setSelectedRequest(item._id);
                                                             setShowDetailsModal(true);
                                                         }}
-                                                        className="p-2 text-blue-600 hover:text-white hover:bg-blue-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                        className="p-2 text-primary-600 hover:text-white bg-primary-50 hover:bg-primary-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                                         title="View details"
                                                     >
                                                         <FiEye size={18} />
@@ -650,7 +651,7 @@ const CustomerRequests = () => {
                                                     {item.itemType === "contact_form" && !item.chatId && (
                                                         <button
                                                             onClick={() => handleConvertToChat(item._id)}
-                                                            className="p-2 text-green-600 hover:text-white hover:bg-green-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                            className="p-2 text-primary-600 hover:text-white bg-primary-50 hover:bg-primary-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                                             title="Convert to Chat"
                                                         >
                                                             <FiMessageSquare size={18} />
@@ -662,19 +663,18 @@ const CustomerRequests = () => {
                                                                 setSelectedRequest(item._id);
                                                                 setShowResponseModal(true);
                                                             }}
-                                                            className="p-2 text-green-600 hover:text-white hover:bg-green-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                            className="p-2 text-primary-600 hover:text-white bg-primary-50 hover:bg-primary-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                                             title="Add response"
                                                         >
                                                             <FiMessageSquare size={18} />
                                                         </button>
                                                     )}
-                                                    <button
-                                                        onClick={() => handleDelete(item._id)}
-                                                        className="p-2 text-red-600 hover:text-white hover:bg-red-500 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                                                        title="Delete"
-                                                    >
-                                                        <FiTrash2 size={18} />
-                                                    </button>
+                                                    <ActionDropdown
+                                                        onDelete={() => handleDelete(item._id)}
+                                                        item={item}
+                                                        itemName="item"
+                                                        deleteConfirmMessage="Are you sure you want to delete this item? This action cannot be undone."
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>
@@ -728,7 +728,7 @@ const CustomerRequests = () => {
                                 <button
                                     onClick={handleAddResponse}
                                     disabled={!responseMessage.trim() || isAddingResponse}
-                                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl hover:from-yellow-600 hover:to-yellow-700 font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
+                                    className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
                                 >
                                     {isAddingResponse ? (
                                         <>

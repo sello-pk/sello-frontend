@@ -22,16 +22,30 @@ const BlogCreateEnhanced = () => {
         category: "",
         tags: "",
         status: "draft",
+        isFeatured: false,
         metaTitle: "",
         metaDescription: "",
         publishDate: "",
         publishTime: "",
     });
 
+    // Generate slug from title
+    const generateSlug = (title) => {
+        return title.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    };
+
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "featuredImage") {
             setFormData({ ...formData, featuredImage: files[0] });
+        } else if (name === "title") {
+            // Auto-generate slug from title if slug is empty or matches old title
+            const newSlug = !formData.slug || formData.slug === generateSlug(formData.title) 
+                ? generateSlug(value) 
+                : formData.slug;
+            setFormData({ ...formData, [name]: value, slug: newSlug });
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -87,13 +101,17 @@ const BlogCreateEnhanced = () => {
             // Set status
             formDataToSend.append("status", status);
             
+            // Handle isFeatured
+            formDataToSend.append("isFeatured", formData.isFeatured ? "true" : "false");
+            
             // Handle publish date/time if provided
-            if (formData.publishDate && formData.publishTime) {
+            // Note: Backend will handle publishedAt based on status
+            if (formData.publishDate && formData.publishTime && status === "published") {
                 const publishDateTime = new Date(`${formData.publishDate}T${formData.publishTime}`);
-                // The backend will handle this based on status
+                formDataToSend.append("publishedAt", publishDateTime.toISOString());
             }
 
-            const result = await createBlog(formDataToSend).unwrap();
+            await createBlog(formDataToSend).unwrap();
             toast.success(status === "published" ? "Blog published successfully! It will appear on the public site immediately." : "Blog saved as draft");
             // Small delay to ensure cache invalidation completes
             setTimeout(() => {
@@ -134,7 +152,7 @@ const BlogCreateEnhanced = () => {
                         <button
                             onClick={(e) => handleSubmit(e, "published")}
                             disabled={isLoading}
-                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 disabled:opacity-50"
+                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2 disabled:opacity-50"
                         >
                             <FiSend size={18} />
                             Publish
@@ -186,6 +204,9 @@ const BlogCreateEnhanced = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Short Summary *
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.excerpt.length}/200 characters)
+                                        </span>
                                     </label>
                                     <textarea
                                         name="excerpt"
@@ -193,9 +214,15 @@ const BlogCreateEnhanced = () => {
                                         onChange={handleChange}
                                         required
                                         rows="3"
-                                        placeholder="Enter a brief summary of your blog post"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        maxLength={200}
+                                        placeholder="Enter a brief summary of your blog post (recommended: 150-200 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.excerpt.length > 200 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.excerpt.length > 200 && (
+                                        <p className="text-xs text-red-500 mt-1">Summary should be 200 characters or less</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -228,29 +255,47 @@ const BlogCreateEnhanced = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Meta Title
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.metaTitle.length}/60 characters)
+                                        </span>
                                     </label>
                                     <input
                                         type="text"
                                         name="metaTitle"
                                         value={formData.metaTitle}
                                         onChange={handleChange}
-                                        placeholder="Enter meta title for SEO"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        maxLength={60}
+                                        placeholder="Enter meta title for SEO (recommended: 50-60 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.metaTitle.length > 60 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.metaTitle.length > 60 && (
+                                        <p className="text-xs text-red-500 mt-1">Meta title should be 60 characters or less</p>
+                                    )}
                                 </div>
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Meta Description
+                                        <span className="text-gray-500 text-xs ml-2">
+                                            ({formData.metaDescription.length}/160 characters)
+                                        </span>
                                     </label>
                                     <textarea
                                         name="metaDescription"
                                         value={formData.metaDescription}
                                         onChange={handleChange}
                                         rows="3"
-                                        placeholder="Enter meta description for SEO"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        maxLength={160}
+                                        placeholder="Enter meta description for SEO (recommended: 150-160 characters)"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            formData.metaDescription.length > 160 ? 'border-red-300' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {formData.metaDescription.length > 160 && (
+                                        <p className="text-xs text-red-500 mt-1">Meta description should be 160 characters or less</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -337,6 +382,24 @@ const BlogCreateEnhanced = () => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
+                                
+                                <div>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="isFeatured"
+                                            checked={formData.isFeatured}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))}
+                                            className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">
+                                            Feature this blog post
+                                        </span>
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Featured blogs appear prominently on the homepage
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
@@ -354,8 +417,22 @@ const BlogCreateEnhanced = () => {
                                     />
                                 </div>
                                 {formData.featuredImage && (
-                                    <div className="mt-2">
-                                        <p className="text-sm text-gray-600">Selected: {formData.featuredImage.name}</p>
+                                    <div className="mt-4">
+                                        <p className="text-sm text-gray-600 mb-2">Selected: {formData.featuredImage.name}</p>
+                                        <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                                            <img
+                                                src={URL.createObjectURL(formData.featuredImage)}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, featuredImage: null }))}
+                                            className="mt-2 text-sm text-red-600 hover:text-red-800"
+                                        >
+                                            Remove Image
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -387,7 +464,7 @@ const BlogCreateEnhanced = () => {
                             type="button"
                             onClick={(e) => handleSubmit(e, "published")}
                             disabled={isLoading}
-                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
                         >
                             {isLoading && <Spinner fullScreen={false} />}
                             <FiSend size={18} />

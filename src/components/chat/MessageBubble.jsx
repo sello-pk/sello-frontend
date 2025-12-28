@@ -106,7 +106,7 @@ const MessageBubble = ({
               <div className="flex gap-2">
                 <button
                   onClick={handleEdit}
-                  className="text-xs px-2 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                  className="text-xs px-2 py-1 bg-primary-500 text-white rounded hover:opacity-90 transition-colors"
                 >
                   Save
                 </button>

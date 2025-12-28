@@ -3,7 +3,7 @@
  * Provides consistent error handling across the admin panel
  */
 
-import { notifyError } from './notifications';
+import { notifyError } from "./notifications";
 
 /**
  * Extract error message from various error formats
@@ -11,50 +11,53 @@ import { notifyError } from './notifications';
  * @returns {string} Human-readable error message
  */
 export const getErrorMessage = (error) => {
-    if (!error) return 'An unexpected error occurred';
-    
-    // RTK Query error format
-    if (error?.data?.message) {
-        return error.data.message;
-    }
-    
-    // Standard error object
-    if (error?.message) {
-        return error.message;
-    }
-    
-    // String error
-    if (typeof error === 'string') {
-        return error;
-    }
-    
-    // Network error
-    if (error?.status === 'FETCH_ERROR' || error?.error === 'TypeError: Failed to fetch') {
-        return 'Unable to connect to server. Please check your connection and try again.';
-    }
-    
-    // 401 Unauthorized
-    if (error?.status === 401) {
-        return 'Your session has expired. Please log in again.';
-    }
-    
-    // 403 Forbidden
-    if (error?.status === 403) {
-        return 'You do not have permission to perform this action.';
-    }
-    
-    // 404 Not Found
-    if (error?.status === 404) {
-        return 'The requested resource was not found.';
-    }
-    
-    // 500 Server Error
-    if (error?.status === 500) {
-        return 'A server error occurred. Please try again later.';
-    }
-    
-    // Default fallback
-    return 'An unexpected error occurred. Please try again.';
+  if (!error) return "An unexpected error occurred";
+
+  // RTK Query error format
+  if (error?.data?.message) {
+    return error.data.message;
+  }
+
+  // Standard error object
+  if (error?.message) {
+    return error.message;
+  }
+
+  // String error
+  if (typeof error === "string") {
+    return error;
+  }
+
+  // Network error
+  if (
+    error?.status === "FETCH_ERROR" ||
+    error?.error === "TypeError: Failed to fetch"
+  ) {
+    return "Unable to connect to server. Please check your connection and try again.";
+  }
+
+  // 401 Unauthorized
+  if (error?.status === 401) {
+    return "Your session has expired. Please log in again.";
+  }
+
+  // 403 Forbidden
+  if (error?.status === 403) {
+    return "You do not have permission to perform this action.";
+  }
+
+  // 404 Not Found
+  if (error?.status === 404) {
+    return "The requested resource was not found.";
+  }
+
+  // 500 Server Error
+  if (error?.status === 500) {
+    return "A server error occurred. Please try again later.";
+  }
+
+  // Default fallback
+  return "An unexpected error occurred. Please try again.";
 };
 
 /**
@@ -67,30 +70,35 @@ export const getErrorMessage = (error) => {
  * @returns {string} Error message
  */
 export const handleApiError = (error, options = {}) => {
-    const {
-        onError,
-        showNotification = true,
-        defaultMessage = 'An error occurred. Please try again.',
-        endpoint,
-        ...metadata
-    } = options;
-    
-    const errorMessage = getErrorMessage(error) || defaultMessage;
-    
-    // Call custom error handler if provided
-    if (onError && typeof onError === 'function') {
-        onError(error, errorMessage);
-    }
-    
-    // Show notification if enabled
-    if (showNotification) {
-        notifyError(errorMessage);
-    }
-    
-    // Log error to console
-    console.error(`API Error: ${endpoint || 'Unknown'}`, error, { endpoint, ...metadata });
-    
-    return errorMessage;
+  const {
+    onError,
+    showNotification = true,
+    defaultMessage = "An error occurred. Please try again.",
+    endpoint,
+    ...metadata
+  } = options;
+
+  const errorMessage = getErrorMessage(error) || defaultMessage;
+
+  // Call custom error handler if provided
+  if (onError && typeof onError === "function") {
+    onError(error, errorMessage);
+  }
+
+  // Show notification if enabled
+  if (showNotification) {
+    notifyError(errorMessage);
+  }
+
+  // Log error to console (only in development)
+  if (import.meta.env.DEV) {
+    console.error(`API Error: ${endpoint || "Unknown"}`, error, {
+      endpoint,
+      ...metadata,
+    });
+  }
+
+  return errorMessage;
 };
 
 /**
@@ -99,17 +107,17 @@ export const handleApiError = (error, options = {}) => {
  * @param {Function} setFieldError - Function to set field errors
  */
 export const handleValidationErrors = (errors, setFieldError) => {
-    if (!errors || typeof errors !== 'object') return;
-    
-    Object.keys(errors).forEach((field) => {
-        const errorMessage = Array.isArray(errors[field])
-            ? errors[field][0]
-            : errors[field];
-        
-        if (setFieldError) {
-            setFieldError(field, errorMessage);
-        }
-    });
+  if (!errors || typeof errors !== "object") return;
+
+  Object.keys(errors).forEach((field) => {
+    const errorMessage = Array.isArray(errors[field])
+      ? errors[field][0]
+      : errors[field];
+
+    if (setFieldError) {
+      setFieldError(field, errorMessage);
+    }
+  });
 };
 
 /**
@@ -119,12 +127,12 @@ export const handleValidationErrors = (errors, setFieldError) => {
  * @returns {Object} Formatted error object
  */
 export const formatErrorBoundaryError = (error, errorInfo) => {
-    return {
-        message: error?.message || 'An unexpected error occurred',
-        stack: error?.stack,
-        componentStack: errorInfo?.componentStack,
-        timestamp: new Date().toISOString(),
-    };
+  return {
+    message: error?.message || "An unexpected error occurred",
+    stack: error?.stack,
+    componentStack: errorInfo?.componentStack,
+    timestamp: new Date().toISOString(),
+  };
 };
 
 /**
@@ -133,12 +141,12 @@ export const formatErrorBoundaryError = (error, errorInfo) => {
  * @returns {boolean} True if network error
  */
 export const isNetworkError = (error) => {
-    return (
-        error?.status === 'FETCH_ERROR' ||
-        error?.error === 'TypeError: Failed to fetch' ||
-        error?.message?.includes('Failed to fetch') ||
-        error?.message?.includes('NetworkError')
-    );
+  return (
+    error?.status === "FETCH_ERROR" ||
+    error?.error === "TypeError: Failed to fetch" ||
+    error?.message?.includes("Failed to fetch") ||
+    error?.message?.includes("NetworkError")
+  );
 };
 
 /**
@@ -147,7 +155,7 @@ export const isNetworkError = (error) => {
  * @returns {boolean} True if auth error
  */
 export const isAuthError = (error) => {
-    return error?.status === 401 || error?.status === 403;
+  return error?.status === 401 || error?.status === 403;
 };
 
 /**
@@ -158,26 +166,25 @@ export const isAuthError = (error) => {
  * @returns {Promise} Promise that resolves or rejects
  */
 export const retryApiCall = async (fn, maxRetries = 3, delay = 1000) => {
-    let lastError;
-    
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            return await fn();
-        } catch (error) {
-            lastError = error;
-            
-            // Don't retry on auth errors or client errors (4xx)
-            if (isAuthError(error) || (error?.status >= 400 && error?.status < 500)) {
-                throw error;
-            }
-            
-            // Wait before retrying
-            if (i < maxRetries - 1) {
-                await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-            }
-        }
-    }
-    
-    throw lastError;
-};
+  let lastError;
 
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on auth errors or client errors (4xx)
+      if (isAuthError(error) || (error?.status >= 400 && error?.status < 500)) {
+        throw error;
+      }
+
+      // Wait before retrying
+      if (i < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
+      }
+    }
+  }
+
+  throw lastError;
+};

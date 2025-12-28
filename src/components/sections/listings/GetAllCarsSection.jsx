@@ -4,6 +4,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
+import { buildCarUrl } from "../../../utils/urlBuilders";
 import {
   useGetCarsQuery,
   useGetMeQuery,
@@ -278,21 +279,20 @@ const GetAllCarsSection = () => {
 
   if (error) {
     // Extract error message from RTK Query error structure
-    const errorMessage = error?.data?.message || 
-                        error?.message || 
-                        error?.error || 
-                        'Unknown error occurred';
-    
+    const errorMessage =
+      error?.data?.message ||
+      error?.message ||
+      error?.error ||
+      "Unknown error occurred";
+
     return (
       <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
         <div className="text-center">
-          <h2 className="text-xl text-red-500 mb-4">
-            Error loading cars
-          </h2>
+          <h2 className="text-xl text-red-500 mb-4">Error loading cars</h2>
           <p className="text-gray-600 mb-4">{errorMessage}</p>
           <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            onClick={() => navigate(0)}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
           >
             Retry
           </button>
@@ -535,9 +535,7 @@ const GetAllCarsSection = () => {
                             </h5>
                           </div>
                           <button
-                            onClick={() =>
-                              car?._id && navigate(`/cars/${car._id}`)
-                            }
+                            onClick={() => car && navigate(buildCarUrl(car))}
                             className={`flex items-center gap-2 ${
                               car?.isSold
                                 ? "text-gray-400 cursor-not-allowed"
@@ -571,7 +569,7 @@ const GetAllCarsSection = () => {
                 }
                 navigate(`/cars?${params.toString()}`);
               }}
-              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium flex items-center gap-2"
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
             >
               View All Vehicles
               <IoIosArrowRoundUp className="text-xl rotate-[40deg]" />
@@ -585,7 +583,7 @@ const GetAllCarsSection = () => {
             <button
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="px-8 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-8 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoadingMore ? (
                 <>
@@ -757,7 +755,7 @@ const GetAllCarsSection = () => {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 disabled={page === totalPages}
-                className="px-6 py-2.5 border border-primary-500 rounded-lg shadow-sm bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+                className="px-6 py-2.5 border border-primary-500 rounded-lg shadow-sm bg-primary-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
               >
                 Next
                 <svg

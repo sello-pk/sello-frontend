@@ -43,7 +43,7 @@ export const ROUTES = {
     chat: '/admin/chat',
     chatbot: '/admin/chatbot',
     supportChatWithId: (chatId) => `/admin/chat/${chatId}`,
-    supportChatbotWithId: (chatId) => `/admin/chatbot/${chatId}`,
+    supportChatbotWithId: (chatId) => `/admin/support-chatbot/${chatId}`,
     promotions: '/admin/promotions',
     settings: '/admin/settings',
     contactForm: '/admin/contact-form',

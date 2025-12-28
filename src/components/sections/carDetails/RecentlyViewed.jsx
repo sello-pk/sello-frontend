@@ -133,7 +133,7 @@ const RecentlyViewed = () => {
                 </span>
               </div>
               <span className="text-sm font-bold text-primary-500">
-                AED {car.price?.toLocaleString() || "0"}
+                PKR {car.price?.toLocaleString() || "0"}
               </span>
             </div>
           </Link>

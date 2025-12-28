@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEditCarMutation, useGetSingleCarQuery, useGetMeQuery } from "../../../redux/services/api";
+import {
+  useEditCarMutation,
+  useGetSingleCarQuery,
+  useGetMeQuery,
+} from "../../../redux/services/api";
 
 import ImagesUpload from "../createPost/ImagesUpload";
 import Input from "../../utils/filter/Input";
@@ -21,7 +25,21 @@ import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
 import { images } from "../../../assets/assets";
 import { useCarCategories } from "../../../hooks/useCarCategories";
-import { isFieldVisible, getRequiredFields } from "../../../utils/vehicleFieldConfig";
+import {
+  isFieldVisible,
+  getRequiredFields,
+} from "../../../utils/vehicleFieldConfig";
+
+// Helper function to get dynamic labels based on vehicle type
+const getVehicleLabel = (vehicleType, fieldType) => {
+  const vehicleName = vehicleType || "Vehicle";
+  if (fieldType === "make") {
+    return `${vehicleName} Make`;
+  } else if (fieldType === "model") {
+    return `${vehicleName} Model`;
+  }
+  return `${vehicleName} ${fieldType}`;
+};
 
 const EditCarForm = () => {
   const { id } = useParams();
@@ -32,7 +50,6 @@ const EditCarForm = () => {
     vehicleType: "Car", // Default vehicle type
     make: "",
     model: "",
-    variant: "",
     year: "",
     condition: "",
     price: "",
@@ -58,15 +75,25 @@ const EditCarForm = () => {
     images: [],
     existingImages: [], // URLs of existing images
   });
-  
+
   // Load car data
-  const { data: car, isLoading: isLoadingCar, error: carError } = useGetSingleCarQuery(id, {
+  const {
+    data: car,
+    isLoading: isLoadingCar,
+    error: carError,
+  } = useGetSingleCarQuery(id, {
     skip: !id,
   });
   const { data: currentUser } = useGetMeQuery();
-  
+
   // Filter categories by vehicle type from formData
-  const { makes, models, getModelsByMake, years, isLoading: categoriesLoading } = useCarCategories(formData.vehicleType);
+  const {
+    makes,
+    models,
+    getModelsByMake,
+    years,
+    isLoading: categoriesLoading,
+  } = useCarCategories(formData.vehicleType);
   const [selectedMake, setSelectedMake] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
@@ -77,14 +104,20 @@ const EditCarForm = () => {
   useEffect(() => {
     if (car && car.postedBy) {
       // Check if user owns this car
-      const postedById = typeof car.postedBy === "object" ? car.postedBy._id : car.postedBy;
-      if (currentUser && postedById && currentUser._id !== postedById && currentUser.role !== 'admin') {
+      const postedById =
+        typeof car.postedBy === "object" ? car.postedBy._id : car.postedBy;
+      if (
+        currentUser &&
+        postedById &&
+        currentUser._id !== postedById &&
+        currentUser.role !== "admin"
+      ) {
         toast.error("You don't have permission to edit this car");
-        navigate('/my-listings');
+        navigate("/my-listings");
         return;
       }
 
-      const geoLoc = car.geoLocation?.coordinates 
+      const geoLoc = car.geoLocation?.coordinates
         ? `[${car.geoLocation.coordinates[0]}, ${car.geoLocation.coordinates[1]}]`
         : "";
 
@@ -94,7 +127,6 @@ const EditCarForm = () => {
         vehicleType: car.vehicleType || "Car", // Include vehicle type
         make: car.make || "",
         model: car.model || "",
-        variant: car.variant || "",
         year: car.year?.toString() || "",
         condition: car.condition || "",
         price: car.price?.toString() || "",
@@ -114,29 +146,39 @@ const EditCarForm = () => {
         contactNumber: car.contactNumber || "",
         geoLocation: geoLoc,
         horsepower: car.horsepower || "",
-        warranty: car.warranty || "",
         numberOfCylinders: car.numberOfCylinders?.toString() || "",
         ownerType: car.ownerType || "",
         images: [],
-        existingImages: Array.isArray(car.images) ? car.images.filter(img => img) : [],
+        existingImages: Array.isArray(car.images)
+          ? car.images.filter((img) => img)
+          : [],
       });
 
       // Set available models and years based on loaded car
       if (car.make && makes && makes.length > 0) {
-        const selectedMakeObj = makes.find(m => m && m.name === car.make);
+        const selectedMakeObj = makes.find((m) => m && m.name === car.make);
         if (selectedMakeObj && selectedMakeObj._id) {
           setSelectedMake(car.make);
-          const makeModels = (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
+          const makeModels =
+            (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
           setAvailableModels(makeModels);
-          
+
           if (car.model && makeModels.length > 0) {
-            const selectedModelObj = makeModels.find(m => m && m.name === car.model);
-            if (selectedModelObj && selectedModelObj._id && years && years.length > 0) {
-              const modelYears = years.filter(y => {
+            const selectedModelObj = makeModels.find(
+              (m) => m && m.name === car.model
+            );
+            if (
+              selectedModelObj &&
+              selectedModelObj._id &&
+              years &&
+              years.length > 0
+            ) {
+              const modelYears = years.filter((y) => {
                 if (!y || !y.parentCategory) return false;
-                const parentId = typeof y.parentCategory === "object" 
-                  ? (y.parentCategory?._id || null)
-                  : y.parentCategory;
+                const parentId =
+                  typeof y.parentCategory === "object"
+                    ? y.parentCategory?._id || null
+                    : y.parentCategory;
                 return parentId && parentId === selectedModelObj._id;
               });
               setAvailableYears(modelYears);
@@ -152,7 +194,9 @@ const EditCarForm = () => {
     if (field === "features") {
       let flatValue = [];
       if (Array.isArray(value)) {
-        flatValue = value.flat().filter((item) => typeof item === "string" && item.trim());
+        flatValue = value
+          .flat()
+          .filter((item) => typeof item === "string" && item.trim());
       } else if (typeof value === "string" && value.trim()) {
         flatValue = value.split(",").map((item) => item.trim());
       }
@@ -161,37 +205,54 @@ const EditCarForm = () => {
       setFormData((prev) => ({ ...prev, [field]: uniqueFeatures }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
-      
+
       // When make changes, update available models
       if (field === "make") {
         setSelectedMake(value);
-        const selectedMakeObj = makes && makes.length > 0 ? makes.find(m => m && m.name === value) : null;
+        const selectedMakeObj =
+          makes && makes.length > 0
+            ? makes.find((m) => m && m.name === value)
+            : null;
         if (selectedMakeObj && selectedMakeObj._id) {
-          const makeModels = (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
+          const makeModels =
+            (getModelsByMake && getModelsByMake[selectedMakeObj._id]) || [];
           setAvailableModels(makeModels);
           // Reset model if it's not available for the new make
-          if (formData.model && !makeModels.find(m => m && m.name === formData.model)) {
+          if (
+            formData.model &&
+            !makeModels.find((m) => m && m.name === formData.model)
+          ) {
             setFormData((prev) => ({ ...prev, model: "" }));
           }
         }
       }
-      
+
       // When model changes, update available years
       if (field === "model") {
-        const selectedModelObj = availableModels && availableModels.length > 0 
-          ? availableModels.find(m => m && m.name === value) 
-          : null;
-        if (selectedModelObj && selectedModelObj._id && years && years.length > 0) {
-          const modelYears = years.filter(y => {
+        const selectedModelObj =
+          availableModels && availableModels.length > 0
+            ? availableModels.find((m) => m && m.name === value)
+            : null;
+        if (
+          selectedModelObj &&
+          selectedModelObj._id &&
+          years &&
+          years.length > 0
+        ) {
+          const modelYears = years.filter((y) => {
             if (!y || !y.parentCategory) return false;
-            const parentId = typeof y.parentCategory === "object" 
-              ? (y.parentCategory?._id || null)
-              : y.parentCategory;
+            const parentId =
+              typeof y.parentCategory === "object"
+                ? y.parentCategory?._id || null
+                : y.parentCategory;
             return parentId && parentId === selectedModelObj._id;
           });
           setAvailableYears(modelYears);
           // Reset year if it's not available for the new model
-          if (formData.year && !modelYears.find(y => y && y.name === formData.year.toString())) {
+          if (
+            formData.year &&
+            !modelYears.find((y) => y && y.name === formData.year.toString())
+          ) {
             setFormData((prev) => ({ ...prev, year: "" }));
           }
         }
@@ -201,15 +262,15 @@ const EditCarForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields dynamically based on vehicle type
     const requiredFields = getRequiredFields(formData.vehicleType);
-    
+
     const missing = requiredFields.filter((key) => {
       const value = formData[key];
-      return !value || (typeof value === 'string' && value.trim() === '');
+      return !value || (typeof value === "string" && value.trim() === "");
     });
-    
+
     if (missing.length) {
       toast.error(`Missing required fields: ${missing.join(", ")}`);
       return;
@@ -240,7 +301,6 @@ const EditCarForm = () => {
 
     const data = new FormData();
     const defaults = {
-      variant: formData.variant || "N/A",
       colorExterior: formData.colorExterior || "N/A",
       colorInterior: formData.colorInterior || "N/A",
       horsepower: formData.horsepower || "N/A",
@@ -304,8 +364,12 @@ const EditCarForm = () => {
     >
       <h1 className="text-center md:text-3xl font-semibold">Edit Car</h1>
       {isLoadingCar && <p className="text-center">Loading car data...</p>}
-      {carError && <p className="text-center text-red-500">Failed to load car data</p>}
-      {!isLoadingCar && !car && <p className="text-center text-red-500">Car not found</p>}
+      {carError && (
+        <p className="text-center text-red-500">Failed to load car data</p>
+      )}
+      {!isLoadingCar && !car && (
+        <p className="text-center text-red-500">Car not found</p>
+      )}
       <div className="border-[1px] border-gray-700 rounded-md px-5 py-6 my-5">
         <div className="my-2">
           {/* Display existing images */}
@@ -315,13 +379,19 @@ const EditCarForm = () => {
               <div className="flex flex-wrap gap-2 mb-2">
                 {formData.existingImages.map((imgUrl, idx) => (
                   <div key={idx} className="relative">
-                    <img src={imgUrl} alt={`Existing ${idx + 1}`} className="w-24 h-24 object-cover rounded border" />
+                    <img
+                      src={imgUrl}
+                      alt={`Existing ${idx + 1}`}
+                      className="w-24 h-24 object-cover rounded border"
+                    />
                     <button
                       type="button"
                       onClick={() => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          existingImages: prev.existingImages.filter((_, i) => i !== idx)
+                          existingImages: prev.existingImages.filter(
+                            (_, i) => i !== idx
+                          ),
                         }));
                       }}
                       className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 rounded"
@@ -395,7 +465,9 @@ const EditCarForm = () => {
 
         <div className="flex gap-6 my-2 w-full items-center">
           <div className="w-1/2">
-            <label className="block mb-1">Car Make *</label>
+            <label className="block mb-1">
+              {getVehicleLabel(formData.vehicleType, "make")} *
+            </label>
             <select
               value={formData.make}
               onChange={(e) => handleChange("make", e.target.value)}
@@ -412,7 +484,9 @@ const EditCarForm = () => {
             </select>
           </div>
           <div className="w-1/2">
-            <label className="block mb-1">Car Model *</label>
+            <label className="block mb-1">
+              {getVehicleLabel(formData.vehicleType, "model")} *
+            </label>
             <select
               value={formData.model}
               onChange={(e) => handleChange("model", e.target.value)}
@@ -430,16 +504,6 @@ const EditCarForm = () => {
           </div>
         </div>
 
-        <div className="mb-2">
-          <label className="block mb-1">Variant</label>
-          <Input
-            inputType="text"
-            value={formData.variant}
-            onChange={(e) => handleChange("variant", e.target.value)}
-            placeholder="e.g., V8"
-          />
-        </div>
-
         <div className="flex gap-6 my-2 w-full items-center">
           <div className="w-1/2">
             <label className="block mb-1">Year *</label>
@@ -451,23 +515,24 @@ const EditCarForm = () => {
               disabled={categoriesLoading || !formData.model}
             >
               <option value="">Select Year</option>
-              {availableYears.length > 0 ? (
-                availableYears.map((year) => (
-                  <option key={year._id} value={year.name}>
-                    {year.name}
-                  </option>
-                ))
-              ) : (
-                // Fallback: show years from 1990 to current year if no categories
-                Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => {
-                  const year = new Date().getFullYear() - i;
-                  return (
-                    <option key={year} value={year}>
-                      {year}
+              {availableYears.length > 0
+                ? availableYears.map((year) => (
+                    <option key={year._id} value={year.name}>
+                      {year.name}
                     </option>
-                  );
-                })
-              )}
+                  ))
+                : // Fallback: show years from 1990 to current year if no categories
+                  Array.from(
+                    { length: new Date().getFullYear() - 1989 },
+                    (_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    }
+                  )}
             </select>
           </div>
           <div className="w-1/2">
@@ -503,7 +568,10 @@ const EditCarForm = () => {
         {isFieldVisible(formData.vehicleType, "fuelType") && (
           <div>
             <label className="block mb-1">Fuel Type</label>
-            <FuelSpecs onChange={(val) => handleChange("fuelType", val)} />
+            <FuelSpecs
+              vehicleType={formData.vehicleType}
+              onChange={(val) => handleChange("fuelType", val)}
+            />
           </div>
         )}
 
@@ -610,42 +678,11 @@ const EditCarForm = () => {
           />
         </div>
 
-        <div className="my-4">
-          <label className="block mb-1">Current Location</label>
-          <button
-            type="button"
-            onClick={() => {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const coords = `[${position.coords.longitude}, ${position.coords.latitude}]`;
-                    handleChange("geoLocation", coords);
-                    toast.success("Location captured!");
-                  },
-                  (error) => toast.error("Geolocation error: " + error.message)
-                );
-              } else {
-                toast.error("Geolocation not supported.");
-              }
-            }}
-            className="w-full flex items-center justify-between px-5 py-2 border border-gray-300 rounded-md my-2"
-          >
-            <img
-              src={images.location}
-              className="w-7 h-7"
-              alt="location icons"
-            />
-            <div className="text-gray-800">Dubai</div>
-            <span></span>
-          </button>
-          <p>Current: {formData.geoLocation}</p>
-        </div>
-
         <div>
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-50"
+            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:opacity-90 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-50"
           >
             {isLoading ? "Updating..." : "Update Car"}
           </button>

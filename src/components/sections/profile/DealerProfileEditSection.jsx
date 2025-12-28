@@ -21,8 +21,8 @@ const DealerProfileEditSection = ({
   const [serviceInput, setServiceInput] = useState("");
 
   const cities = [
-    "Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah",
-    "Fujairah", "Umm Al Quwain", "Al Ain"
+    "Lahore", "Karachi", "Islamabad", "Rawalpindi", "Faisalabad",
+    "Multan", "Peshawar", "Quetta", "Sialkot"
   ];
 
   const employeeCountOptions = ["1-10", "11-50", "51-100", "100+"];
@@ -120,7 +120,7 @@ const DealerProfileEditSection = ({
         {!isEditingDealer ? (
           <button
             onClick={() => setIsEditingDealer(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
           >
             <FiEdit2 size={18} />
             Edit Profile
@@ -164,7 +164,7 @@ const DealerProfileEditSection = ({
             <button
               onClick={handleSave}
               disabled={isUpdatingDealer}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
             >
               <FiSave size={18} />
               {isUpdatingDealer ? "Saving..." : "Save Changes"}
@@ -190,7 +190,7 @@ const DealerProfileEditSection = ({
                   className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
                 />
                 {isEditingDealer && (
-                  <label className="absolute bottom-0 right-0 bg-primary-500 text-white rounded-full p-2 cursor-pointer hover:bg-primary-600 transition-colors">
+                  <label className="absolute bottom-0 right-0 bg-primary-500 text-white rounded-full p-2 cursor-pointer hover:opacity-90 transition-colors">
                     <FaUpload size={14} />
                     <input
                       type="file"
@@ -583,7 +583,7 @@ const DealerProfileEditSection = ({
                   <button
                     type="button"
                     onClick={() => addToArray("specialties", specialtyInput, setSpecialtyInput)}
-                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90"
                   >
                     <FaPlus />
                   </button>
@@ -659,13 +659,13 @@ const DealerProfileEditSection = ({
                   {dealerFormData.languages.map((language) => (
                     <span
                       key={language}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-primary-50 text-primary-800 rounded-full text-sm"
                     >
                       {language}
                       <button
                         type="button"
                         onClick={() => removeFromArray("languages", language)}
-                        className="hover:text-blue-600"
+                        className="hover:text-primary-600"
                       >
                         <FaTimes size={12} />
                       </button>

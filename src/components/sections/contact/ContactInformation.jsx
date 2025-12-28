@@ -12,14 +12,14 @@ const ContactInformation = () => {
         { label: "General Inquiries", value: import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com"}` },
         { label: "Support", value: import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"}` },
       ],
-      color: "bg-blue-50 text-blue-600",
+      color: "bg-primary-50 text-primary-600",
     },
     {
       icon: FiPhone,
       title: "Phone Number",
       items: [
-        { label: "Main Office", value: "+971 45 061 300", link: "tel:+97145061300" },
-        { label: "Support Line", value: "+971 50 123 4567", link: "tel:+971501234567" },
+        { label: "Main Office", value: "+92 42 1234567", link: "tel:+92421234567" },
+        { label: "Support Line", value: "+92 300 1234567", link: "tel:+923001234567" },
       ],
       color: "bg-green-50 text-green-600",
     },
@@ -27,7 +27,7 @@ const ContactInformation = () => {
       icon: FiMapPin,
       title: "Office Address",
       items: [
-        { label: "Head Office", value: "Sello.ae Head Office, JLT, Dubai, UAE", link: null },
+        { label: "Head Office", value: "Sello Head Office, Gulberg, Lahore, Pakistan", link: null },
       ],
       color: "bg-purple-50 text-purple-600",
     },
@@ -39,7 +39,7 @@ const ContactInformation = () => {
         { label: "Friday", value: "9:00 AM - 1:00 PM", link: null },
         { label: "Saturday", value: "Closed", link: null },
       ],
-      color: "bg-orange-50 text-orange-600",
+      color: "bg-primary-50 text-primary-600",
     },
   ];
 

@@ -5,6 +5,7 @@ import { images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { FiStar } from "react-icons/fi";
 import LazyImage from "../../common/LazyImage";
+import { buildCarUrl } from "../../../utils/urlBuilders";
 
 const FeaturedCars = () => {
   const navigate = useNavigate();
@@ -128,7 +129,7 @@ const FeaturedCars = () => {
                 />
                 {/* Boost Badge if boosted */}
                 {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && (
-                  <div className="absolute bottom-2 left-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                  <div className="absolute bottom-2 left-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
                     ⚡ BOOSTED
                   </div>
                 )}
@@ -179,10 +180,10 @@ const FeaturedCars = () => {
 
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                   <h6 className="text-lg md:text-xl font-semibold text-primary-500">
-                    AED {carPrice}
+                    PKR {carPrice}
                   </h6>
                   <button
-                    onClick={() => car._id && navigate(`/cars/${car._id}`)}
+                    onClick={() => car && navigate(buildCarUrl(car))}
                     className="flex items-center gap-2 text-primary-500 hover:text-primary-500 hover:underline text-sm md:text-base font-medium transition-colors"
                   >
                     View Details

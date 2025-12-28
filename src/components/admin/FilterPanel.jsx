@@ -137,7 +137,7 @@ const FilterPanel = ({
                 </button>
                 <button
                     onClick={handleApply}
-                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
                 >
                     Apply Filters
                 </button>

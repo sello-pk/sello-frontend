@@ -390,8 +390,8 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         <div className="mb-3 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -465,8 +465,8 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
             }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               userLocation
-                ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                : "bg-blue-600 text-white hover:bg-blue-700"
+                ? "bg-primary-50 text-primary-700 hover:bg-primary-100"
+                : "bg-primary-500 text-white hover:opacity-90"
             }`}
           >
             {showLocationPicker ? "Cancel" : userLocation ? "Change" : "Set Location"}
@@ -501,7 +501,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
           />
           {isSearching && (
             <div className="flex-shrink-0 ml-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
             </div>
           )}
           {searchQuery && !isSearching && (
@@ -608,7 +608,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
             <Marker position={userLocation} icon={userLocationIcon}>
               <Popup>
                 <div className="text-center">
-                  <strong className="text-blue-600">📍 Your Location</strong>
+                  <strong className="text-primary-600">📍 Your Location</strong>
                   {distance !== null && (
                     <p className="text-xs mt-1 text-gray-600">{distance.toFixed(1)} km from car</p>
                   )}
@@ -621,7 +621,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
           {isCalculatingRoute && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg z-[1000] border border-gray-200">
               <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
                 <span className="text-sm text-gray-700">Calculating route...</span>
               </div>
             </div>

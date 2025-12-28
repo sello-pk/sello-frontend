@@ -12,7 +12,7 @@ const ReviewsAnalysis = () => {
   const ratingDistribution = [
     { stars: 5, percentage: 89, color: "bg-green-500" },
     { stars: 4, percentage: 9, color: "bg-primary-400" },
-    { stars: 3, percentage: 1, color: "bg-orange-400" },
+    { stars: 3, percentage: 1, color: "bg-primary-400" },
     { stars: 2, percentage: 0, color: "bg-red-400" },
     { stars: 1, percentage: 0, color: "bg-red-600" },
   ];

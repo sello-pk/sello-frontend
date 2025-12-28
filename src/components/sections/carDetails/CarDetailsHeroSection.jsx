@@ -23,8 +23,10 @@ const CarDetailsHeroSection = () => {
     );
   }
 
-  const carTitle = `${car.year || ''} ${car.make || ''} ${car.model || ''}`.trim();
-  const carSubtitle = `${car.variant || ''} ${car.transmission || ''} ${car.bodyType || ''}`.trim();
+  const carTitle = `${car.year || ""} ${car.make || ""} ${
+    car.model || ""
+  }`.trim();
+  const carSubtitle = `${car.transmission || ""} ${car.bodyType || ""}`.trim();
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -55,15 +57,16 @@ const CarDetailsHeroSection = () => {
                   </div>
                 </>
               )}
-              {car.postedBy?.role === "dealer" && car.postedBy?.dealerInfo?.verified && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <div className="flex items-center gap-1 text-primary-500">
-                    <FaCheckCircle size={14} />
-                    <span className="font-medium">Verified Dealer</span>
-                  </div>
-                </>
-              )}
+              {car.postedBy?.role === "dealer" &&
+                car.postedBy?.dealerInfo?.verified && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <div className="flex items-center gap-1 text-primary-500">
+                      <FaCheckCircle size={14} />
+                      <span className="font-medium">Verified Dealer</span>
+                    </div>
+                  </>
+                )}
             </div>
           </div>
 
@@ -71,7 +74,7 @@ const CarDetailsHeroSection = () => {
           <div className="flex flex-col items-end gap-2">
             <div className="text-right">
               <p className="text-3xl md:text-4xl font-bold text-primary-500">
-                AED {car.price?.toLocaleString() || '0'}
+                PKR {car.price?.toLocaleString() || "0"}
               </p>
               {car.isSold && (
                 <p className="text-red-600 font-medium text-sm mt-1">Sold</p>
@@ -85,7 +88,7 @@ const CarDetailsHeroSection = () => {
                 </span>
               )}
               {car.isBoosted && new Date(car.boostExpiry) > new Date() && (
-                <span className="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                <span className="bg-gradient-to-r from-primary-400 to-primary-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                   <FiZap size={12} />
                   BOOSTED
                 </span>

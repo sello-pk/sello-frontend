@@ -188,7 +188,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
               value={formData.fullName}
               onChange={handleChange}
               placeholder="e.g. John Doe"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -202,7 +202,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="e.g. john@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -216,7 +216,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="e.g. +1234567890"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -229,7 +229,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
                 name="role"
                 value={formData.roleId || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
               >
                 <option value="">Select a role</option>
                 {roles.map((role) => (
@@ -261,7 +261,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

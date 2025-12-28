@@ -50,6 +50,8 @@ const ROLE_MENU_ACCESS = {
         "/admin/analytics",
         "/admin/chat",
         "/admin/chatbot",
+        "/admin/support-chat",
+        "/admin/support-chatbot",
         "/admin/customer-requests",
         "/admin/promotions",
         "/admin/payments",
@@ -67,6 +69,8 @@ const ROLE_MENU_ACCESS = {
         "/admin/dashboard",
         "/admin/chat",            // Chat monitoring
         "/admin/chatbot",         // Support chatbot
+        "/admin/support-chat",    // Support chat interface
+        "/admin/support-chatbot", // Support chatbot interface
         "/admin/customer-requests",       // Customer requests and contact forms
     ],
     "Content Manager": [
@@ -140,6 +144,20 @@ export const canAccessMenu = (user, path) => {
     }
 
     const allowedPaths = getAllowedMenuPaths(user);
-    return allowedPaths.includes(path);
+    
+    // Check exact path match
+    if (allowedPaths.includes(path)) {
+        return true;
+    }
+    
+    // Check if path starts with any allowed path (for routes with params like /admin/support-chatbot/:chatId)
+    // This handles routes like /admin/support-chatbot/123 which should match /admin/support-chatbot
+    for (const allowedPath of allowedPaths) {
+        if (path.startsWith(allowedPath + '/') || path === allowedPath) {
+            return true;
+        }
+    }
+    
+    return false;
 };
 

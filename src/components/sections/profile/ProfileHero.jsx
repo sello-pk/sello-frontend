@@ -32,6 +32,7 @@ import NotificationsSection from "./NotificationsSection";
 import DealerRequestForm from "../../profile/DealerRequestForm";
 import SubscriptionManagement from "../../subscriptions/SubscriptionManagement";
 import DealerProfileEditSection from "./DealerProfileEditSection";
+import AccountDeletionRequest from "../../profile/AccountDeletionRequest";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -47,12 +48,15 @@ const ProfileHero = () => {
     avatarPreview: null,
   });
 
-  const { data: user, isLoading, isError, error, refetch } = useGetMeQuery(
-    undefined,
-    {
-      skip: !localStorage.getItem("token"),
-    }
-  );
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetMeQuery(undefined, {
+    skip: !localStorage.getItem("token"),
+  });
   const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
     skip: !user || isLoading,
   });
@@ -60,11 +64,10 @@ const ProfileHero = () => {
     skip: !user || isLoading,
   });
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
-  const [updateProfile, { isLoading: isUpdating }] =
-    useUpdateProfileMutation();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
   const [updateDealerProfile, { isLoading: isUpdatingDealer }] =
     useUpdateDealerProfileMutation();
-  
+
   // Dealer profile form state
   const [dealerFormData, setDealerFormData] = useState({
     businessName: "",
@@ -107,13 +110,13 @@ const ProfileHero = () => {
   useEffect(() => {
     if (user) {
       try {
-      setFormData({
+        setFormData({
           name: user?.name || "",
           email: user?.email || "",
-        avatar: null,
+          avatar: null,
           avatarPreview: user?.avatar || null,
-      });
-        
+        });
+
         // Set dealer form data if user is a dealer
         if (user?.role === "dealer" && user?.dealerInfo) {
           setDealerFormData({
@@ -138,23 +141,26 @@ const ProfileHero = () => {
             services: user.dealerInfo.services || [],
           });
         }
-        
+
         const posts = user?.carsPosted?.length || 0;
         const sales = user?.carsPurchased?.length || 0;
-        const savedCount = user?.savedCars?.length || savedCarsData?.length || 0;
-      const earnings =
-          (user?.carsPurchased?.reduce((sum, car) => sum + (car?.price || 0), 0)) ||
-        0;
-      setMetrics({
-        posts,
-        activeListings: posts,
-        sales,
-        earnings,
-        savedCount,
-        clicks: 0,
+        const savedCount =
+          user?.savedCars?.length || savedCarsData?.length || 0;
+        const earnings =
+          user?.carsPurchased?.reduce(
+            (sum, car) => sum + (car?.price || 0),
+            0
+          ) || 0;
+        setMetrics({
+          posts,
+          activeListings: posts,
+          sales,
+          earnings,
+          savedCount,
+          clicks: 0,
           rating: user?.sellerRating || 0,
           ratingCount: user?.reviewCount || 0,
-      });
+        });
       } catch (error) {
         console.error("Error setting user data", error);
       }
@@ -220,7 +226,9 @@ const ProfileHero = () => {
       setShowProfilePopup(false);
     } catch (err) {
       console.error("Update failed", err);
-      alert(err?.data?.message || "Failed to update profile. Please try again.");
+      alert(
+        err?.data?.message || "Failed to update profile. Please try again."
+      );
     }
   };
 
@@ -260,8 +268,8 @@ const ProfileHero = () => {
             {error?.data?.message || error?.message || "Failed to load profile"}
           </div>
           <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            onClick={() => navigate(0)}
+            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
           >
             Retry
           </button>
@@ -275,13 +283,15 @@ const ProfileHero = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-2">No user data available</div>
+          <div className="text-red-500 text-lg mb-2">
+            No user data available
+          </div>
           <div className="text-gray-500 text-sm mb-4">
             Please try logging in again.
           </div>
           <button
             onClick={() => navigate("/login")}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
           >
             Go to Login
           </button>
@@ -359,25 +369,32 @@ const ProfileHero = () => {
       ? [
           {
             id: "become-dealer",
-            label: user?.role === "dealer" && !user?.dealerInfo?.verified
-              ? "Verification Pending"
-              : "Become a Dealer",
+            label:
+              user?.role === "dealer" && !user?.dealerInfo?.verified
+                ? "Verification Pending"
+                : "Become a Dealer",
             icon: FiStar,
             onClick: () => setShowDealerForm(true),
-            highlight: !(user?.role === "dealer" && !user?.dealerInfo?.verified),
+            highlight: !(
+              user?.role === "dealer" && !user?.dealerInfo?.verified
+            ),
           },
         ]
       : []),
     // Only show subscription tab if user doesn't have active premium subscription
-    ...(subscriptionData?.subscription?.isActive && 
-        subscriptionData?.subscription?.endDate && 
-        new Date(subscriptionData?.subscription?.endDate) > new Date() &&
-        subscriptionData?.subscription?.plan !== 'free' ? [] : [{
-      id: "subscription",
-      label: "Subscription",
-      icon: FiStar,
-      onClick: () => setActiveSection("subscription"),
-    }]),
+    ...(subscriptionData?.subscription?.isActive &&
+    subscriptionData?.subscription?.endDate &&
+    new Date(subscriptionData?.subscription?.endDate) > new Date() &&
+    subscriptionData?.subscription?.plan !== "free"
+      ? []
+      : [
+          {
+            id: "subscription",
+            label: "Subscription",
+            icon: FiStar,
+            onClick: () => setActiveSection("subscription"),
+          },
+        ]),
     {
       id: "support",
       label: "Support",
@@ -422,7 +439,10 @@ const ProfileHero = () => {
                   {user?.name || "User"}
                 </h1>
                 {user?.verified && (
-                  <FiCheckCircle className="text-primary-500 flex-shrink-0" size={20} />
+                  <FiCheckCircle
+                    className="text-primary-500 flex-shrink-0"
+                    size={20}
+                  />
                 )}
               </div>
               <p className="text-gray-500 text-sm mb-4">{user?.email || ""}</p>
@@ -443,7 +463,7 @@ const ProfileHero = () => {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-semibold text-gray-900">
-                    AED {metrics.earnings.toLocaleString()}
+                    PKR {metrics.earnings.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">Earnings</div>
                 </div>
@@ -453,7 +473,7 @@ const ProfileHero = () => {
             {/* Action Button */}
             <button
               onClick={() => navigate("/create-post")}
-              className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium text-sm transition-colors shadow-sm hover:shadow-md"
+              className="px-6 py-2.5 bg-primary-500 hover:opacity-90 text-white rounded-lg font-medium text-sm transition-colors shadow-sm hover:shadow-md"
             >
               Create Post
             </button>
@@ -526,19 +546,27 @@ const ProfileHero = () => {
                   <>
                     {/* Dealer Account Overview */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Overview</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Account Overview
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="border-l-4 border-primary-500 pl-4">
-                          <p className="text-sm text-gray-600">Account Status</p>
+                          <p className="text-sm text-gray-600">
+                            Account Status
+                          </p>
                           <p className="font-semibold text-gray-900 text-lg capitalize">
                             {user?.dealerInfo?.verified ? (
-                              <span className="text-green-600">Verified Dealer</span>
+                              <span className="text-green-600">
+                                Verified Dealer
+                              </span>
                             ) : (
-                              <span className="text-yellow-600">Pending Verification</span>
+                              <span className="text-yellow-600">
+                                Pending Verification
+                              </span>
                             )}
                           </p>
                         </div>
-                        <div className="border-l-4 border-blue-500 pl-4">
+                        <div className="border-l-4 border-primary-500 pl-4">
                           <p className="text-sm text-gray-600">Business Name</p>
                           <p className="font-semibold text-gray-900 text-lg">
                             {user?.dealerInfo?.businessName || "Not set"}
@@ -546,21 +574,27 @@ const ProfileHero = () => {
                         </div>
                         <div className="border-l-4 border-green-500 pl-4">
                           <p className="text-sm text-gray-600">Email</p>
-                          <p className="font-semibold text-gray-900 text-lg">{user?.email}</p>
+                          <p className="font-semibold text-gray-900 text-lg">
+                            {user?.email}
+                          </p>
                         </div>
                         <div className="border-l-4 border-purple-500 pl-4">
                           <p className="text-sm text-gray-600">Member Since</p>
                           <p className="font-semibold text-gray-900 text-lg">
-                            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                            {user?.createdAt
+                              ? new Date(user.createdAt).toLocaleDateString()
+                              : "N/A"}
                           </p>
                         </div>
                       </div>
                       <div className="mt-6 pt-6 border-t border-gray-200">
-                        <p className="text-sm text-gray-600 mb-2">Quick Actions</p>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Quick Actions
+                        </p>
                         <div className="flex flex-wrap gap-3">
                           <button
                             onClick={() => setActiveSection("dealer-profile")}
-                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 text-sm font-medium"
+                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 text-sm font-medium"
                           >
                             Edit Business Profile
                           </button>
@@ -592,9 +626,14 @@ const ProfileHero = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-gray-500">Total Posts</span>
+                          <span className="text-sm text-gray-500">
+                            Total Posts
+                          </span>
                           <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-                            <FiFileText className="text-primary-500" size={20} />
+                            <FiFileText
+                              className="text-primary-500"
+                              size={20}
+                            />
                           </div>
                         </div>
                         <div className="text-3xl font-semibold text-gray-900">
@@ -604,9 +643,14 @@ const ProfileHero = () => {
 
                       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-gray-500">Active Listings</span>
+                          <span className="text-sm text-gray-500">
+                            Active Listings
+                          </span>
                           <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                            <FiCheckCircle className="text-green-600" size={20} />
+                            <FiCheckCircle
+                              className="text-green-600"
+                              size={20}
+                            />
                           </div>
                         </div>
                         <div className="text-3xl font-semibold text-gray-900">
@@ -616,9 +660,11 @@ const ProfileHero = () => {
 
                       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-gray-500">Total Sales</span>
-                          <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <FiStar className="text-blue-600" size={20} />
+                          <span className="text-sm text-gray-500">
+                            Total Sales
+                          </span>
+                          <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                            <FiStar className="text-primary-600" size={20} />
                           </div>
                         </div>
                         <div className="text-3xl font-semibold text-gray-900">
@@ -628,13 +674,15 @@ const ProfileHero = () => {
 
                       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-gray-500">Earnings</span>
+                          <span className="text-sm text-gray-500">
+                            Earnings
+                          </span>
                           <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
                             <span className="text-yellow-600 text-xl">💰</span>
                           </div>
                         </div>
                         <div className="text-2xl font-semibold text-gray-900">
-                          AED {metrics.earnings.toLocaleString()}
+                          PKR {metrics.earnings.toLocaleString()}
                         </div>
                       </div>
                     </div>
@@ -645,27 +693,35 @@ const ProfileHero = () => {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
                   <NotificationsSection />
                 </div>
+
+                {/* Account Deletion Request */}
+                <AccountDeletionRequest user={user} />
               </>
             )}
 
             {activeSection === "subscription" && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                {subscriptionData?.subscription?.isActive && 
-                 subscriptionData?.subscription?.endDate && 
-                 new Date(subscriptionData.subscription.endDate) > new Date() &&
-                 subscriptionData?.subscription?.plan !== 'free' ? (
+                {subscriptionData?.subscription?.isActive &&
+                subscriptionData?.subscription?.endDate &&
+                new Date(subscriptionData.subscription.endDate) > new Date() &&
+                subscriptionData?.subscription?.plan !== "free" ? (
                   <div className="text-center py-12">
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FiCheckCircle className="text-green-500 text-4xl" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      Active Subscription: {subscriptionData?.planDetails?.name || 'Premium'}
+                      Active Subscription:{" "}
+                      {subscriptionData?.planDetails?.name || "Premium"}
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Your subscription is active until {new Date(subscriptionData.subscription.endDate).toLocaleDateString()}
+                      Your subscription is active until{" "}
+                      {new Date(
+                        subscriptionData.subscription.endDate
+                      ).toLocaleDateString()}
                     </p>
                     <p className="text-sm text-gray-500">
-                      You have unlimited listings and all premium features enabled.
+                      You have unlimited listings and all premium features
+                      enabled.
                     </p>
                   </div>
                 ) : (
@@ -816,7 +872,7 @@ const ProfileHero = () => {
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary-500 hover:opacity-90 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <MdEdit size={18} />
                   Edit Profile
@@ -840,7 +896,7 @@ const ProfileHero = () => {
                   <button
                     onClick={handleSaveProfile}
                     disabled={isUpdating}
-                    className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-primary-500 hover:opacity-90 disabled:bg-primary-300 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     {isUpdating ? (
                       <>

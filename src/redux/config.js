@@ -1,5 +1,6 @@
 // Centralized frontend configuration for API and sockets
 // This keeps all environment-dependent URLs in one place.
+import { logger } from "@utils/logger";
 
 // Base API URL (must include /api in your backend)
 // Priority:
@@ -10,7 +11,7 @@ export const API_BASE_URL =
   (import.meta.env.DEV
     ? "http://localhost:4000/api"
     : (() => {
-        console.error("VITE_API_URL is required in production!");
+        logger.error("VITE_API_URL is required in production!");
         return ""; // Fail fast in production if not configured
       })());
 
@@ -21,5 +22,3 @@ export const SOCKET_BASE_URL = API_BASE_URL.endsWith("/api")
 
 // Admin API route prefixes
 export const ADMIN_API_PREFIX = "/admin";
-
-

@@ -11,6 +11,7 @@ import Pagination from "../../components/admin/Pagination";
 import toast from "react-hot-toast";
 import { FiPlus, FiEdit, FiTrash2, FiX, FiImage } from "react-icons/fi";
 import ConfirmModal from "../../components/admin/ConfirmModal";
+import ActionDropdown from "../../components/admin/ActionDropdown";
 
 const Banners = () => {
     const [showModal, setShowModal] = useState(false);
@@ -169,7 +170,7 @@ const Banners = () => {
                     </div>
                     <button
                         onClick={handleOpenModal}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2"
                     >
                         <FiPlus size={18} />
                         Add Banner
@@ -209,21 +210,14 @@ const Banners = () => {
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{banner.title}</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Type: {banner.type}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Position: {banner.position}</p>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleEdit(banner)}
-                                            className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2"
-                                        >
-                                            <FiEdit size={16} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteClick(banner._id)}
-                                            className="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 flex items-center justify-center gap-2"
-                                        >
-                                            <FiTrash2 size={16} />
-                                            Delete
-                                        </button>
+                                    <div className="flex items-center justify-end">
+                                        <ActionDropdown
+                                            onEdit={() => handleEdit(banner)}
+                                            onDelete={() => handleDeleteClick(banner._id)}
+                                            item={banner}
+                                            itemName="banner"
+                                            deleteConfirmMessage="Are you sure you want to delete this banner? This action cannot be undone."
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -404,7 +398,7 @@ const Banners = () => {
                                     <button
                                         type="submit"
                                         disabled={isCreating || isUpdating}
-                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {(isCreating || isUpdating) && <Spinner fullScreen={false} />}
                                         {editingBanner ? (isUpdating ? "Updating..." : "Update") : (isCreating ? "Creating..." : "Create")}
