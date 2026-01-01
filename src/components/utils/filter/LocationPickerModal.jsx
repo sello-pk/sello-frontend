@@ -101,7 +101,6 @@ const LocationPickerModal = ({
     }
   }, [initialLocation, isOpen]);
 
-
   // Stop watching position
   useEffect(() => {
     return () => {
@@ -171,12 +170,40 @@ const LocationPickerModal = ({
       console.log("Search results:", data);
 
       if (data && data.length > 0) {
-        const results = data.map((item) => ({
-          display_name: item.display_name,
-          lat: parseFloat(item.lat),
-          lon: parseFloat(item.lon),
-        }));
-        setSearchResults(results);
+        const results = data.map((item) => ({ ...item }));
+
+        const handleSelectResult = (result) => {
+          setSelectedLocation(result);
+          setMapCenter([result.lat, result.lon]);
+          setMapZoom(15);
+        };
+
+        // Fallback to Google Places API if available
+        const googleApiKey =
+          import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY ||
+          import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (googleApiKey) {
+          const googleResponse = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+              query
+            )}&key=${googleApiKey}`
+          );
+          const googleData = await googleResponse.json();
+
+          if (googleData.status === "OK" && googleData.results.length > 0) {
+            const results = googleData.results.map((item) => ({
+              display_name: item.formatted_address,
+              lat: item.geometry.location.lat,
+              lon: item.geometry.location.lng,
+            }));
+            setSearchResults(results);
+          } else {
+            setSearchResults([]);
+            toast.error("No locations found");
+          }
+        } else {
+          setSearchResults(results);
+        }
       } else {
         // Fallback to Google Places API if available
         const googleApiKey =
@@ -305,7 +332,7 @@ const LocationPickerModal = ({
     setLocationMode("auto");
 
     onClose();
-  }
+  };
 
   if (!isOpen) return null;
 

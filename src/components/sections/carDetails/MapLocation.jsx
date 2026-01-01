@@ -1,6 +1,14 @@
 // MapView.jsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Circle,
+  useMap,
+  Polyline,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
@@ -19,7 +27,7 @@ L.Icon.Default.mergeOptions({
 // Custom icon for user location (blue circle - like reference)
 const createUserLocationIcon = () => {
   return L.divIcon({
-    className: 'custom-user-location-marker',
+    className: "custom-user-location-marker",
     html: `
       <div style="position: relative; width: 24px; height: 24px;">
         <div style="width: 24px; height: 24px; background: #3B82F6; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
@@ -33,7 +41,7 @@ const createUserLocationIcon = () => {
 // Custom icon for car location (red teardrop - like reference)
 const createCarLocationIcon = () => {
   return L.divIcon({
-    className: 'custom-car-location-marker',
+    className: "custom-car-location-marker",
     html: `
       <div style="position: relative;">
         <div style="width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #EF4444; position: relative;">
@@ -68,37 +76,42 @@ const calculateRoute = async (startLat, startLng, endLat, endLng) => {
     // Using OpenRouteService Directions API
     // You can get a free API key from https://openrouteservice.org/
     // For now, using a demo key (replace with your own in production)
-    const apiKey = import.meta.env.VITE_ORS_API_KEY || '5b3ce3597851110001cf6248e77c3e7b';
-    
+    const apiKey =
+      import.meta.env.VITE_ORS_API_KEY || "5b3ce3597851110001cf6248e77c3e7b";
+
     // Format: [longitude, latitude] for API
     const response = await fetch(
       `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${startLng},${startLat}&end=${endLng},${endLat}`,
       {
         headers: {
-          'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-        }
+          Accept:
+            "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
+        },
       }
     );
 
     if (!response.ok) {
-      throw new Error('Route calculation failed');
+      throw new Error("Route calculation failed");
     }
 
     const data = await response.json();
-    
+
     if (data.features && data.features[0]) {
       const geometry = data.features[0].geometry;
       const properties = data.features[0].properties;
-      
+
       // Convert coordinates from [lng, lat] to [lat, lng] for Leaflet
-      const routeCoordinates = geometry.coordinates.map(coord => [coord[1], coord[0]]);
+      const routeCoordinates = geometry.coordinates.map((coord) => [
+        coord[1],
+        coord[0],
+      ]);
       const distance = properties.segments[0].distance / 1000; // Convert to km
       const duration = properties.segments[0].duration / 60; // Convert to minutes
-      
+
       return {
         route: routeCoordinates,
         distance: distance,
-        duration: duration
+        duration: duration,
       };
     }
     return null;
@@ -107,20 +120,20 @@ const calculateRoute = async (startLat, startLng, endLat, endLng) => {
     // Fallback: return straight line distance with estimated route
     const distance = calculateDistance(startLat, startLng, endLat, endLng);
     const duration = distance * 2; // Rough estimate: 2 min per km (average city speed)
-    
+
     // Create a simple curved route for visual effect
     const midLat = (startLat + endLat) / 2;
     const midLng = (startLng + endLng) / 2;
     const offset = distance * 0.1; // Small offset for curve
-    
+
     return {
       route: [
         [startLat, startLng],
         [midLat + offset, midLng + offset],
-        [endLat, endLng]
+        [endLat, endLng],
       ],
       distance: distance,
-      duration: duration
+      duration: duration,
     };
   }
 };
@@ -151,12 +164,12 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
   // Use ref to track coordinates and prevent infinite loops
   const coordinatesRef = useRef(coordinates);
   const prevCoordinatesRef = useRef(coordinates);
-  
+
   // Check if coordinates actually changed
   const coordinatesChanged = useMemo(() => {
     const prev = prevCoordinatesRef.current;
     const curr = coordinates;
-    
+
     if (!prev || !curr || !Array.isArray(prev) || !Array.isArray(curr)) {
       if (prev !== curr) {
         prevCoordinatesRef.current = curr;
@@ -165,8 +178,12 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
       }
       return false;
     }
-    
-    if (prev.length !== curr.length || prev[0] !== curr[0] || prev[1] !== curr[1]) {
+
+    if (
+      prev.length !== curr.length ||
+      prev[0] !== curr[0] ||
+      prev[1] !== curr[1]
+    ) {
       prevCoordinatesRef.current = curr;
       coordinatesRef.current = curr;
       return true;
@@ -176,17 +193,21 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
 
   // Get car coordinates
   const getCarCoordinates = () => {
-    if (carLocation && carLocation.coordinates && carLocation.coordinates.length === 2) {
+    if (
+      carLocation &&
+      carLocation.coordinates &&
+      carLocation.coordinates.length === 2
+    ) {
       // carLocation.coordinates is [longitude, latitude]
       return {
         lat: carLocation.coordinates[1],
-        lng: carLocation.coordinates[0]
+        lng: carLocation.coordinates[0],
       };
     } else if (coordinates && coordinates.length === 2) {
       // coordinates is [latitude, longitude]
       return {
         lat: coordinates[0],
-        lng: coordinates[1]
+        lng: coordinates[1],
       };
     }
     return null;
@@ -197,22 +218,26 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
     if (userLocation && getCarCoordinates()) {
       const carCoords = getCarCoordinates();
       if (!carCoords) return;
-      
+
       setIsCalculatingRoute(true);
-      
+
       calculateRoute(
-        userLocation[0], userLocation[1],
-        carCoords.lat, carCoords.lng
-      ).then((routeData) => {
-        if (routeData) {
-          setRoute(routeData.route);
-          setDistance(routeData.distance);
-          setTravelTime(routeData.duration);
-        }
-        setIsCalculatingRoute(false);
-      }).catch(() => {
-        setIsCalculatingRoute(false);
-      });
+        userLocation[0],
+        userLocation[1],
+        carCoords.lat,
+        carCoords.lng
+      )
+        .then((routeData) => {
+          if (routeData) {
+            setRoute(routeData.route);
+            setDistance(routeData.distance);
+            setTravelTime(routeData.duration);
+          }
+          setIsCalculatingRoute(false);
+        })
+        .catch(() => {
+          setIsCalculatingRoute(false);
+        });
     }
   }, [userLocation, coordinatesChanged]);
 
@@ -235,7 +260,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 0
+          maximumAge: 0,
         }
       );
     } else {
@@ -254,18 +279,29 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
   // Update map center when user location is found
   useEffect(() => {
     const currentCoords = coordinatesRef.current;
-    if (!currentCoords || !Array.isArray(currentCoords) || currentCoords.length !== 2) {
+    if (
+      !currentCoords ||
+      !Array.isArray(currentCoords) ||
+      currentCoords.length !== 2
+    ) {
       return;
     }
-    
-    if (userLocation && Array.isArray(userLocation) && userLocation.length === 2) {
+
+    if (
+      userLocation &&
+      Array.isArray(userLocation) &&
+      userLocation.length === 2
+    ) {
       // Center between user and car location
       const centerLat = (userLocation[0] + currentCoords[0]) / 2;
       const centerLng = (userLocation[1] + currentCoords[1]) / 2;
-      
+
       // Only update if actually different
       const [existingLat, existingLng] = mapCenter;
-      if (Math.abs(centerLat - existingLat) > 0.0001 || Math.abs(centerLng - existingLng) > 0.0001) {
+      if (
+        Math.abs(centerLat - existingLat) > 0.0001 ||
+        Math.abs(centerLng - existingLng) > 0.0001
+      ) {
         setMapCenter([centerLat, centerLng]);
         setMapZoom(12);
       }
@@ -273,9 +309,12 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
       // Only update if coordinates actually changed
       const [currentLat, currentLng] = currentCoords;
       const [existingLat, existingLng] = mapCenter;
-      
+
       // Check if coordinates are actually different (with small tolerance for floating point)
-      if (Math.abs(currentLat - existingLat) > 0.0001 || Math.abs(currentLng - existingLng) > 0.0001) {
+      if (
+        Math.abs(currentLat - existingLat) > 0.0001 ||
+        Math.abs(currentLng - existingLng) > 0.0001
+      ) {
         setMapCenter([currentLat, currentLng]);
         setMapZoom(13);
       }
@@ -293,11 +332,13 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&limit=5&addressdetails=1`,
         {
           headers: {
-            'User-Agent': 'Sello.ae Location Picker'
-          }
+            "User-Agent": "Sello.ae Location Picker",
+          },
         }
       );
       const data = await response.json();
@@ -310,14 +351,18 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         }));
         setSearchResults(results);
       } else {
-        const googleApiKey = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        const googleApiKey =
+          import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY ||
+          import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (googleApiKey) {
           const googleResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+              query
+            )}&key=${googleApiKey}`
           );
           const googleData = await googleResponse.json();
-          
-          if (googleData.status === 'OK' && googleData.results.length > 0) {
+
+          if (googleData.status === "OK" && googleData.results.length > 0) {
             const results = googleData.results.map((item) => ({
               display_name: item.formatted_address,
               lat: item.geometry.location.lat,
@@ -391,8 +436,18 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-5 h-5 text-primary-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
               <div className="flex items-center gap-4">
@@ -426,8 +481,18 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
                 className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                 title="Clear route"
               >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -441,15 +506,21 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
           <div className="flex-1">
             {userLocation ? (
               <div>
-                <div className="text-xs text-gray-500 mb-0.5">Your Location</div>
+                <div className="text-xs text-gray-500 mb-0.5">
+                  Your Location
+                </div>
                 <div className="text-sm font-medium text-gray-900">
                   {userLocation[0].toFixed(4)}, {userLocation[1].toFixed(4)}
                 </div>
               </div>
             ) : (
               <div>
-                <div className="text-xs text-gray-500 mb-0.5">Set Your Location</div>
-                <div className="text-sm text-gray-400">To see route and distance</div>
+                <div className="text-xs text-gray-500 mb-0.5">
+                  Set Your Location
+                </div>
+                <div className="text-sm text-gray-400">
+                  To see route and distance
+                </div>
               </div>
             )}
           </div>
@@ -469,7 +540,11 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
                 : "bg-primary-500 text-white hover:opacity-90"
             }`}
           >
-            {showLocationPicker ? "Cancel" : userLocation ? "Change" : "Set Location"}
+            {showLocationPicker
+              ? "Cancel"
+              : userLocation
+              ? "Change"
+              : "Set Location"}
           </button>
           {!showLocationPicker && (
             <button
@@ -486,123 +561,185 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
       {/* Search bar */}
       {showLocationPicker && (
         <div className="mb-3 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden relative">
-        <div className="flex items-center px-4 py-3">
-          <div className="flex-shrink-0 mr-3">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for nearby places..."
-            className="flex-1 outline-none text-sm text-gray-900 placeholder-gray-400"
-          />
-          {isSearching && (
-            <div className="flex-shrink-0 ml-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
-            </div>
-          )}
-          {searchQuery && !isSearching && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSearchResults([]);
-              }}
-              className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-        
-        {/* Search results dropdown */}
-        {searchResults.length > 0 && (
-          <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-200 max-h-60 overflow-y-auto z-[1000] shadow-lg">
-            {searchResults.map((result, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelectResult(result)}
-                className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 transition-colors"
+          <div className="flex items-center px-4 py-3">
+            <div className="flex-shrink-0 mr-3">
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
-                      {result.display_name}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for nearby places..."
+              className="flex-1 outline-none text-sm text-gray-900 placeholder-gray-400"
+            />
+            {isSearching && (
+              <div className="flex-shrink-0 ml-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+              </div>
+            )}
+            {searchQuery && !isSearching && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }}
+                className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Search results dropdown */}
+          {searchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-200 max-h-60 overflow-y-auto z-[1000] shadow-lg">
+              {searchResults.map((result, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectResult(result)}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 truncate">
+                        {result.display_name}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
-      
+
       {error && (
         <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">{error}</p>
         </div>
       )}
-      
-      <div className="w-full h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-gray-300 shadow-md relative" style={{ zIndex: 1 }}>
+
+      <div
+        className="w-full h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-gray-300 shadow-md relative"
+        style={{ zIndex: 1 }}
+      >
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%", zIndex: 1, position: "relative" }}
-          eventHandlers={showLocationPicker ? {
-            click: handleMapClick
-          } : {}}
+          style={{
+            height: "100%",
+            width: "100%",
+            zIndex: 1,
+            position: "relative",
+          }}
+          eventHandlers={
+            showLocationPicker
+              ? {
+                  click: handleMapClick,
+                }
+              : {}
+          }
         >
           <MapUpdater center={mapCenter} zoom={mapZoom} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
+
           {/* Route line - Blue line connecting user and car */}
           {route && route.length > 0 && (
             <Polyline
               positions={route}
               pathOptions={{
-                color: '#3B82F6',
+                color: "#3B82F6",
                 weight: 5,
                 opacity: 0.8,
-                lineCap: 'round',
-                lineJoin: 'round'
+                lineCap: "round",
+                lineJoin: "round",
               }}
             />
           )}
-          
+
           {/* Car location marker - Red teardrop */}
           {carCoords && (
-            <Marker position={[carCoords.lat, carCoords.lng]} icon={carLocationIcon}>
+            <Marker
+              position={[carCoords.lat, carCoords.lng]}
+              icon={carLocationIcon}
+            >
               <Popup>
                 <div className="text-center">
                   <strong className="text-red-600">🚗 Car Location</strong>
                   {distance !== null && (
-                    <p className="text-xs mt-1 text-gray-600">{distance.toFixed(1)} km away</p>
+                    <p className="text-xs mt-1 text-gray-600">
+                      {distance.toFixed(1)} km away
+                    </p>
                   )}
                 </div>
               </Popup>
             </Marker>
           )}
-          
+
           {/* User location marker - Blue circle */}
           {userLocation && (
             <Marker position={userLocation} icon={userLocationIcon}>
@@ -610,7 +747,9 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
                 <div className="text-center">
                   <strong className="text-primary-600">📍 Your Location</strong>
                   {distance !== null && (
-                    <p className="text-xs mt-1 text-gray-600">{distance.toFixed(1)} km from car</p>
+                    <p className="text-xs mt-1 text-gray-600">
+                      {distance.toFixed(1)} km from car
+                    </p>
                   )}
                 </div>
               </Popup>
@@ -622,7 +761,9 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg z-[1000] border border-gray-200">
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
-                <span className="text-sm text-gray-700">Calculating route...</span>
+                <span className="text-sm text-gray-700">
+                  Calculating route...
+                </span>
               </div>
             </div>
           )}

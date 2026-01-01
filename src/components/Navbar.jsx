@@ -127,7 +127,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between sticky top-0 z-50 ${
+        className={`w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 flex items-center justify-between sticky top-0 z-50 ${
           location.pathname === "/cars" ||
           location.pathname === "/users" ||
           location.pathname === "/blog"
@@ -141,10 +141,10 @@ const Navbar = () => {
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="cursor-pointer"
+          className="cursor-pointer flex-shrink-0"
         >
           <img
-            className="h-14 md:h-20"
+            className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto"
             src={
               location.pathname === "/cars" ||
               location.pathname === "/users" ||
@@ -157,13 +157,13 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Search Bar */}
-        <div className="hidden lg:block w-full max-w-xs">
+        <div className="hidden lg:block w-full max-w-xs flex-shrink-0">
           <SearchBar />
         </div>
 
         {/* Desktop Links */}
         <div
-          className={`hidden md:flex items-center gap-6 text-lg ${
+          className={`hidden lg:flex items-center gap-4 xl:gap-6 text-sm lg:text-base ${
             location.pathname === "/cars" ||
             location.pathname === "/users" ||
             location.pathname === "/blog"
@@ -175,7 +175,9 @@ const Navbar = () => {
             <Link
               key={index}
               to={link.path}
-              className={isActive(link.path) ? "font-bold" : ""}
+              className={`hover:opacity-80 transition-opacity ${
+                isActive(link.path) ? "font-bold" : ""
+              }`}
             >
               {link.name}
             </Link>
@@ -183,29 +185,30 @@ const Navbar = () => {
         </div>
 
         {/* User Avatar / Login + Actions */}
-        <div className="flex items-center gap-4 text-white">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 text-white flex-shrink-0">
           {/* Create Post Button (Desktop) */}
           <button
             onClick={() => navigate("/create-post")}
-            className={`hover:placeholder-opacity-85 hidden md:flex gap-2 items-center ml-2 ${
+            className={`hidden sm:flex gap-1 sm:gap-2 items-center text-xs sm:text-sm lg:text-base hover:opacity-80 transition-opacity ${
               location.pathname === "/cars" ||
               location.pathname === "/users" ||
               location.pathname === "/blog"
-                ? "text-gray-600  "
+                ? "text-gray-600"
                 : "text-white"
             }`}
             title="Create Post"
           >
-            <FaCirclePlus />
-            <span className="">Sale Your Car</span>
+            <FaCirclePlus className="text-sm sm:text-base" />
+            <span className="hidden md:inline">Sale Your Car</span>
           </button>
+
           {!isLoading && currentUser ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
               {/* Dashboard Links */}
               {currentUser.role === "admin" && (
                 <Link
                   to="/admin/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
+                  className="hidden md:block text-xs px-2 py-1 bg-primary-500 rounded hover:opacity-90 text-white transition-colors"
                 >
                   Admin
                 </Link>
@@ -213,26 +216,27 @@ const Navbar = () => {
               {user?.role === "dealer" && user?.dealerInfo?.verified && (
                 <Link
                   to="/dealer/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
+                  className="hidden md:block text-xs px-2 py-1 bg-primary-500 rounded hover:opacity-90 text-white transition-colors"
                 >
-                  Dealer Dashboard
+                  Dealer
                 </Link>
               )}
               {user?.role === "dealer" && !user?.dealerInfo?.verified && (
                 <Link
                   to="/seller/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:opacity-90 text-white transition-colors`}
+                  className="hidden md:block text-xs px-2 py-1 bg-primary-500 rounded hover:opacity-90 text-white transition-colors"
                 >
-                  My Dashboard
+                  Dashboard
                 </Link>
               )}
-              {/* Individual users don't have a dashboard - removed My Dashboard link */}
+
               {/* Notification Bell */}
               <NotificationBell />
+
               {/* Avatar */}
               <div
                 onClick={() => navigate("/profile")}
-                className="cursor-pointer md:w-14 w-12 md:h-14 h-12 rounded-full overflow-hidden border-2 border-white"
+                className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-white flex-shrink-0"
                 title="Profile"
               >
                 <img
@@ -245,7 +249,7 @@ const Navbar = () => {
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="md:px-6 md:py-2 py-1 px-4 bg-primary-500 rounded-md text-lg text-white hover:opacity-90 transition-colors"
+              className="px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 bg-primary-500 rounded text-xs sm:text-sm lg:text-base text-white hover:opacity-90 transition-colors"
             >
               Login
             </button>
@@ -255,7 +259,7 @@ const Navbar = () => {
           <button
             onClick={openDrawer}
             title="Menu"
-            className={` md:hidden ${
+            className={`lg:hidden ${
               location.pathname === "/cars" ||
               location.pathname === "/users" ||
               location.pathname === "/blog"
@@ -263,7 +267,8 @@ const Navbar = () => {
                 : "text-white"
             }`}
           >
-            <FaBars size={28} />
+            <FaBars size={20} className="sm:hidden" />
+            <FaBars size={24} className="hidden sm:block" />
           </button>
         </div>
       </nav>
@@ -272,22 +277,22 @@ const Navbar = () => {
       {open && (
         <div
           ref={drawerRef}
-          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-500 px-6 py-6 bg-primary-300 shadow-xl md:hidden"
+          className="fixed top-0 right-0 w-[85%] sm:w-[75%] md:w-[60%] h-full z-50 text-primary-500 px-4 sm:px-6 py-4 sm:py-6 bg-primary-300 shadow-xl lg:hidden"
         >
           {/* Close Button */}
-          <div className="flex justify-end text-3xl mb-6">
+          <div className="flex justify-end text-2xl sm:text-3xl mb-4 sm:mb-6">
             <button onClick={closeDrawer}>
               <FaXmark />
             </button>
           </div>
 
           {/* Search Bar */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <SearchBar />
           </div>
 
           {/* Drawer Menu Links */}
-          <div className="flex flex-col gap-4 text-lg">
+          <div className="flex flex-col gap-3 sm:gap-4 text-base sm:text-lg">
             {menuLinks.map((link, index) => (
               <Link
                 key={index}
@@ -308,7 +313,7 @@ const Navbar = () => {
                 closeDrawer();
                 navigate("/create-post");
               }}
-              className="mt-4 flex items-center gap-2 text-primary-500"
+              className="mt-4 flex items-center gap-2 text-primary-500 text-base sm:text-lg"
             >
               <FaCirclePlus />
               Create Post
@@ -319,29 +324,33 @@ const Navbar = () => {
               <Link
                 to="/admin/dashboard"
                 onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
+                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4 text-base sm:text-lg"
               >
                 <span>Admin Panel</span>
               </Link>
             )}
-            {!isLoading && user?.role === "dealer" && user?.dealerInfo?.verified && (
-              <Link
-                to="/dealer/dashboard"
-                onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
-              >
-                <span>Dealer Dashboard</span>
-              </Link>
-            )}
-            {!isLoading && user?.role === "dealer" && !user?.dealerInfo?.verified && (
-              <Link
-                to="/seller/dashboard"
-                onClick={closeDrawer}
-                className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4"
-              >
-                <span>My Dashboard</span>
-              </Link>
-            )}
+            {!isLoading &&
+              user?.role === "dealer" &&
+              user?.dealerInfo?.verified && (
+                <Link
+                  to="/dealer/dashboard"
+                  onClick={closeDrawer}
+                  className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4 text-base sm:text-lg"
+                >
+                  <span>Dealer Dashboard</span>
+                </Link>
+              )}
+            {!isLoading &&
+              user?.role === "dealer" &&
+              !user?.dealerInfo?.verified && (
+                <Link
+                  to="/seller/dashboard"
+                  onClick={closeDrawer}
+                  className="mt-4 flex items-center gap-2 text-primary-500 border-t border-primary-300 pt-4 text-base sm:text-lg"
+                >
+                  <span>My Dashboard</span>
+                </Link>
+              )}
             {/* Individual users don't have a dashboard */}
           </div>
         </div>

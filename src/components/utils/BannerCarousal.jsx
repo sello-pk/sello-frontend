@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGetBannersQuery } from "../../redux/services/api";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { slides, mdSlides } from "../../assets/banners/banner";
 
@@ -8,18 +7,7 @@ const BannerCarousal = () => {
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
 
-  // Fetch active banners from API
-  const {
-    data: bannersData,
-    isLoading,
-    error,
-  } = useGetBannersQuery({
-    type: "homepage",
-    position: "hero",
-    isActive: true,
-  });
-
-  // For debugging - use only local slides first
+  // Use only local slides - no API dependency
   const activeSlides = [
     {
       id: "slide1",
@@ -67,38 +55,21 @@ const BannerCarousal = () => {
 
   // Auto-play functionality with pause on hover
   useEffect(() => {
-    console.log("Auto-slide effect triggered:", {
-      activeSlidesLength: activeSlides.length,
-      isPaused,
-      currentSlide,
-    });
-
     if (activeSlides.length > 1 && !isPaused) {
-      console.log("Setting interval for auto-slide");
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => {
           const nextSlide = (prev + 1) % activeSlides.length;
-          console.log("Auto-sliding from", prev, "to", nextSlide);
           return nextSlide;
         });
       }, 3000);
+    }
 
-      return () => {
-        if (intervalRef.current) {
-          console.log("Clearing interval");
-          clearInterval(intervalRef.current);
-        }
-      };
-    } else {
-      console.log("Auto-slide disabled:", {
-        activeSlidesLength: activeSlides.length,
-        isPaused,
-      });
+    return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-    }
-  }, [activeSlides.length, isPaused, currentSlide]);
+    };
+  }, [activeSlides.length, isPaused]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -120,15 +91,7 @@ const BannerCarousal = () => {
     setTimeout(() => setIsPaused(false), 2000);
   };
 
-  // Early returns for loading and no banners
-  if (isLoading) {
-    return (
-      <section className="relative w-full h-[90vh] md:h-[350px] lg:h-[400px] overflow-hidden bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse flex items-center justify-center">
-        <div className="text-gray-400 text-lg">Loading banners...</div>
-      </section>
-    );
-  }
-
+  // Early returns for no banners
   if (activeSlides.length === 0) {
     return (
       <section className="relative w-full h-[90vh] md:h-[350px] lg:h-[400px] overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -139,7 +102,7 @@ const BannerCarousal = () => {
 
   return (
     <section
-      className="relative w-full h-[60vh] md:h-[350px] lg:h-[400px] overflow-hidden flex items-center justify-center "
+      className="relative w-full h-[60vh] md:h-[350px] lg:h-[400px] overflow-hidden flex items-center justify-center bg-gradient-to-r from-primary-500 to-gray-600"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -163,13 +126,9 @@ const BannerCarousal = () => {
                   <img
                     src={slide.image}
                     alt={slide.title || `Banner ${index + 1}`}
-                    className="hidden md:block sm:block lg:block absolute inset-0 w-full h-full sm:object-contain md:object-contain lg:object-cover object-center"
+                    className="hidden sm:block absolute inset-0 w-full h-full object-cover object-center"
                     loading="eager"
                     onError={(e) => {
-                      console.error(
-                        "Desktop image failed to load:",
-                        slide.image
-                      );
                       e.target.style.display = "none";
                     }}
                   />
@@ -177,13 +136,9 @@ const BannerCarousal = () => {
                   <img
                     src={slide.mobileImage || slide.image}
                     alt={slide.title || `Banner ${index + 1}`}
-                    className="lg:hidden md:hidden sm:hidden absolute inset-0 w-[98%] mx-auto h-full object-contain object-center"
+                    className="sm:hidden absolute inset-0 w-full h-full object-contain object-center"
                     loading="eager"
                     onError={(e) => {
-                      console.error(
-                        "Mobile image failed to load:",
-                        slide.mobileImage
-                      );
                       e.target.style.display = "none";
                     }}
                   />

@@ -6,17 +6,26 @@ const AppRoot = ({ children }) => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Hide loader immediately when DOM is ready
-    // Use requestAnimationFrame to ensure smooth transition
-    requestAnimationFrame(() => {
+    // Simple timeout approach - more reliable
+    const timer = setTimeout(() => {
       setIsInitialLoad(false);
-    });
+    }, 800);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <StrictMode>
       {isInitialLoad && <AppLoader />}
-      {children}
+      <div
+        style={{
+          opacity: isInitialLoad ? 0 : 1,
+          transition: "opacity 0.3s ease-in-out",
+          minHeight: "100vh",
+        }}
+      >
+        {children}
+      </div>
     </StrictMode>
   );
 };

@@ -3,11 +3,13 @@ import { useParams } from "react-router-dom";
 import { useGetSingleCarQuery } from "../../../redux/services/api";
 import { FaCheckCircle, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 import { FiZap } from "react-icons/fi";
+import { extractCarIdFromSlug } from "../../../utils/urlBuilders";
 
 const CarDetailsHeroSection = () => {
-  const { id } = useParams();
-  const { data: car, isLoading } = useGetSingleCarQuery(id, {
-    skip: !id,
+  const { id: routeParam } = useParams();
+  const extractedCarId = extractCarIdFromSlug(routeParam);
+  const { data: car, isLoading } = useGetSingleCarQuery(extractedCarId, {
+    skip: !extractedCarId,
   });
 
   if (isLoading || !car) {

@@ -862,6 +862,7 @@ const CreatePostForm = () => {
             <label className="block mb-1">Fuel Type</label>
             <FuelSpecs
               vehicleType={formData.vehicleType}
+              value={formData.fuelType}
               onChange={(val) => handleChange("fuelType", val)}
             />
           </div>
@@ -873,6 +874,18 @@ const CreatePostForm = () => {
             <label className="block mb-1">Regional Spec</label>
             <RegionalSpecs
               onChange={(val) => handleChange("regionalSpec", val)}
+            />
+          </div>
+        )}
+
+        {/* Body Type - Full Width */}
+        {isFieldVisible(formData.vehicleType, "bodyType") && (
+          <div className="mb-2 pl-2">
+            <label className="block mb-1">Body Type</label>
+            <BodyTypes
+              vehicleType={formData.vehicleType}
+              value={formData.bodyType}
+              onChange={(val) => handleChange("bodyType", val)}
             />
           </div>
         )}

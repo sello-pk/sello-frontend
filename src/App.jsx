@@ -223,6 +223,11 @@ const CarDetailsRouteGuard = ({ children }) => {
   // CRITICAL: Get current URL from window to verify actual route
   const actualPath = window.location.pathname;
 
+  // FIRST CHECK: If we're not on a cars route, don't interfere
+  if (!actualPath.startsWith("/cars/") || actualPath === "/cars") {
+    return <>{children}</>;
+  }
+
   // ABSOLUTE CHECK - If we're on home route, don't render at all
   // Check both location.pathname AND window.location.pathname for safety
   if (
@@ -296,8 +301,8 @@ const App = () => {
 
       <Routes>
         {/* HOME - Exact path match, declared first */}
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home key={location.key} />} />
+        <Route path="/home" element={<Home key={location.key} />} />
 
         {/* Auth */}
         <Route path="/login" element={<Login />} />
@@ -369,15 +374,12 @@ const App = () => {
           }
         />
         {/* Car Details - Only match if path starts with /cars/ and has an ID */}
-        {/* Use a function to validate before rendering */}
         <Route
           path="/cars/:id"
           element={
-            <CarDetailsRouteGuard>
-              <Suspense fallback={<RouteLoader />}>
-                <CarDetails />
-              </Suspense>
-            </CarDetailsRouteGuard>
+            <Suspense fallback={<RouteLoader />}>
+              <CarDetails />
+            </Suspense>
           }
         />
         <Route

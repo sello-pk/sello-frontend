@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import { extractCarIdFromSlug } from "../../../utils/urlBuilders";
 import {
   useEditCarMutation,
   useGetSingleCarQuery,
@@ -42,8 +42,11 @@ const getVehicleLabel = (vehicleType, fieldType) => {
 };
 
 const EditCarForm = () => {
-  const { id } = useParams();
+  const { id: routeParam } = useParams();
+  const extractedCarId = extractCarIdFromSlug(routeParam);
   const navigate = useNavigate();
+  const location = useLocation();
+  const token = localStorage.getItem("token");
   const [formData, setFormData] = useState({
     title: "",
     description: "",

@@ -37,7 +37,7 @@ export const useRecentlyViewedCars = () => {
       console.error("Error loading recently viewed cars:", error);
       setRecentCars([]);
     }
-  }, []);
+  }, []); // Empty dependency array - run only once on mount
 
   /**
    * Add a car to recently viewed
@@ -104,4 +104,3 @@ export const useRecentlyViewedCars = () => {
     clearRecentlyViewed,
   };
 };
-

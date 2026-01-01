@@ -26,20 +26,22 @@ import {
   FaUser,
   FaStar,
 } from "react-icons/fa";
+import { extractCarIdFromSlug } from "../../../utils/urlBuilders";
 
 const CarDetailsEtc = () => {
-  const { id } = useParams();
+  const { id: routeParam } = useParams();
+  const extractedCarId = extractCarIdFromSlug(routeParam);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
   const {
     data: car,
     isLoading,
     error,
     refetch,
-  } = useGetSingleCarQuery(id, {
-    skip: !id,
+  } = useGetSingleCarQuery(extractedCarId, {
+    skip: !extractedCarId,
   });
-  const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
   const [markCarAsSold] = useMarkCarAsSoldMutation();
   const [showMore, setShowMore] = useState(false);
   const [showChat, setShowChat] = useState(false);

@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { 
-  useGetSingleCarQuery, 
+import {
+  useGetSingleCarQuery,
   useGetMeQuery,
   useSaveCarMutation,
   useUnsaveCarMutation,
   useGetSavedCarsQuery,
   useTrackRecentlyViewedMutation,
-  useCreateReportMutation
+  useCreateReportMutation,
 } from "../../../redux/services/api";
 import CarChatWidget from "../../carChat/CarChatWidget";
 import toast from "react-hot-toast";
-import { FaHeart, FaRegHeart, FaShareAlt, FaPhone, FaCommentDots } from "react-icons/fa";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaShareAlt,
+  FaPhone,
+  FaCommentDots,
+} from "react-icons/fa";
+import { extractCarIdFromSlug } from "../../../utils/urlBuilders";
 
 const Btns = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id: routeParam } = useParams();
+  const extractedCarId = extractCarIdFromSlug(routeParam);
   const token = localStorage.getItem("token");
-  const { data: car } = useGetSingleCarQuery(id, { skip: !id });
+  const { data: car } = useGetSingleCarQuery(extractedCarId, {
+    skip: !extractedCarId,
+  });
   const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
-  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, { skip: !currentUser || !token });
+  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
+    skip: !currentUser || !token,
+  });
   const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
   const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
   const [trackRecentlyViewed] = useTrackRecentlyViewedMutation();
@@ -28,16 +40,18 @@ const Btns = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
-  
+
   const savedCars = savedCarsData || [];
-  const isSaved = savedCars.some(savedCar => savedCar._id === id);
-  
+  const isSaved = savedCars.some((savedCar) => savedCar._id === extractedCarId);
+
   // Track recently viewed when car loads
   useEffect(() => {
-    if (id && currentUser) {
-      trackRecentlyViewed(id).catch(err => console.error('Failed to track view:', err));
+    if (extractedCarId && currentUser) {
+      trackRecentlyViewed(extractedCarId).catch((err) =>
+        console.error("Failed to track view:", err)
+      );
     }
-  }, [id, currentUser, trackRecentlyViewed]);
+  }, [extractedCarId, currentUser, trackRecentlyViewed]);
 
   const handleShare = () => {
     try {
@@ -57,7 +71,7 @@ const Btns = () => {
       // Share failed
     }
   };
-  
+
   const isSold = !!car?.isSold;
 
   const handleChat = () => {
@@ -75,7 +89,7 @@ const Btns = () => {
     }
     setShowChat(true);
   };
-  
+
   const handleCall = () => {
     if (isSold) {
       toast.error("This car has been sold. Calling is disabled.");
@@ -118,7 +132,9 @@ const Btns = () => {
             {!isSold && (
               <button
                 onClick={handleChat}
-                disabled={!currentUser || (car && currentUser._id === car.postedBy?._id)}
+                disabled={
+                  !currentUser || (car && currentUser._id === car.postedBy?._id)
+                }
                 className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaCommentDots />
@@ -172,7 +188,7 @@ const Btns = () => {
                 Sold
               </span>
             )}
-            
+
             {/* Report Button */}
             <button
               onClick={() => {
@@ -204,19 +220,25 @@ const Btns = () => {
 
       {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => {
-          if (!isReporting) {
-            setShowReportModal(false);
-            setReportReason("");
-            setReportDescription("");
-          }
-        }}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => {
+            if (!isReporting) {
+              setShowReportModal(false);
+              setReportReason("");
+              setReportDescription("");
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-xl font-semibold mb-4">Report Listing</h3>
             <p className="text-sm text-gray-600 mb-4">
               Please select a reason for reporting this listing:
             </p>
-            
+
             <select
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
@@ -224,8 +246,12 @@ const Btns = () => {
             >
               <option value="">Select a reason</option>
               <option value="Spam">Spam</option>
-              <option value="Inappropriate Content">Inappropriate Content</option>
-              <option value="Misleading Information">Misleading Information</option>
+              <option value="Inappropriate Content">
+                Inappropriate Content
+              </option>
+              <option value="Misleading Information">
+                Misleading Information
+              </option>
               <option value="Fake Listing">Fake Listing</option>
               <option value="Harassment">Harassment</option>
               <option value="Other">Other</option>
@@ -257,21 +283,26 @@ const Btns = () => {
                     toast.error("Please select a reason");
                     return;
                   }
-                  
+
                   try {
                     await createReport({
                       targetType: "Car",
                       targetId: car._id,
                       reason: reportReason,
-                      description: reportDescription
+                      description: reportDescription,
                     }).unwrap();
-                    
-                    toast.success("Report submitted successfully. Our team will review it shortly.");
+
+                    toast.success(
+                      "Report submitted successfully. Our team will review it shortly."
+                    );
                     setShowReportModal(false);
                     setReportReason("");
                     setReportDescription("");
                   } catch (error) {
-                    toast.error(error?.data?.message || "Failed to submit report. Please try again.");
+                    toast.error(
+                      error?.data?.message ||
+                        "Failed to submit report. Please try again."
+                    );
                   }
                 }}
                 disabled={isReporting || !reportReason}
