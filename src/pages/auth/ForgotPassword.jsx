@@ -28,7 +28,10 @@ const ForgotPassword = () => {
       localStorage.setItem("email", email);
       navigate("/verify-otp");
     } catch (err) {
-      const errorMessage = err?.data?.message || err?.message || "Failed to send OTP. Please try again later.";
+      const errorMessage =
+        err?.data?.message ||
+        err?.message ||
+        "Failed to send OTP. Please try again later.";
       setError(errorMessage);
       toast.error(errorMessage, { duration: 5000 });
       console.error("Forgot password error", err);
@@ -109,8 +112,6 @@ const ForgotPassword = () => {
             </form>
           </div>
         </div>
-
-    
       </div>
     </>
   );

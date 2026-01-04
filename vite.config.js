@@ -2,28 +2,25 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix for __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   base: "/",
-
   plugins: [
-    // 🔥 FORCE CLASSIC JSX RUNTIME (CRITICAL FIX)
-    react({
-      jsxRuntime: "classic",
-    }),
+    react(),
 
+    // Copy _redirects for Netlify/Vercel
     viteStaticCopy({
-      targets: [
-        {
-          src: "public/_redirects",
-          dest: ".",
-        },
-      ],
+      targets: [{ src: "public/_redirects", dest: "." }],
     }),
   ],
 
   resolve: {
-    dedupe: ["react", "react-dom"],
+    dedupe: ["react", "react-dom"], // ensure single React instance
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/components"),
@@ -50,7 +47,8 @@ export default defineConfig({
   build: {
     target: "es2015",
     minify: "terser",
-    sourcemap: false,
+    sourcemap: true,
+    chunkSizeWarningLimit: 800,
 
     terserOptions: {
       compress: {
@@ -58,44 +56,6 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
-
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-
-          // ✅ KEEP ALL REACT-DEPENDENT CODE TOGETHER
-          if (
-            id.includes("react") ||
-            id.includes("react-dom") ||
-            id.includes("react-router") ||
-            id.includes("react-leaflet") ||
-            id.includes("leaflet") ||
-            id.includes("@react-google-maps")
-          ) {
-            return "react-ecosystem";
-          }
-
-          if (id.includes("@reduxjs") || id.includes("react-redux")) {
-            return "redux";
-          }
-
-          if (id.includes("@tiptap")) {
-            return "tiptap";
-          }
-
-          if (id.includes("jspdf")) return "pdf";
-          if (id.includes("xlsx")) return "excel";
-
-          if (id.includes("recharts")) return "charts";
-          if (id.includes("gsap")) return "animations";
-
-          return "vendor";
-        },
-      },
-    },
-
-    chunkSizeWarningLimit: 800,
   },
 
   optimizeDeps: {

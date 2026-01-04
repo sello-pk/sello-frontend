@@ -20,7 +20,11 @@ const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [data, setData] = useState({ email: "", password: "", rememberMe: true });
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+    rememberMe: true,
+  });
 
   const navigate = useNavigate();
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -40,7 +44,7 @@ const Login = () => {
         password: data.password,
         rememberMe: !!data.rememberMe,
       }).unwrap();
-      
+
       if (!res) {
         throw new Error("Empty response from server");
       }
@@ -57,35 +61,39 @@ const Login = () => {
       // Store tokens using utility functions for consistency
       const token = res.token || res.accessToken || res.data?.token;
       const user = res.user || res.data?.user;
-      
+
       if (!token || !user) {
         throw new Error("Failed to extract login credentials from response.");
       }
 
       // Store access token (refresh token is handled via httpOnly cookie on the server)
       setAccessToken(token);
-      
+
       // Store user data
       localStorage.setItem("user", JSON.stringify(user));
 
       // Invalidate and refetch user queries (mutation already does this, but ensure it happens)
-        if (api?.util?.invalidateTags) {
-          store.dispatch(api.util.invalidateTags(["User"]));
+      if (api?.util?.invalidateTags) {
+        store.dispatch(api.util.invalidateTags(["User"]));
       }
 
       toast.success("Login successful");
-      
+
       // Small delay to allow state updates
       setTimeout(() => {
         // Redirect based on user role - be strict about admin checks
         const userRole = user?.role?.toLowerCase()?.trim();
-        
+
         // Redirect based on user role - be conservative about admin redirects
         // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
         if (userRole === "admin") {
           // Check if user object has admin-related properties (indicating real admin)
           // If unsure, let AdminRoute handle the check
-          if ('adminRole' in user || 'roleId' in user || user?.status === "active") {
+          if (
+            "adminRole" in user ||
+            "roleId" in user ||
+            user?.status === "active"
+          ) {
             navigate("/admin/dashboard");
           } else {
             // Role is "admin" but missing admin properties - redirect to home for safety
@@ -106,7 +114,8 @@ const Login = () => {
       }, 100);
     } catch (err) {
       console.error("Login error", err);
-      const errorMessage = err?.data?.message || err?.message || "Login failed. Please try again.";
+      const errorMessage =
+        err?.data?.message || err?.message || "Login failed. Please try again.";
       toast.error(errorMessage);
     }
   };
@@ -116,7 +125,7 @@ const Login = () => {
       if (!credentialResponse?.credential) {
         throw new Error("No credential received from Google");
       }
-      
+
       const token = credentialResponse.credential;
       const res = await googleLogin(token).unwrap();
 
@@ -125,7 +134,9 @@ const Login = () => {
       const responseUser = res?.user || res?.data?.user;
 
       if (!responseToken || !responseUser) {
-        console.error("Invalid Google login response structure", { response: res });
+        console.error("Invalid Google login response structure", {
+          response: res,
+        });
         throw new Error("Invalid response from server. Please try again.");
       }
 
@@ -134,31 +145,41 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(responseUser));
 
       // Invalidate and refetch user queries
-        if (api?.util?.invalidateTags) {
-          store.dispatch(api.util.invalidateTags(["User"]));
+      if (api?.util?.invalidateTags) {
+        store.dispatch(api.util.invalidateTags(["User"]));
       }
 
       toast.success("Google login successful");
-      
+
       // Small delay to allow state updates
       setTimeout(() => {
         // Redirect based on user role - be strict about admin checks
         const userRole = responseUser?.role?.toLowerCase()?.trim();
-        
+
         // Redirect based on user role - be conservative about admin redirects
         // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
         if (userRole === "admin") {
           // Check if user object has admin-related properties (indicating real admin)
           // If unsure, let AdminRoute handle the check
-          if ('adminRole' in responseUser || 'roleId' in responseUser || responseUser?.status === "active") {
+          if (
+            "adminRole" in responseUser ||
+            "roleId" in responseUser ||
+            responseUser?.status === "active"
+          ) {
             navigate("/admin/dashboard");
           } else {
             // Role is "admin" but missing admin properties - redirect to home for safety
             navigate("/");
           }
-        } else if (userRole === "dealer" && responseUser?.dealerInfo?.verified) {
+        } else if (
+          userRole === "dealer" &&
+          responseUser?.dealerInfo?.verified
+        ) {
           navigate("/dealer/dashboard");
-        } else if (userRole === "dealer" && !responseUser?.dealerInfo?.verified) {
+        } else if (
+          userRole === "dealer" &&
+          !responseUser?.dealerInfo?.verified
+        ) {
           // Unverified dealers go to seller dashboard
           navigate("/seller/dashboard");
         } else if (userRole === "individual") {
@@ -176,21 +197,22 @@ const Login = () => {
         message: err?.message,
         originalStatus: err?.originalStatus,
         error: err?.error,
-        serverMessage: err?.data?.message || err?.data?.error || err?.message
+        serverMessage: err?.data?.message || err?.data?.error || err?.message,
       });
-      
+
       let errorMessage = "Google login failed. Please try again.";
-      
+
       // Handle RTK Query errors - check nested data structure
       const errorData = err?.data || err;
-      
+
       // Prioritize server error message
       if (errorData?.message) {
         errorMessage = errorData.message;
       } else if (errorData?.error) {
-        errorMessage = typeof errorData.error === 'string' 
-          ? errorData.error 
-          : errorData.error?.message || "Server error occurred";
+        errorMessage =
+          typeof errorData.error === "string"
+            ? errorData.error
+            : errorData.error?.message || "Server error occurred";
       } else if (err?.message) {
         errorMessage = err.message;
       } else if (err?.status === 401 || err?.originalStatus === 401) {
@@ -199,14 +221,26 @@ const Login = () => {
         errorMessage = "Access denied. Please contact support.";
       } else if (err?.status === 500 || err?.originalStatus === 500) {
         // Show server error message if available, otherwise generic message
-        errorMessage = errorData?.message || errorData?.error || "Server error. Please check server logs for details.";
+        errorMessage =
+          errorData?.message ||
+          errorData?.error ||
+          "Server error. Please check server logs for details.";
         console.error("Server error details", { errorData });
-      } else if (err?.status === 'FETCH_ERROR' || err?.status === 'PARSING_ERROR' || err?.message?.includes('Failed to fetch')) {
-        errorMessage = "Unable to connect to server. Please ensure the backend server is running and try again.";
-      } else if (err?.error === 'TypeError: Failed to fetch' || err?.data?.error === 'TypeError: Failed to fetch') {
-        errorMessage = "Server connection failed. Please check if the backend server is running on port 4000.";
+      } else if (
+        err?.status === "FETCH_ERROR" ||
+        err?.status === "PARSING_ERROR" ||
+        err?.message?.includes("Failed to fetch")
+      ) {
+        errorMessage =
+          "Unable to connect to server. Please ensure the backend server is running and try again.";
+      } else if (
+        err?.error === "TypeError: Failed to fetch" ||
+        err?.data?.error === "TypeError: Failed to fetch"
+      ) {
+        errorMessage =
+          "Server connection failed. Please check if the backend server is running on port 4000.";
       }
-      
+
       toast.error(errorMessage);
     } finally {
       // no-op
@@ -227,11 +261,11 @@ const Login = () => {
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
                 <img
                   className="w-10 h-10"
-                  src={images?.userIcon || '/user-icon.png'}
+                  src={images?.userIcon || "/user-icon.png"}
                   alt="userIcon"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/user-icon.png';
+                    e.target.src = "/user-icon.png";
                   }}
                 />
               </div>
@@ -296,7 +330,9 @@ const Login = () => {
                       setData({ ...data, rememberMe: e.target.checked })
                     }
                   />
-                  <span className="text-sm text-gray-700">Remember for 30 days</span>
+                  <span className="text-sm text-gray-700">
+                    Remember for 30 days
+                  </span>
                 </div>
                 <Link
                   to={"/forgot-password"}
@@ -335,28 +371,38 @@ const Login = () => {
                       if (!hasGoogleClientId) {
                         return;
                       }
-                      
+
                       // Handle actual errors when OAuth IS configured
-                      if (error?.message?.includes("origin is not allowed") || error?.message?.includes("GSI_LOGGER")) {
-                        toast.error("Google Sign-In configuration error. Please use email/password login.");
+                      if (
+                        error?.message?.includes("origin is not allowed") ||
+                        error?.message?.includes("GSI_LOGGER")
+                      ) {
+                        toast.error(
+                          "Google Sign-In configuration error. Please use email/password login."
+                        );
                         return;
                       }
-                      
+
                       // Log other errors for debugging (only if configured)
                       console.error("Google OAuth error", error);
-                      
+
                       let errorMsg = "Google login failed. ";
-                      
+
                       if (error?.type === "popup_closed_by_user") {
                         errorMsg = "Login cancelled.";
                       } else if (error?.type === "popup_failed_to_open") {
-                        errorMsg = "Popup blocked. Please allow popups for this site.";
-                      } else if (error?.type === "idpiframe_initialization_failed") {
-                        errorMsg = "Google authentication service unavailable. Please use email/password login.";
+                        errorMsg =
+                          "Popup blocked. Please allow popups for this site.";
+                      } else if (
+                        error?.type === "idpiframe_initialization_failed"
+                      ) {
+                        errorMsg =
+                          "Google authentication service unavailable. Please use email/password login.";
                       } else {
-                        errorMsg += "Please try again or use email/password login.";
+                        errorMsg +=
+                          "Please try again or use email/password login.";
                       }
-                      
+
                       toast.error(errorMsg);
                     }}
                     useOneTap={false}

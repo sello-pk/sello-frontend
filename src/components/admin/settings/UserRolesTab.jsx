@@ -21,6 +21,7 @@ import {
   FaTimes,
   FaCopy,
   FaPaperPlane,
+  FaRedo,
 } from "react-icons/fa";
 import InviteUserModal from "./InviteUserModal";
 import RoleForm from "./RoleForm";
@@ -34,6 +35,7 @@ const UserRolesTab = () => {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [inviteFilter, setInviteFilter] = useState("all"); // 'all', 'pending', 'accepted'
 
   // Modal & Form States
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -49,9 +51,15 @@ const UserRolesTab = () => {
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [showDeleteInviteModal, setShowDeleteInviteModal] = useState(false);
+  const [inviteToDelete, setInviteToDelete] = useState(null);
   const dropdownRefs = useRef({});
   const buttonRefs = useRef({});
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, userId: null });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    userId: null,
+  });
   const [deleteUser] = useDeleteUserMutation();
 
   const fetchData = async () => {
@@ -73,20 +81,14 @@ const UserRolesTab = () => {
       );
 
       const [rolesRes, invitesRes] = await Promise.all([
-        axios.get(
-          `${API_BASE_URL}/roles`,
-          {
-            withCredentials: true,
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        ),
-        axios.get(
-          `${API_BASE_URL}/roles/invites/all`,
-          {
-            withCredentials: true,
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        ),
+        axios.get(`${API_BASE_URL}/roles`, {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_BASE_URL}/roles/invites/all`, {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       if (usersRes.data.success) {
@@ -129,10 +131,12 @@ const UserRolesTab = () => {
 
       const dropdownElement = dropdownRefs.current[openDropdown];
       const buttonElement = buttonRefs.current[openDropdown];
-      
+
       // Check if click is on the dropdown button or inside the dropdown
-      const isDropdownButton = buttonElement && buttonElement.contains(event.target);
-      const isInsideDropdown = dropdownElement && dropdownElement.contains(event.target);
+      const isDropdownButton =
+        buttonElement && buttonElement.contains(event.target);
+      const isInsideDropdown =
+        dropdownElement && dropdownElement.contains(event.target);
 
       // If click is outside both the dropdown and the button, close it
       if (!isDropdownButton && !isInsideDropdown) {
@@ -166,15 +170,15 @@ const UserRolesTab = () => {
       const dropdownWidth = 192;
       const dropdownHeight = 200;
       const gap = 8;
-      
+
       let top = rect.bottom + gap;
       let left = rect.right - dropdownWidth;
-      
+
       // Check if dropdown would go off-screen to the right
       if (left < 0) {
         left = rect.left;
       }
-      
+
       // Check if dropdown would go off-screen to the bottom
       const viewportHeight = window.innerHeight;
       if (top + dropdownHeight > viewportHeight) {
@@ -183,16 +187,16 @@ const UserRolesTab = () => {
           top = viewportHeight - dropdownHeight - 10;
         }
       }
-      
-      setDropdownPosition(prev => ({ ...prev, top, left }));
+
+      setDropdownPosition((prev) => ({ ...prev, top, left }));
     };
 
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
 
     return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
     };
   }, [openDropdown, dropdownPosition.userId]);
 
@@ -265,7 +269,7 @@ const UserRolesTab = () => {
 
   const handleDropdownToggle = (userId, event) => {
     event.stopPropagation();
-    
+
     if (openDropdown === userId) {
       setOpenDropdown(null);
       setDropdownPosition({ top: 0, left: 0, userId: null });
@@ -275,16 +279,16 @@ const UserRolesTab = () => {
       const dropdownWidth = 192; // w-48 = 192px
       const dropdownHeight = 200; // Approximate height
       const gap = 8; // mt-2 = 8px
-      
+
       // Calculate position: below the button, aligned to the right
       let top = rect.bottom + gap;
       let left = rect.right - dropdownWidth;
-      
+
       // Check if dropdown would go off-screen to the right
       if (left < 0) {
         left = rect.left; // Align to left edge of button
       }
-      
+
       // Check if dropdown would go off-screen to the bottom
       const viewportHeight = window.innerHeight;
       if (top + dropdownHeight > viewportHeight) {
@@ -295,7 +299,7 @@ const UserRolesTab = () => {
           top = viewportHeight - dropdownHeight - 10;
         }
       }
-      
+
       setDropdownPosition({ top, left, userId });
       setOpenDropdown(userId);
     }
@@ -422,7 +426,9 @@ const UserRolesTab = () => {
       toast.success("User deleted successfully");
       fetchData();
     } catch (error) {
-      toast.error(error?.data?.message || error?.message || "Failed to delete user");
+      toast.error(
+        error?.data?.message || error?.message || "Failed to delete user"
+      );
     } finally {
       setIsDeletingUser(false);
       setShowDeleteUserModal(false);
@@ -434,6 +440,122 @@ const UserRolesTab = () => {
     toast.info(`Reset password for ${user.name} - Feature coming soon`);
     setOpenDropdown(null);
     // You can implement this functionality
+  };
+
+  // Handler functions for invitations
+  const handleResendInvite = async (invite) => {
+    try {
+      const token = getAccessToken();
+      await axios.post(
+        `${API_BASE_URL}/roles/invites/${invite._id}/resend`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(`Invitation resent to ${invite.email}`);
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error("Error resending invite:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to resend invitation"
+      );
+    }
+  };
+
+  const handleDeleteInviteConfirm = async () => {
+    if (!inviteToDelete) return;
+    try {
+      const token = getAccessToken();
+      await axios.delete(`${API_BASE_URL}/roles/invites/${inviteToDelete}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Invitation removed successfully");
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error("Error removing invite:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to remove invitation"
+      );
+    } finally {
+      setShowDeleteInviteModal(false);
+      setInviteToDelete(null);
+    }
+  };
+
+  const handleDeleteInvite = async (inviteId) => {
+    if (!window.confirm("Are you sure you want to delete this invitation?")) {
+      return;
+    }
+
+    try {
+      const token = getAccessToken();
+      await axios.delete(`${API_BASE_URL}/roles/invites/${inviteId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Invitation deleted successfully");
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error("Error deleting invite:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete invitation"
+      );
+    }
+  };
+
+  // Handler for copying invite URL (moved outside of map)
+  const handleCopyInviteUrl = async (invite, inviteUrl) => {
+    if (!inviteUrl) {
+      toast.error("Invite URL not available");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.success("Invite URL copied to clipboard!", {
+        duration: 3000,
+      });
+
+      // Also show URL in a toast
+      setTimeout(() => {
+        toast(
+          <div>
+            <p className="font-semibold mb-2">Invite URL (copied):</p>
+            <p className="text-xs break-all bg-gray-100 p-2 rounded">
+              {inviteUrl}
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              Share this URL with {invite.email}
+            </p>
+          </div>,
+          {
+            duration: 15000,
+            style: { maxWidth: "500px" },
+          }
+        );
+      }, 500);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      // Fallback: show the URL in a toast
+      toast(
+        <div>
+          <p className="font-semibold mb-2">Invite URL:</p>
+          <p className="text-xs break-all bg-gray-100 p-2 rounded">
+            {inviteUrl}
+          </p>
+        </div>,
+        {
+          duration: 20000,
+          style: { maxWidth: "500px" },
+        }
+      );
+    }
   };
 
   if (isRoleFormOpen) {
@@ -606,7 +728,9 @@ const UserRolesTab = () => {
                                     ref={(el) => {
                                       if (el) buttonRefs.current[user._id] = el;
                                     }}
-                                    onClick={(e) => handleDropdownToggle(user._id, e)}
+                                    onClick={(e) =>
+                                      handleDropdownToggle(user._id, e)
+                                    }
                                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded hover:bg-gray-100"
                                     aria-label="User actions menu"
                                   >
@@ -640,13 +764,54 @@ const UserRolesTab = () => {
                 </div>
               </div>
 
-              {/* Pending Invites Table */}
+              {/* All Invitations Table */}
               {invites.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <h3 className="font-bold text-gray-800">
-                      Pending Invitations
-                    </h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-gray-800">
+                        All Invitations
+                      </h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setInviteFilter("all")}
+                          className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
+                            inviteFilter === "all"
+                              ? "bg-primary-500 text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          All ({invites.length})
+                        </button>
+                        <button
+                          onClick={() => setInviteFilter("pending")}
+                          className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
+                            inviteFilter === "pending"
+                              ? "bg-primary-500 text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          Pending (
+                          {invites.filter((i) => i.status === "pending").length}
+                          )
+                        </button>
+                        <button
+                          onClick={() => setInviteFilter("accepted")}
+                          className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
+                            inviteFilter === "accepted"
+                              ? "bg-primary-500 text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          Accepted (
+                          {
+                            invites.filter((i) => i.status === "accepted")
+                              .length
+                          }
+                          )
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -663,126 +828,143 @@ const UserRolesTab = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {invites.map((invite) => {
-                          // Construct invite URL
-                          const frontendUrl =
-                            import.meta.env.VITE_FRONTEND_URL ||
-                            (typeof window !== "undefined"
-                              ? window.location.origin
-                              : "") ||
-                            import.meta.env.VITE_API_URL?.replace("/api", "") ||
-                            "http://localhost:5173";
-                          const inviteUrl = invite.token
-                            ? `${frontendUrl}/accept-invite/${invite.token}`
-                            : null;
+                        {invites
+                          .filter((invite) => {
+                            if (inviteFilter === "all") return true;
+                            return invite.status === inviteFilter;
+                          })
+                          .map((invite) => {
+                            // Construct invite URL
+                            const frontendUrl =
+                              import.meta.env.VITE_FRONTEND_URL ||
+                              (typeof window !== "undefined"
+                                ? window.location.origin
+                                : "") ||
+                              import.meta.env.VITE_API_URL?.replace(
+                                "/api",
+                                ""
+                              ) ||
+                              "http://localhost:5173";
+                            const inviteUrl = invite.token
+                              ? `${frontendUrl}/accept-invite/${invite.token}`
+                              : null;
 
-                          const handleCopyInviteUrl = async () => {
-                            if (!inviteUrl) {
-                              toast.error("Invite URL not available");
-                              return;
-                            }
-
-                            try {
-                              await navigator.clipboard.writeText(inviteUrl);
-                              toast.success("Invite URL copied to clipboard!", {
-                                duration: 3000,
-                              });
-
-                              // Also show the URL in a toast
-                              setTimeout(() => {
-                                toast.info(
-                                  <div>
-                                    <p className="font-semibold mb-2">
-                                      Invite URL (copied):
-                                    </p>
-                                    <p className="text-xs break-all bg-gray-100 p-2 rounded">
-                                      {inviteUrl}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-2">
-                                      Share this URL with {invite.email}
-                                    </p>
-                                  </div>,
-                                  {
-                                    duration: 15000,
-                                    style: { maxWidth: "500px" },
-                                  }
-                                );
-                              }, 500);
-                            } catch (err) {
-                              console.error("Failed to copy:", err);
-                              // Fallback: show the URL in an alert
-                              toast.info(
-                                <div>
-                                  <p className="font-semibold mb-2">
-                                    Invite URL:
-                                  </p>
-                                  <p className="text-xs break-all bg-gray-100 p-2 rounded">
-                                    {inviteUrl}
-                                  </p>
-                                </div>,
-                                {
-                                  duration: 20000,
-                                  style: { maxWidth: "500px" },
-                                }
-                              );
-                            }
-                          };
-
-                          return (
-                            <tr
-                              key={invite._id}
-                              className="hover:bg-gray-50 transition-colors"
-                            >
-                              <td className="px-6 py-4 text-gray-800 font-medium text-sm">
-                                {invite.email}
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  {invite.role}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-gray-500 text-sm">
-                                {invite.invitedBy?.name || "Unknown"}
-                              </td>
-                              <td className="px-6 py-4 text-gray-500 text-sm">
-                                {new Date(
-                                  invite.createdAt
-                                ).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4">
-                                <span
-                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    invite.status === "pending"
-                                      ? "bg-primary-100 text-primary-500"
-                                      : invite.status === "accepted"
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-gray-100 text-gray-800"
-                                  }`}
-                                >
-                                  {invite.status.charAt(0).toUpperCase() +
-                                    invite.status.slice(1)}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                {invite.status === "pending" && inviteUrl ? (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      onClick={handleCopyInviteUrl}
-                                      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary-500 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
-                                      title="Copy invite URL to share with user"
-                                    >
-                                      <FaCopy size={12} /> Copy URL
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-400 text-xs">
-                                    -
+                            return (
+                              <tr
+                                key={invite._id}
+                                className="hover:bg-gray-50 transition-colors"
+                              >
+                                <td className="px-6 py-4 text-gray-800 font-medium text-sm">
+                                  {invite.email}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    {invite.role}
                                   </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                                </td>
+                                <td className="px-6 py-4 text-gray-500 text-sm">
+                                  {invite.invitedBy?.name || "Unknown"}
+                                </td>
+                                <td className="px-6 py-4 text-gray-500 text-sm">
+                                  {new Date(
+                                    invite.createdAt
+                                  ).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                      invite.status === "pending"
+                                        ? "bg-primary-100 text-primary-500"
+                                        : invite.status === "accepted"
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-gray-100 text-gray-800"
+                                    }`}
+                                  >
+                                    {invite.status.charAt(0).toUpperCase() +
+                                      invite.status.slice(1)}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  {invite.status === "pending" ? (
+                                    <div className="flex items-center justify-end gap-2">
+                                      {inviteUrl && (
+                                        <button
+                                          onClick={() =>
+                                            handleCopyInviteUrl(
+                                              invite,
+                                              inviteUrl
+                                            )
+                                          }
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary-500 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                                          title="Copy invite URL to share with user"
+                                        >
+                                          <FaCopy size={12} /> Copy URL
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() =>
+                                          handleResendInvite(invite)
+                                        }
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                        title="Resend invitation email"
+                                      >
+                                        <FaRedo size={12} /> Resend
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteInvite(invite._id)
+                                        }
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                        title="Delete invitation"
+                                      >
+                                        <FaTrash size={12} /> Delete
+                                      </button>
+                                    </div>
+                                  ) : invite.status === "accepted" ? (
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={() => {
+                                          // Navigate to user details or show user info
+                                          const user = users.find(
+                                            (u) => u.email === invite.email
+                                          );
+                                          if (user) {
+                                            // Navigate to user details or show user modal
+                                            toast.success(
+                                              `User ${user.name} has accepted the invitation`
+                                            );
+                                          } else {
+                                            toast.error(
+                                              "User has accepted the invitation but account not found"
+                                            );
+                                          }
+                                        }}
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                                        title="View user details"
+                                      >
+                                        <FaEye size={12} /> View User
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          // Set the invitation to delete and show modal
+                                          setInviteToDelete(invite._id);
+                                          setShowDeleteInviteModal(true);
+                                        }}
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                        title="Remove invitation record"
+                                      >
+                                        <FaTrash size={12} /> Remove
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="text-gray-400 text-xs">
+                                      -
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>
@@ -973,9 +1155,23 @@ const UserRolesTab = () => {
         isLoading={isDeletingUser}
       />
 
+      {/* Delete Invitation Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteInviteModal}
+        onClose={() => {
+          setShowDeleteInviteModal(false);
+          setInviteToDelete(null);
+        }}
+        onConfirm={handleDeleteInviteConfirm}
+        title="Remove Invitation"
+        message="Are you sure you want to remove this invitation record? This action cannot be undone."
+        confirmText="Remove"
+        variant="danger"
+      />
+
       {/* Assign Role Modal */}
       {showAssignRoleModal && userToAssignRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
             {/* Header */}
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -1084,68 +1280,70 @@ const UserRolesTab = () => {
       )}
 
       {/* Portal Dropdown - Rendered outside scrollable container */}
-      {openDropdown && dropdownPosition.userId && (() => {
-        const user = users.find(u => u._id === dropdownPosition.userId);
-        if (!user) return null;
+      {openDropdown &&
+        dropdownPosition.userId &&
+        (() => {
+          const user = users.find((u) => u._id === dropdownPosition.userId);
+          if (!user) return null;
 
-        return createPortal(
-          <div
-            ref={(el) => {
-              if (el) dropdownRefs.current[dropdownPosition.userId] = el;
-            }}
-            className="fixed w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] py-1"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              maxHeight: 'calc(100vh - 200px)',
-              overflowY: 'auto'
-            }}
-          >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewUser(user);
+          return createPortal(
+            <div
+              ref={(el) => {
+                if (el) dropdownRefs.current[dropdownPosition.userId] = el;
               }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
-            >
-              <FaEye size={14} />
-              View Details
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditUserRole(user);
+              className="fixed w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] py-1"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
               }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
             >
-              <FaEdit size={14} />
-              Edit Role
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleResetPassword(user);
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
-            >
-              <FaKey size={14} />
-              Reset Password
-            </button>
-            <hr className="my-1 border-gray-200" />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveFromTeam(user);
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
-            >
-              <FaTrash size={14} />
-              Delete User
-            </button>
-          </div>,
-          document.body
-        );
-      })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewUser(user);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+              >
+                <FaEye size={14} />
+                View Details
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditUserRole(user);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+              >
+                <FaEdit size={14} />
+                Edit Role
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetPassword(user);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+              >
+                <FaKey size={14} />
+                Reset Password
+              </button>
+              <hr className="my-1 border-gray-200" />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveFromTeam(user);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+              >
+                <FaTrash size={14} />
+                Delete User
+              </button>
+            </div>,
+            document.body
+          );
+        })()}
     </div>
   );
 };

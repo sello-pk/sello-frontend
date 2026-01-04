@@ -1,29 +1,21 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
-
-// 🔥 REQUIRED FOR CPANEL + LEGACY VENDOR CODE
-window.React = React;
-window.ReactDOM = ReactDOM;
-
+import React from "react";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { store } from "./redux/store.js";
 import { Provider } from "react-redux";
+import { store } from "./redux/store.js";
+import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SupportChatProvider } from "./contexts/SupportChatContext.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import AppRoot from "./AppRoot.jsx";
-import { BrowserRouter } from "react-router-dom";
-import { logger } from "./utils/logger.js";
 import "leaflet/dist/leaflet.css";
+import { logger } from "./utils/logger.js";
 
-// Google OAuth client ID
-const envGoogleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const isDev = import.meta.env.DEV;
-const googleClientId = envGoogleClientId;
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (!googleClientId) {
-  if (isDev) {
+  if (import.meta.env.DEV) {
     logger.warn(
       "VITE_GOOGLE_CLIENT_ID is not set. Google Login will not work."
     );

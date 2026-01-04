@@ -11,7 +11,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
     email: "",
     phone: "",
     role: "",
-    roleId: ""
+    roleId: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -23,38 +23,38 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
         email: "",
         phone: "",
         role: "",
-        roleId: ""
+        roleId: "",
       });
     }
   }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === "role") {
       // Find the selected role object to get its ID
       // Try matching by name, displayName, or _id
-      const selectedRole = roles.find(r => 
-        r.name === value || 
-        r.displayName === value || 
-        r._id === value
+      const selectedRole = roles.find(
+        (r) => r.name === value || r.displayName === value || r._id === value
       );
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        role: selectedRole ? (selectedRole.displayName || selectedRole.name) : value,
-        roleId: selectedRole ? selectedRole._id : ""
+        role: selectedRole
+          ? selectedRole.displayName || selectedRole.name
+          : value,
+        roleId: selectedRole ? selectedRole._id : "",
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.fullName?.trim()) {
       toast.error("Full name is required");
@@ -78,22 +78,22 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
         setLoading(false);
         return;
       }
-      
+
       // Prepare data to send - use roleId if available, otherwise use role name
       const inviteData = {
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
         phone: formData.phone?.trim() || null,
         role: formData.role, // Role name/displayName
-        roleId: formData.roleId || null // Role ID from database
+        roleId: formData.roleId || null, // Role ID from database
       };
-      
+
       const response = await axios.post(
         `${API_BASE_URL}/roles/invite`,
         inviteData,
-        { 
+        {
           withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -104,34 +104,44 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
           try {
             await navigator.clipboard.writeText(response.data.inviteUrl);
             toast.success("Invite URL copied to clipboard!", {
-              duration: 3000
+              duration: 3000,
             });
           } catch (err) {
             // Failed to copy to clipboard
           }
-          
+
           // Show different messages based on email status
           if (response.data.emailSent) {
-            toast.success("Invitation sent successfully! Invite URL copied to clipboard.", {
-              duration: 5000
-            });
+            toast.success(
+              "Invitation sent successfully! Invite URL copied to clipboard.",
+              {
+                duration: 5000,
+              }
+            );
           } else {
-            toast.error("Email was NOT sent. Invite URL copied to clipboard - please share it manually.", {
-              duration: 8000,
-              icon: '⚠️'
-            });
-            
+            toast.error(
+              "Email was NOT sent. Invite URL copied to clipboard - please share it manually.",
+              {
+                duration: 8000,
+                icon: "⚠️",
+              }
+            );
+
             // Also show the URL in a more visible way
             setTimeout(() => {
               toast(
                 <div>
-                  <p className="font-semibold mb-2">Invite URL (copied to clipboard):</p>
-                  <p className="text-xs break-all bg-gray-100 p-2 rounded">{response.data.inviteUrl}</p>
+                  <p className="font-semibold mb-2">
+                    Invite URL (copied to clipboard):
+                  </p>
+                  <p className="text-xs break-all bg-gray-100 p-2 rounded">
+                    {response.data.inviteUrl}
+                  </p>
                 </div>,
                 {
                   duration: 15000,
-                  style: { maxWidth: '500px' },
-                  icon: 'ℹ️'
+                  style: { maxWidth: "500px" },
+                  icon: "ℹ️",
                 }
               );
             }, 1000);
@@ -140,21 +150,23 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
           // Fallback if no URL in response
           if (response.data.warning) {
             toast.error(response.data.message || "Email could not be sent", {
-              duration: 5000
+              duration: 5000,
             });
           } else {
             toast.success("Invitation created successfully!");
           }
         }
-        
+
         onInviteSuccess();
         onClose();
       }
     } catch (error) {
       console.error("Invite error:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Failed to send invitation";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to send invitation";
       toast.error(errorMessage);
-      
     } finally {
       setLoading(false);
     }
@@ -163,12 +175,12 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
         {/* Header */}
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 className="text-xl font-bold text-gray-800">Invite New User</h3>
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -208,7 +220,8 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+              Phone Number{" "}
+              <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <input
               type="tel"
@@ -239,8 +252,18 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
